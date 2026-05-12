@@ -4,6 +4,13 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
   <title>MyBook</title>
+  <link rel="manifest" href="/mybook/manifest.json"/>
+  <link rel="apple-touch-icon" href="/mybook/icon.svg"/>
+  <meta name="theme-color" content="#0d0d0f"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="MyBook"/>
   <style>
     *{box-sizing:border-box;margin:0;padding:0;}
     :root{
@@ -1668,6 +1675,11 @@ function plural(n,a,b,c){ const m=n%10,h=n%100; if(m===1&&h!==11)return a; if(m>
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape') ['ov-read','ov-note','ov-link','ov-board','ov-lcat','ov-ncat','ov-fin','ov-confirm'].forEach(id=>document.getElementById(id)?.classList.remove('open'));
 });
+
+// ══ PWA ══
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/mybook/sw.js').catch(e=>console.warn('SW:',e));
+}
 
 // ══ BOOT ══
 auth.getRedirectResult().catch(e=>{ if(e.code&&e.code!=='auth/no-auth-event') console.warn('redirect result:',e); });

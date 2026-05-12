@@ -1,0 +1,19 @@
+{
+  "name": "MyBook",
+  "short_name": "MyBook",
+  "description": "Личная база знаний",
+  "start_url": "/mybook/",
+  "scope": "/mybook/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d0d0f",
+  "theme_color": "#0d0d0f",
+  "icons": [
+    {
+      "src": "/mybook/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
