@@ -786,14 +786,26 @@ async function initUser(user){
   return false;
 }
 async function createFamily(){
-  document.getElementById('fsetup-err').style.display='none';
-  document.getElementById('fsetup-create').textContent='Создаём…';
+  const errEl=document.getElementById('fsetup-err');
+  const btn=document.getElementById('fsetup-create');
+  errEl.style.display='none';
+  btn.textContent='Создаём…';
+  btn.disabled=true;
   const code=Math.random().toString(36).slice(2,8).toUpperCase();
-  familyId=code; localStorage.setItem('mb_fid',code);
-  await db.collection('families').doc(code).collection('data').doc('all').set({_created:Date.now()});
-  await db.collection('users').doc(currentUser.uid).set({familyId:code},{merge:true});
-  document.getElementById('family-setup').style.display='none';
-  await loadAll(); setSection('family'); updateFamilyCodeUI();
+  try{
+    await db.collection('families').doc(code).collection('data').doc('all').set({_created:Date.now()});
+    await db.collection('users').doc(currentUser.uid).set({familyId:code},{merge:true});
+    familyId=code; localStorage.setItem('mb_fid',code);
+    document.getElementById('family-setup').style.display='none';
+    await loadAll(); setSection('family'); updateFamilyCodeUI();
+  }catch(e){
+    familyId=null; localStorage.removeItem('mb_fid');
+    errEl.textContent='Ошибка: '+e.message;
+    errEl.style.display='block';
+    btn.textContent='✨ Создать новое пространство';
+    btn.disabled=false;
+    console.error('createFamily:',e);
+  }
 }
 async function joinFamily(){
   const code=document.getElementById('join-code').value.trim().toUpperCase();
@@ -854,11 +866,20 @@ function setupListener(){
 
 async function signInGoogle(){
   document.getElementById('login-err').style.display='none';
+  await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+  const provider = new firebase.auth.GoogleAuthProvider();
+  // PWA standalone (installed app) must use popup; browser uses redirect
+  const isPWA = window.navigator.standalone===true || window.matchMedia('(display-mode:standalone)').matches;
   try{
-    await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-    await auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
+    if(isPWA){ await auth.signInWithPopup(provider); }
+    else      { await auth.signInWithRedirect(provider); }
   }
-  catch(e){ document.getElementById('login-err').style.display='block'; console.error(e); }
+  catch(e){
+    const el=document.getElementById('login-err');
+    el.textContent='Ошибка входа: '+e.message;
+    el.style.display='block';
+    console.error(e);
+  }
 }
 function signOutUser(){ if(_unsubListen){_unsubListen();_unsubListen=null;} familyId=null; auth.signOut(); }
 
