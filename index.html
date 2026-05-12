@@ -150,6 +150,8 @@
     .tab.active{color:var(--accent);border-bottom-color:var(--accent);}
     .tab-add{color:var(--text3);font-size:16px;padding:10px 10px;}
     .tab-add:hover{color:var(--accent);}
+    .tab-edit{font-size:11px;opacity:.55;margin-left:4px;vertical-align:middle;}
+    .tab-edit:hover{opacity:1;}
 
     /* ══ Link cards ══ */
     .links-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:11px;}
@@ -685,6 +687,18 @@
   </div>
 </div>
 
+<!-- ── Note category form ── -->
+<div class="overlay" id="ov-ncat" onclick="closeOv('ov-ncat',event)">
+  <div class="modal modal-sm">
+    <button class="close-x" onclick="closeOv('ov-ncat')">✕</button>
+    <div class="modal-title" id="ncat-title">Новая категория</div>
+    <div class="fg"><label class="fl">Название</label><input class="fi" id="ncat-name" type="text" placeholder="Напиши название…"/></div>
+    <div class="fg"><label class="fl">Иконка</label><div class="icon-grid" id="ncat-icons"></div></div>
+    <div class="fg"><label class="fl">Цвет</label><div class="swatches" id="ncat-colors"></div></div>
+    <div class="form-actions" id="ncat-actions"></div>
+  </div>
+</div>
+
 <!-- ── Confirm ── -->
 <div class="overlay" id="ov-confirm" onclick="closeOv('ov-confirm',event)">
   <div class="confirm-box">
@@ -702,20 +716,7 @@
 //  CONFIG
 // ══════════════════════════════════════════════════════════
 
-const NOTE_CATS = {
-  notes: [
-    {id:'ideas',  label:'Идеи',        icon:'💡', color:'#e07b50'},
-    {id:'learn',  label:'Учёба / Инфо',icon:'📚', color:'#5bbf7a'},
-    {id:'diary',  label:'Дневник',     icon:'🗒️', color:'#9b7fe8'},
-    {id:'misc',   label:'Разное',      icon:'🗃️', color:'#55556a'},
-  ],
-  work: [
-    {id:'tasks',      label:'Задачи',    icon:'📋', color:'#c9a96e'},
-    {id:'clients',    label:'Клиенты',   icon:'🤝', color:'#9b7fe8'},
-    {id:'templates',  label:'Шаблоны',   icon:'📄', color:'#5eaee0'},
-    {id:'ideas-work', label:'Идеи',      icon:'💡', color:'#e07b50'},
-  ],
-};
+let NOTE_CATS = {notes:[], work:[]};
 
 const BOARD_ICONS  = ['✅','🛒','💫','📅','🗒️','💡','📌','🎯','💪','🍕','🎵','📷','✈️','🏠','💰','📚','🔗','⭐','❤️','🎁','🌿','🔥','💎','🎀'];
 const BOARD_COLORS = ['#5bbf7a','#5eaee0','#9b7fe8','#e07b50','#e05577','#c9a96e','#8e8ea0','#4ecdc4','#ff6b6b','#ffd166'];
@@ -739,6 +740,20 @@ const K = {
 let BUDGET = [];
 
 function loadAll(){
+  NOTE_CATS = {
+    notes: jload('mb_ncats_notes',[
+      {id:'ideas', label:'Идеи',         icon:'💡', color:'#e07b50'},
+      {id:'learn', label:'Учёба / Инфо', icon:'📚', color:'#5bbf7a'},
+      {id:'diary', label:'Дневник',      icon:'🗒️', color:'#9b7fe8'},
+      {id:'misc',  label:'Разное',       icon:'🗃️', color:'#55556a'},
+    ]),
+    work: jload('mb_ncats_work',[
+      {id:'tasks',      label:'Задачи',  icon:'📋', color:'#c9a96e'},
+      {id:'clients',    label:'Клиенты', icon:'🤝', color:'#9b7fe8'},
+      {id:'templates',  label:'Шаблоны', icon:'📄', color:'#5eaee0'},
+      {id:'ideas-work', label:'Идеи',    icon:'💡', color:'#e07b50'},
+    ]),
+  };
   NOTES = jload(K.notes, [{id:1,cat:'ideas',pin:false,tags:[],created:'2026-05-12',title:'Первая идея',body:'Сюда пиши свои идеи, мысли, планы ✨'}]);
   WORK  = jload(K.work,  [{id:1,cat:'tasks',pin:false,tags:[],created:'2026-05-12',title:'Шаблон ответа клиенту',body:'Привет! Спасибо за обращение 🙏\n\nЧтобы рассчитать стоимость:\n1. Размер и место\n2. Цвет или ч/б?\n3. Референсы\n4. Дата записи'}]);
   LINK_CATS = jload(K.lcats, [
@@ -817,11 +832,15 @@ function setSection(s){
 
 function buildNoteTabs(secId, cats){
   const all = [{id:'all',label:'Все',icon:''},...cats];
-  document.getElementById(secId+'-tabs').innerHTML = all.map(c=>
-    `<button class="tab ${noteFilter[secId]===c.id?'active':''}" onclick="setNoteTab('${secId}','${c.id}')">
+  document.getElementById(secId+'-tabs').innerHTML = all.map(c=>{
+    const active = noteFilter[secId]===c.id;
+    return `<button class="tab ${active?'active':''}" onclick="setNoteTab('${secId}','${c.id}')">
       ${c.icon?c.icon+' ':''}${c.label}
-    </button>`
-  ).join('') + `<button class="tab tab-add" onclick="openNoteForm('${secId}')" title="Добавить">＋</button>`;
+      ${active&&c.id!=='all'?`<span class="tab-edit" onclick="event.stopPropagation();openNoteCatForm('${secId}','${c.id}')">✎</span>`:''}
+    </button>`;
+  }).join('') +
+  `<button class="tab tab-add" onclick="openNoteForm('${secId}')" title="Добавить запись">＋</button>` +
+  `<button class="tab tab-add" onclick="openNoteCatForm('${secId}')" title="Новая категория">⊕</button>`;
 }
 
 function setNoteTab(sec, cat){
@@ -951,6 +970,65 @@ function deleteNote(secId,id){
   else { WORK=WORK.filter(n=>n.id!==id); jsave(K.work,WORK); renderWork(); }
   toast('🗑 Удалено');
 }
+// ── Note category management ──
+let editingNcatSec=null, editingNcatId=null, ncSelIcon='💡', ncSelColor='#e07b50';
+
+function openNoteCatForm(secId, catId){
+  editingNcatSec=secId; editingNcatId=catId||null;
+  const cat=catId?NOTE_CATS[secId].find(c=>c.id===catId):null;
+  ncSelIcon=cat?cat.icon:BOARD_ICONS[0];
+  ncSelColor=cat?cat.color:BOARD_COLORS[0];
+  document.getElementById('ncat-title').textContent=catId?'Изменить категорию':'Новая категория';
+  document.getElementById('ncat-name').value=cat?cat.label:'';
+  document.getElementById('ncat-icons').innerHTML=BOARD_ICONS.map(ic=>
+    `<div class="ico ${ic===ncSelIcon?'sel':''}" onclick="ncSelIcon='${ic}';document.querySelectorAll('#ncat-icons .ico').forEach(e=>e.classList.remove('sel'));this.classList.add('sel')">${ic}</div>`
+  ).join('');
+  document.getElementById('ncat-colors').innerHTML=BOARD_COLORS.map(cl=>
+    `<div class="sw ${cl===ncSelColor?'sel':''}" style="background:${cl}" onclick="ncSelColor='${cl}';document.querySelectorAll('#ncat-colors .sw').forEach(e=>e.classList.remove('sel'));this.classList.add('sel')"></div>`
+  ).join('');
+  document.getElementById('ncat-actions').innerHTML=
+    (catId?`<button class="btn btn-d" onclick="deleteNoteCat('${secId}','${catId}')">🗑 Удалить</button>`:'') +
+    `<button class="btn btn-g" onclick="closeOv('ov-ncat')">Отмена</button>
+     <button class="btn btn-p" onclick="submitNoteCat()">Сохранить</button>`;
+  openOv('ov-ncat');
+  setTimeout(()=>document.getElementById('ncat-name').focus(),80);
+}
+function submitNoteCat(){
+  const name=document.getElementById('ncat-name').value.trim();
+  if(!name){ document.getElementById('ncat-name').focus(); return; }
+  const cats=NOTE_CATS[editingNcatSec];
+  const key=editingNcatSec==='notes'?'mb_ncats_notes':'mb_ncats_work';
+  if(editingNcatId){
+    const c=cats.find(x=>x.id===editingNcatId);
+    if(c){ c.label=name; c.icon=ncSelIcon; c.color=ncSelColor; }
+    toast('✅ Обновлено');
+  } else {
+    cats.push({id:'nc_'+Date.now(), label:name, icon:ncSelIcon, color:ncSelColor});
+    toast('✅ Категория добавлена');
+  }
+  jsave(key, cats);
+  closeOv('ov-ncat');
+  if(editingNcatSec==='notes') renderNotes(); else renderWork();
+}
+function deleteNoteCat(secId, catId){
+  const store=secId==='notes'?NOTES:WORK;
+  const used=store.some(n=>n.cat===catId);
+  const fallback=NOTE_CATS[secId].find(c=>c.id!==catId)?.id||null;
+  confirmAction(
+    'Удалить категорию?',
+    used?'Заметки из неё перейдут в первую оставшуюся':'',
+    ()=>{
+      NOTE_CATS[secId]=NOTE_CATS[secId].filter(c=>c.id!==catId);
+      if(used){ store.forEach(n=>{ if(n.cat===catId) n.cat=fallback; }); jsave(secId==='notes'?K.notes:K.work, store); }
+      jsave(secId==='notes'?'mb_ncats_notes':'mb_ncats_work', NOTE_CATS[secId]);
+      if(noteFilter[secId]===catId) noteFilter[secId]='all';
+      closeOv('ov-ncat');
+      if(secId==='notes') renderNotes(); else renderWork();
+      toast('🗑 Категория удалена');
+    }
+  );
+}
+
 function togglePin(secId,id){
   const store=secId==='notes'?NOTES:WORK;
   const n=store.find(x=>x.id===id);
@@ -1439,7 +1517,7 @@ function today(){ return new Date().toISOString().slice(0,10); }
 function plural(n,a,b,c){ const m=n%10,h=n%100; if(m===1&&h!==11)return a; if(m>=2&&m<=4&&(h<10||h>=20))return b; return c; }
 
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape') ['ov-read','ov-note','ov-link','ov-board','ov-lcat','ov-fin','ov-confirm'].forEach(id=>document.getElementById(id)?.classList.remove('open'));
+  if(e.key==='Escape') ['ov-read','ov-note','ov-link','ov-board','ov-lcat','ov-ncat','ov-fin','ov-confirm'].forEach(id=>document.getElementById(id)?.classList.remove('open'));
 });
 
 // ══ BOOT ══
