@@ -781,7 +781,7 @@ firebase.initializeApp({
   appId:"1:393438806255:web:23b8eedce013483ff49b1a",
 });
 const db   = firebase.firestore();
-db.settings({ experimentalForceLongPolling: true, merge: true });
+db.settings({ experimentalAutoDetectLongPolling: true, merge: true });
 const auth = firebase.auth();
 let currentUser=null, familyId=null, _syncTimer=null, _myLastSync=0, _unsubListen=null, _pollInterval=null;
 
