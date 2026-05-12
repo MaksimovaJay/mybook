@@ -389,6 +389,20 @@
   <div id="login-err" style="font-size:12px;color:#e05577;display:none;">Ошибка входа — попробуй ещё раз</div>
 </div>
 
+<!-- ══ FAMILY SETUP ══ -->
+<div id="family-setup" style="position:fixed;inset:0;background:var(--bg);z-index:299;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:28px;text-align:center;">
+  <div style="font-size:44px;">👨‍👩‍👧</div>
+  <div style="font-size:20px;font-weight:700;">Настройка пространства</div>
+  <div style="font-size:13px;color:var(--text2);max-width:280px;line-height:1.6;">Создай новое — получишь код для Ильи.<br>Или введи уже существующий код.</div>
+  <button id="fsetup-create" onclick="createFamily()" class="btn btn-p" style="width:260px;justify-content:center;font-size:14px;">✨ Создать новое пространство</button>
+  <div style="color:var(--text3);font-size:12px;margin:2px 0;">— или войди по коду —</div>
+  <div style="display:flex;gap:8px;width:260px;">
+    <input id="join-code" class="fi" placeholder="Код (напр. AB12CD)" style="flex:1;text-transform:uppercase;letter-spacing:2px;text-align:center;font-weight:700;" oninput="this.value=this.value.toUpperCase()"/>
+    <button class="btn btn-g" onclick="joinFamily()">Войти</button>
+  </div>
+  <div id="fsetup-err" style="font-size:12px;color:#e05577;display:none;"></div>
+</div>
+
 <div class="app">
 
   <!-- ══ SIDEBAR (desktop) ══ -->
@@ -462,6 +476,7 @@
         <img id="user-avatar" width="26" height="26" style="border-radius:50%;display:none;flex-shrink:0;">
         <span id="user-name" style="font-size:12px;color:var(--text2);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
       </div>
+      <button class="sb-btn" onclick="copyFamilyCode()" title="Скопировать код для Ильи"><span>🔑</span> Код: <span id="fcode-val" style="font-weight:700;letter-spacing:1px;color:var(--accent);"></span></button>
       <button class="sb-btn" onclick="exportAll()"><span>⬇</span> Экспорт</button>
       <button class="sb-btn" id="signout-btn" style="display:none;" onclick="signOutUser()"><span>🚪</span> Выйти</button>
     </div>
@@ -745,9 +760,50 @@ firebase.initializeApp({
 });
 const db   = firebase.firestore();
 const auth = firebase.auth();
-let currentUser=null, _syncTimer=null, _myLastSync=0, _unsubListen=null;
+let currentUser=null, familyId=null, _syncTimer=null, _myLastSync=0, _unsubListen=null;
 
-function getDocRef(){ return currentUser?db.collection('users').doc(currentUser.uid).collection('data').doc('all'):null; }
+function getDocRef(){ return familyId?db.collection('families').doc(familyId).collection('data').doc('all'):null; }
+
+async function initUser(user){
+  try{
+    const ud=await db.collection('users').doc(user.uid).get();
+    if(ud.exists&&ud.data().familyId){ familyId=ud.data().familyId; localStorage.setItem('mb_fid',familyId); return true; }
+  }catch(e){}
+  const cached=localStorage.getItem('mb_fid');
+  if(cached){
+    try{
+      const fd=await db.collection('families').doc(cached).collection('data').doc('all').get();
+      if(fd.exists){ familyId=cached; await db.collection('users').doc(user.uid).set({familyId:cached},{merge:true}); return true; }
+    }catch(e){}
+  }
+  return false;
+}
+async function createFamily(){
+  document.getElementById('fsetup-err').style.display='none';
+  document.getElementById('fsetup-create').textContent='Создаём…';
+  const code=Math.random().toString(36).slice(2,8).toUpperCase();
+  familyId=code; localStorage.setItem('mb_fid',code);
+  await db.collection('families').doc(code).collection('data').doc('all').set({_created:Date.now()});
+  await db.collection('users').doc(currentUser.uid).set({familyId:code},{merge:true});
+  document.getElementById('family-setup').style.display='none';
+  await loadAll(); setSection('family'); updateFamilyCodeUI();
+}
+async function joinFamily(){
+  const code=document.getElementById('join-code').value.trim().toUpperCase();
+  const err=document.getElementById('fsetup-err');
+  err.style.display='none';
+  if(code.length<4){err.textContent='Введи код';err.style.display='block';return;}
+  try{
+    const fd=await db.collection('families').doc(code).collection('data').doc('all').get();
+    if(!fd.exists){err.textContent='Код не найден — проверь правильность';err.style.display='block';return;}
+    familyId=code; localStorage.setItem('mb_fid',code);
+    await db.collection('users').doc(currentUser.uid).set({familyId:code},{merge:true});
+    document.getElementById('family-setup').style.display='none';
+    await loadAll(); setSection('family'); updateFamilyCodeUI();
+  }catch(e){err.textContent='Ошибка соединения';err.style.display='block';}
+}
+function updateFamilyCodeUI(){ const el=document.getElementById('fcode-val'); if(el&&familyId) el.textContent=familyId; }
+function copyFamilyCode(){ if(!familyId) return; navigator.clipboard?.writeText(familyId); toast('📋 Код скопирован: '+familyId); }
 
 function syncToFirestore(){
   const ref=getDocRef(); if(!ref) return;
@@ -794,7 +850,7 @@ async function signInGoogle(){
   try{ await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
   catch(e){ document.getElementById('login-err').style.display='block'; console.error(e); }
 }
-function signOutUser(){ if(_unsubListen){_unsubListen();_unsubListen=null;} auth.signOut(); }
+function signOutUser(){ if(_unsubListen){_unsubListen();_unsubListen=null;} familyId=null; auth.signOut(); }
 
 // ══════════════════════════════════════════════════════════
 //  CONFIG
@@ -1619,11 +1675,17 @@ auth.onAuthStateChanged(async user=>{
     const av=document.getElementById('user-avatar');
     if(user.photoURL){av.src=user.photoURL;av.style.display='inline-block';}
     document.getElementById('signout-btn').style.display='flex';
-    await loadAll();
-    setSection('family');
+    const hasFamily=await initUser(user);
+    if(hasFamily){
+      document.getElementById('family-setup').style.display='none';
+      await loadAll(); setSection('family'); updateFamilyCodeUI();
+    } else {
+      document.getElementById('family-setup').style.display='flex';
+    }
   } else {
-    currentUser=null;
+    currentUser=null; familyId=null;
     document.getElementById('login-screen').style.display='flex';
+    document.getElementById('family-setup').style.display='none';
     document.getElementById('signout-btn').style.display='none';
   }
 });
