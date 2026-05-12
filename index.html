@@ -320,6 +320,15 @@
     .sw:hover{transform:scale(1.15);}
     .sw.sel{border-color:var(--text);}
 
+    /* Currency selector */
+    .cur-grid{display:flex;gap:5px;flex-wrap:wrap;}
+    .cur-btn{background:var(--s3);border:1.5px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;font-weight:600;padding:6px 10px;cursor:pointer;transition:all .15s;font-family:inherit;white-space:nowrap;}
+    .cur-btn:hover{border-color:var(--border2);color:var(--text);}
+    .cur-btn.sel{background:rgba(201,169,110,.15);border-color:var(--accent);color:var(--accent);}
+    .budget-sum-val2{font-size:12px;color:inherit;opacity:.65;margin-top:2px;}
+    .budget-tx-conv{font-size:10.5px;color:var(--text3);margin-top:2px;}
+    .cur-flag{font-size:14px;}
+
     /* Who toggle & badge */
     .who-btn{flex:1;padding:8px;border-radius:8px;border:1.5px solid var(--border);background:none;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit;}
     .who-btn.sel-me{background:rgba(201,169,110,.15);border-color:var(--accent);color:var(--accent);}
@@ -465,14 +474,14 @@
         </div>
         <!-- Summary -->
         <div class="budget-summary" id="budget-summary"></div>
-        <!-- Transactions -->
-        <div class="section-content" style="padding-top:12px;">
-          <div id="budget-list"></div>
-        </div>
-        <!-- Add -->
+        <!-- Add (always right after summary) -->
         <div class="budget-add-row">
           <button class="btn btn-d" style="flex:1" onclick="openFinForm('out')">🔴 Расход</button>
           <button class="btn btn-income" style="flex:1" onclick="openFinForm('in')">💚 Доход</button>
+        </div>
+        <!-- Transactions -->
+        <div class="section-content" style="padding-top:4px;">
+          <div id="budget-list"></div>
         </div>
       </div>
     </div>
@@ -648,7 +657,11 @@
         <button class="who-btn" id="ftx-mu" onclick="setFinWho('mu')">Илья</button>
       </div>
     </div>
-    <div class="fg"><label class="fl">Сумма (₽)</label><input class="fi" id="ftx-amount" type="number" placeholder="0" min="0" inputmode="decimal"/></div>
+    <div class="fg">
+      <label class="fl">Валюта</label>
+      <div class="cur-grid" id="ftx-cur-grid"></div>
+    </div>
+    <div class="fg"><label class="fl" id="ftx-amt-lbl">Сумма</label><input class="fi" id="ftx-amount" type="number" placeholder="0" min="0" inputmode="decimal"/></div>
     <div class="fg"><label class="fl">Категория</label><select class="fs" id="ftx-cat"></select></div>
     <div class="fg"><label class="fl">Комментарий</label><input class="fi" id="ftx-note" type="text" placeholder="Необязательно…"/></div>
     <div class="fg"><label class="fl">Дата</label><input class="fi" id="ftx-date" type="date"/></div>
@@ -1054,22 +1067,33 @@ function renderBudget(){
   const prefix=`${budgetYear}-${String(budgetMon+1).padStart(2,'0')}`;
   const txs=BUDGET.filter(t=>t.date.startsWith(prefix)).sort((a,z)=>z.date.localeCompare(a.date));
 
-  const totalIn  = txs.filter(t=>t.type==='in' ).reduce((s,t)=>s+t.amount,0);
-  const totalOut = txs.filter(t=>t.type==='out').reduce((s,t)=>s+t.amount,0);
-  const bal=totalIn-totalOut;
-  const balClass=bal>=0?'fin-in':'fin-out';
+  const usdIn  = txs.filter(t=>t.type==='in' ).reduce((s,t)=>s+toUSD(t.amount,t.currency||'VND'),0);
+  const usdOut = txs.filter(t=>t.type==='out').reduce((s,t)=>s+toUSD(t.amount,t.currency||'VND'),0);
+  const usdBal = usdIn-usdOut;
+  const balClass=usdBal>=0?'fin-in':'fin-out';
 
   document.getElementById('budget-summary').innerHTML=`
-    <div class="budget-sum-card"><div class="budget-sum-val fin-in">+${fmtMoney(totalIn)}</div><div class="budget-sum-lbl">Доходы</div></div>
-    <div class="budget-sum-card"><div class="budget-sum-val fin-out">-${fmtMoney(totalOut)}</div><div class="budget-sum-lbl">Расходы</div></div>
-    <div class="budget-sum-card"><div class="budget-sum-val ${balClass}">${bal>=0?'+':''}${fmtMoney(bal)}</div><div class="budget-sum-lbl">Остаток</div></div>`;
+    <div class="budget-sum-card">
+      <div class="budget-sum-val fin-in">+${fmtUSD(usdIn)}</div>
+      <div class="budget-sum-val2 fin-in">+${fmtKGS(usdIn*CURRENCIES.KGS.rate)}</div>
+      <div class="budget-sum-lbl">Доходы</div>
+    </div>
+    <div class="budget-sum-card">
+      <div class="budget-sum-val fin-out">-${fmtUSD(usdOut)}</div>
+      <div class="budget-sum-val2 fin-out">-${fmtKGS(usdOut*CURRENCIES.KGS.rate)}</div>
+      <div class="budget-sum-lbl">Расходы</div>
+    </div>
+    <div class="budget-sum-card">
+      <div class="budget-sum-val ${balClass}">${usdBal>=0?'+':''}${fmtUSD(usdBal)}</div>
+      <div class="budget-sum-val2 ${balClass}">${usdBal>=0?'+':''}${fmtKGS(usdBal*CURRENCIES.KGS.rate)}</div>
+      <div class="budget-sum-lbl">Остаток</div>
+    </div>`;
 
   if(!txs.length){
     document.getElementById('budget-list').innerHTML=`<div class="budget-empty">Операций нет — добавь первую</div>`;
     return;
   }
 
-  // group by day
   const byDay={};
   txs.forEach(t=>{ if(!byDay[t.date]) byDay[t.date]=[]; byDay[t.date].push(t); });
   document.getElementById('budget-list').innerHTML=Object.entries(byDay).map(([date,list])=>{
@@ -1077,6 +1101,13 @@ function renderBudget(){
     const rows=list.map(t=>{
       const parts=t.cat.split(' '); const icon=parts[0]; const catLabel=parts.slice(1).join(' ');
       const whoBadge=t.who?`<span class="who-badge ${t.who}">${t.who==='me'?'Женя':'Илья'}</span>`:'';
+      const cur=t.currency||'VND';
+      const usd=toUSD(t.amount,cur);
+      const sign=t.type==='in'?'+':'-';
+      const origAmt=sign+fmtOrig(t.amount,cur);
+      const convLine=cur==='USD'
+        ?`${fmtKGS(usd*CURRENCIES.KGS.rate)}`
+        :`≈ ${fmtUSD(usd)} / ${fmtKGS(usd*CURRENCIES.KGS.rate)}`;
       return `<div class="budget-tx-row">
         <div class="budget-tx-ico">${icon}</div>
         <div class="budget-tx-info">
@@ -1085,7 +1116,8 @@ function renderBudget(){
         </div>
         ${whoBadge}
         <div class="budget-tx-right">
-          <div class="budget-tx-amt ${t.type==='in'?'fin-in':'fin-out'}">${t.type==='in'?'+':'-'}${fmtMoney(t.amount)} ₽</div>
+          <div class="budget-tx-amt ${t.type==='in'?'fin-in':'fin-out'}">${origAmt}</div>
+          <div class="budget-tx-conv">${convLine}</div>
         </div>
         <button class="budget-tx-del" onclick="deleteBudgetTx(${t.id})">✕</button>
       </div>`;
@@ -1163,7 +1195,27 @@ const FIN_CATS = {
   in: ['💼 Зарплата','💻 Фриланс','🎁 Подарок','💰 Другое'],
 };
 
-let finBoardId=null, finTxType='out', finWho='me';
+const CURRENCIES = {
+  VND: {label:'Донг',   symbol:'₫', flag:'🇻🇳', rate:25000},
+  USD: {label:'Доллар', symbol:'$', flag:'🇺🇸', rate:1},
+  KGS: {label:'Сом',    symbol:'с', flag:'🇰🇬', rate:87},
+  RUB: {label:'Рубль',  symbol:'₽', flag:'🇷🇺', rate:90},
+  TRY: {label:'Лира',   symbol:'₺', flag:'🇹🇷', rate:38},
+};
+function toUSD(amount, cur){ return amount / ((CURRENCIES[cur]||CURRENCIES.USD).rate); }
+function fmtUSD(n){
+  const a=Math.abs(n);
+  return '$'+(a>=100?Math.round(a).toLocaleString('ru-RU'):a.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2}));
+}
+function fmtKGS(n){ return Math.abs(Math.round(n)).toLocaleString('ru-RU')+' с'; }
+function fmtOrig(n, cur){
+  const c=CURRENCIES[cur]||CURRENCIES.USD;
+  const a=Math.abs(n);
+  const s=cur==='VND'?Math.round(a).toLocaleString('ru-RU'):a%1===0?a.toLocaleString('ru-RU'):a.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2});
+  return cur==='USD'?c.symbol+s:s+' '+c.symbol;
+}
+
+let finBoardId=null, finTxType='out', finWho='me', finCurrency='VND';
 
 function renderFinanceBoard(b,items){
   const totalIn  = items.filter(t=>t.type==='in' ).reduce((s,t)=>s+t.amount,0);
@@ -1224,9 +1276,19 @@ function openFinForm(type){
   document.getElementById('ftx-amount').value='';
   document.getElementById('ftx-note').value='';
   document.getElementById('ftx-date').value=`${budgetYear}-${String(budgetMon+1).padStart(2,'0')}-${String(new Date().getDate()).padStart(2,'0')}`;
+  renderCurButtons();
   updateFinCats();
   openOv('ov-fin');
   setTimeout(()=>document.getElementById('ftx-amount').focus(),80);
+}
+function renderCurButtons(){
+  document.getElementById('ftx-cur-grid').innerHTML=Object.entries(CURRENCIES).map(([code,c])=>
+    `<button class="cur-btn ${code===finCurrency?'sel':''}" onclick="setFinCurrency('${code}')">${c.flag} ${c.label}</button>`
+  ).join('');
+  document.getElementById('ftx-amt-lbl').textContent=`Сумма (${CURRENCIES[finCurrency].symbol})`;
+}
+function setFinCurrency(cur){
+  finCurrency=cur; renderCurButtons();
 }
 function setFinWho(who){
   finWho=who;
@@ -1245,7 +1307,7 @@ function updateFinCats(){
 function submitFinTx(){
   const amt=parseFloat(document.getElementById('ftx-amount').value.replace(',','.'));
   if(!amt||amt<=0){ document.getElementById('ftx-amount').focus(); return; }
-  BUDGET.push({id:BUDGET.reduce((m,i)=>Math.max(m,i.id),0)+1,type:finTxType,who:finWho,amount:amt,cat:document.getElementById('ftx-cat').value,note:document.getElementById('ftx-note').value.trim(),date:document.getElementById('ftx-date').value||today()});
+  BUDGET.push({id:BUDGET.reduce((m,i)=>Math.max(m,i.id),0)+1,type:finTxType,who:finWho,currency:finCurrency,amount:amt,cat:document.getElementById('ftx-cat').value,note:document.getElementById('ftx-note').value.trim(),date:document.getElementById('ftx-date').value||today()});
   jsave(K.budget,BUDGET); closeOv('ov-fin'); renderBudget(); toast(finTxType==='in'?'💚 Доход добавлен':'🔴 Расход добавлен');
 }
 function fmtMoney(n){ return Math.abs(n).toLocaleString('ru-RU'); }
