@@ -217,6 +217,37 @@
     .board-add-tile{border:2px dashed var(--border);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:28px 16px;cursor:pointer;transition:border-color .2s,background .2s;color:var(--text3);min-height:110px;}
     .board-add-tile:hover{border-color:var(--accent);background:rgba(201,169,110,.04);color:var(--accent);}
 
+    /* ── Family tabs ── */
+    .fam-topbar{display:flex;align-items:center;gap:4px;padding:0 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:20;}
+    .fam-tab{background:none;border:none;color:var(--text3);padding:13px 14px;font-size:13.5px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s,border-color .15s;font-family:inherit;white-space:nowrap;}
+    .fam-tab:hover{color:var(--text2);}
+    .fam-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+    #fam-topbar-actions{padding:6px 0;}
+
+    /* ── Budget view ── */
+    .budget-nav{display:flex;align-items:center;justify-content:center;gap:16px;padding:14px 20px 10px;}
+    .budget-nav-btn{background:var(--s2);border:1px solid var(--border);color:var(--text2);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s;}
+    .budget-nav-btn:hover{background:var(--s3);color:var(--text);}
+    .budget-month-label{font-size:15px;font-weight:700;min-width:150px;text-align:center;}
+    .budget-summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:0 20px 4px;}
+    .budget-sum-card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:14px 12px;text-align:center;}
+    .budget-sum-val{font-size:18px;font-weight:700;line-height:1.2;}
+    .budget-sum-lbl{font-size:11px;color:var(--text3);margin-top:4px;}
+    .budget-tx-group{margin-bottom:14px;}
+    .budget-tx-date{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;padding:0 4px;margin-bottom:6px;}
+    .budget-tx-row{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;background:var(--s1);border:1px solid var(--border);margin-bottom:5px;transition:border-color .15s;}
+    .budget-tx-row:hover{border-color:var(--border2);}
+    .budget-tx-ico{font-size:20px;width:36px;height:36px;background:var(--s2);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .budget-tx-info{flex:1;min-width:0;}
+    .budget-tx-cat{font-size:13px;font-weight:600;}
+    .budget-tx-note{font-size:11.5px;color:var(--text3);}
+    .budget-tx-right{text-align:right;flex-shrink:0;}
+    .budget-tx-amt{font-size:14px;font-weight:700;}
+    .budget-tx-del{background:none;border:none;color:transparent;font-size:13px;cursor:pointer;padding:2px 4px;flex-shrink:0;transition:color .15s;}
+    .budget-tx-row:hover .budget-tx-del{color:var(--text3);}
+    .budget-tx-del:hover{color:#e05577!important;}
+    .budget-empty{text-align:center;color:var(--text3);padding:40px 0;font-size:13px;}
+
     /* ── Finance board ── */
     .fin-summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border);margin:0;border-bottom:1px solid var(--border);}
     .fin-sum-box{background:var(--s1);padding:10px 12px;text-align:center;}
@@ -331,6 +362,12 @@
         <span class="sb-group-label">Семья</span>
       </div>
       <div class="sb-sub" id="sb-family-sub">
+        <button class="sb-item" id="sb-fam-boards" onclick="setSection('family');setFamView('boards')">
+          <span>📋</span> Задачи и списки
+        </button>
+        <button class="sb-item" id="sb-fam-budget" onclick="setSection('family');setFamView('budget')">
+          <span>💰</span> Бюджет
+        </button>
         <div id="sb-boards-list"></div>
         <button class="sb-item" onclick="openBoardForm()">
           <span style="font-size:13px;color:var(--text3)">＋</span> Новый раздел
@@ -390,15 +427,40 @@
 
     <!-- ── СЕМЬЯ ── -->
     <div class="section" id="sec-family">
+      <!-- Family sub-tabs -->
       <div class="fam-topbar">
-        <span style="font-size:16px;font-weight:700;">🏠 Семья</span>
-        <span id="fam-stats" style="font-size:12px;color:var(--text3);"></span>
-        <div style="margin-left:auto;display:flex;gap:8px;">
-          <button class="btn btn-g" onclick="clearDoneAll()">🧹 Очистить выполненные</button>
+        <button class="fam-tab active" id="ftab-boards" onclick="setFamView('boards')">📋 Семья</button>
+        <button class="fam-tab" id="ftab-budget" onclick="setFamView('budget')">💰 Бюджет</button>
+        <div id="fam-topbar-actions" style="margin-left:auto;display:flex;gap:8px;">
+          <button class="btn btn-g" onclick="clearDoneAll()">🧹 Очистить</button>
         </div>
       </div>
-      <div class="section-content">
-        <div class="boards" id="boards-grid"></div>
+
+      <!-- Boards view -->
+      <div id="fam-view-boards">
+        <div class="section-content">
+          <div class="boards" id="boards-grid"></div>
+        </div>
+      </div>
+
+      <!-- Budget view -->
+      <div id="fam-view-budget" style="display:none;flex-direction:column;flex:1;">
+        <!-- Month nav -->
+        <div class="budget-nav">
+          <button class="budget-nav-btn" onclick="budgetMonthStep(-1)">‹</button>
+          <span class="budget-month-label" id="budget-month-lbl"></span>
+          <button class="budget-nav-btn" onclick="budgetMonthStep(1)">›</button>
+        </div>
+        <!-- Summary -->
+        <div class="budget-summary" id="budget-summary"></div>
+        <!-- Transactions -->
+        <div class="section-content" style="padding-top:12px;">
+          <div id="budget-list"></div>
+        </div>
+        <!-- Add -->
+        <div style="padding:0 20px 16px;">
+          <button class="btn btn-p" style="width:100%" onclick="openFinForm('budget')">＋ Добавить операцию</button>
+        </div>
       </div>
     </div>
 
@@ -625,8 +687,10 @@ let BOARDS = [], FAMILY = {};
 const K = {
   notes:'mb_notes', work:'mb_work',
   links:'mb_links', lcats:'mb_lcats',
-  boards:'mb_boards', family:'mb_family',
+  boards:'mb_boards', family:'mb_family', budget:'mb_budget',
 };
+
+let BUDGET = [];
 
 function loadAll(){
   NOTES = jload(K.notes, [{id:1,cat:'ideas',pin:false,tags:[],created:'2026-05-12',title:'Первая идея',body:'Сюда пиши свои идеи, мысли, планы ✨'}]);
@@ -637,13 +701,15 @@ function loadAll(){
   ]);
   LINKS = jload(K.links, []);
   BOARDS = jload(K.boards, [
-    {id:'tasks',   label:'Задачи',  icon:'✅', color:'#5bbf7a', type:'check',   placeholder:'Добавить задачу…'},
-    {id:'shop',    label:'Покупки', icon:'🛒', color:'#5eaee0', type:'check',   placeholder:'Добавить в список…'},
-    {id:'wishes',  label:'Желания', icon:'💫', color:'#9b7fe8', type:'check',   placeholder:'Добавить желание…'},
-    {id:'todos',   label:'Дела',    icon:'📅', color:'#e07b50', type:'check',   placeholder:'Добавить дело…'},
-    {id:'fnotes',  label:'Заметки', icon:'🗒️', color:'#8e8ea0', type:'text',   placeholder:'Написать…'},
-    {id:'budget',  label:'Бюджет',  icon:'💰', color:'#ffd166', type:'finance', placeholder:''},
+    {id:'tasks',   label:'Задачи',  icon:'✅', color:'#5bbf7a', type:'check', placeholder:'Добавить задачу…'},
+    {id:'shop',    label:'Покупки', icon:'🛒', color:'#5eaee0', type:'check', placeholder:'Добавить в список…'},
+    {id:'wishes',  label:'Желания', icon:'💫', color:'#9b7fe8', type:'check', placeholder:'Добавить желание…'},
+    {id:'todos',   label:'Дела',    icon:'📅', color:'#e07b50', type:'check', placeholder:'Добавить дело…'},
+    {id:'fnotes',  label:'Заметки', icon:'🗒️', color:'#8e8ea0', type:'text',  placeholder:'Написать…'},
   ]);
+  // migrate: remove old budget board if present
+  BOARDS = BOARDS.filter(b=>b.id!=='budget');
+  BUDGET = jload(K.budget, []);
   FAMILY = jload(K.family, {});
   BOARDS.forEach(b=>{ if(!FAMILY[b.id]) FAMILY[b.id]=[]; });
 }
@@ -655,7 +721,10 @@ function jsave(key,val){ localStorage.setItem(key,JSON.stringify(val)); }
 // ══════════════════════════════════════════════════════════
 
 let curSection = 'family';
+let famView    = 'boards';
 let noteFilter = {notes:'all', work:'all', links:'all'};
+let budgetYear = new Date().getFullYear();
+let budgetMon  = new Date().getMonth(); // 0-based
 let editingNoteId = null, editingNoteSection = null, readingNote = null;
 let editingBoardId = null, bfSelIcon='✅', bfSelColor='#5bbf7a';
 let editingLcatId = null, lcSelIcon='👨‍👩‍👧';
@@ -673,7 +742,7 @@ function setSection(s){
   document.querySelectorAll('.sb-group-head').forEach(b=>b.classList.remove('section-active'));
   document.getElementById('sg-'+s)?.classList.add('section-active');
 
-  if(s==='family') renderFamily();
+  if(s==='family'){ famView==='budget'?renderBudget():renderFamily(); }
   if(s==='notes')  renderNotes();
   if(s==='work')   renderWork();
   if(s==='links')  renderLinks();
@@ -920,13 +989,28 @@ function submitLinkCat(){
 //  FAMILY (boards)
 // ══════════════════════════════════════════════════════════
 
+function setFamView(view){
+  famView=view;
+  // tabs
+  document.getElementById('ftab-boards').classList.toggle('active', view==='boards');
+  document.getElementById('ftab-budget').classList.toggle('active', view==='budget');
+  // sidebar
+  document.getElementById('sb-fam-boards').classList.toggle('active', view==='boards');
+  document.getElementById('sb-fam-budget').classList.toggle('active', view==='budget');
+  // views
+  document.getElementById('fam-view-boards').style.display = view==='boards' ? '' : 'none';
+  const bv = document.getElementById('fam-view-budget');
+  bv.style.display = view==='budget' ? 'flex' : 'none';
+  // topbar actions
+  document.getElementById('fam-topbar-actions').style.display = view==='boards' ? 'flex' : 'none';
+  if(view==='budget') renderBudget();
+  else renderFamily();
+}
+
 function renderFamily(){
   let total=0,done=0;
   BOARDS.filter(b=>b.type==='check').forEach(b=>{ total+=FAMILY[b.id]?.length||0; done+=(FAMILY[b.id]||[]).filter(i=>i.done).length; });
-  document.getElementById('fam-stats').textContent=total?`${done}/${total} выполнено`:'';
-
   buildSidebarBoards();
-
   document.getElementById('boards-grid').innerHTML=
     BOARDS.map(b=>renderBoard(b)).join('') +
     `<div class="board-add-tile" onclick="openBoardForm()">
@@ -934,6 +1018,61 @@ function renderFamily(){
       <div style="font-size:13px">Добавить раздел</div>
     </div>`;
 }
+
+// ── Budget ─────────────────────────────────────────────────
+function budgetMonthStep(d){
+  budgetMon+=d;
+  if(budgetMon>11){ budgetMon=0; budgetYear++; }
+  if(budgetMon<0) { budgetMon=11; budgetYear--; }
+  renderBudget();
+}
+
+function renderBudget(){
+  const MONTHS=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+  document.getElementById('budget-month-lbl').textContent=`${MONTHS[budgetMon]} ${budgetYear}`;
+
+  const prefix=`${budgetYear}-${String(budgetMon+1).padStart(2,'0')}`;
+  const txs=BUDGET.filter(t=>t.date.startsWith(prefix)).sort((a,z)=>z.date.localeCompare(a.date));
+
+  const totalIn  = txs.filter(t=>t.type==='in' ).reduce((s,t)=>s+t.amount,0);
+  const totalOut = txs.filter(t=>t.type==='out').reduce((s,t)=>s+t.amount,0);
+  const bal=totalIn-totalOut;
+  const balClass=bal>=0?'fin-in':'fin-out';
+
+  document.getElementById('budget-summary').innerHTML=`
+    <div class="budget-sum-card"><div class="budget-sum-val fin-in">+${fmtMoney(totalIn)}</div><div class="budget-sum-lbl">Доходы</div></div>
+    <div class="budget-sum-card"><div class="budget-sum-val fin-out">-${fmtMoney(totalOut)}</div><div class="budget-sum-lbl">Расходы</div></div>
+    <div class="budget-sum-card"><div class="budget-sum-val ${balClass}">${bal>=0?'+':''}${fmtMoney(bal)}</div><div class="budget-sum-lbl">Остаток</div></div>`;
+
+  if(!txs.length){
+    document.getElementById('budget-list').innerHTML=`<div class="budget-empty">Операций нет — добавь первую</div>`;
+    return;
+  }
+
+  // group by day
+  const byDay={};
+  txs.forEach(t=>{ if(!byDay[t.date]) byDay[t.date]=[]; byDay[t.date].push(t); });
+  document.getElementById('budget-list').innerHTML=Object.entries(byDay).map(([date,list])=>{
+    const d=new Date(date); const label=d.toLocaleDateString('ru-RU',{day:'numeric',month:'long'});
+    const rows=list.map(t=>{
+      const parts=t.cat.split(' '); const icon=parts[0]; const catLabel=parts.slice(1).join(' ');
+      return `<div class="budget-tx-row">
+        <div class="budget-tx-ico">${icon}</div>
+        <div class="budget-tx-info">
+          <div class="budget-tx-cat">${esc(catLabel)}</div>
+          ${t.note?`<div class="budget-tx-note">${esc(t.note)}</div>`:''}
+        </div>
+        <div class="budget-tx-right">
+          <div class="budget-tx-amt ${t.type==='in'?'fin-in':'fin-out'}">${t.type==='in'?'+':'-'}${fmtMoney(t.amount)} ₽</div>
+        </div>
+        <button class="budget-tx-del" onclick="deleteBudgetTx(${t.id})">✕</button>
+      </div>`;
+    }).join('');
+    return `<div class="budget-tx-group"><div class="budget-tx-date">${label}</div>${rows}</div>`;
+  }).join('');
+}
+
+function deleteBudgetTx(id){ BUDGET=BUDGET.filter(t=>t.id!==id); jsave(K.budget,BUDGET); renderBudget(); }
 
 function buildSidebarBoards(){
   document.getElementById('sb-boards-list').innerHTML=BOARDS.map(b=>
@@ -946,8 +1085,7 @@ function buildSidebarBoards(){
 
 function renderBoard(b){
   const items=FAMILY[b.id]||[];
-  if(b.type==='text')    return renderTextBoard(b,items);
-  if(b.type==='finance') return renderFinanceBoard(b,items);
+  if(b.type==='text') return renderTextBoard(b,items);
   const active=items.filter(i=>!i.done), doneItems=items.filter(i=>i.done);
   return `<div class="board">
     <div class="board-accent" style="background:${b.color}"></div>
@@ -1054,13 +1192,13 @@ function renderFinanceBoard(b,items){
   </div>`;
 }
 
-function openFinForm(boardId){
-  finBoardId=boardId; finTxType='out';
+function openFinForm(){
+  finTxType='out';
   document.getElementById('ftx-out').classList.add('sel-out');
   document.getElementById('ftx-in').classList.remove('sel-in');
   document.getElementById('ftx-amount').value='';
   document.getElementById('ftx-note').value='';
-  document.getElementById('ftx-date').value=today();
+  document.getElementById('ftx-date').value=`${budgetYear}-${String(budgetMon+1).padStart(2,'0')}-${String(new Date().getDate()).padStart(2,'0')}`;
   updateFinCats();
   openOv('ov-fin');
   setTimeout(()=>document.getElementById('ftx-amount').focus(),80);
@@ -1077,11 +1215,9 @@ function updateFinCats(){
 function submitFinTx(){
   const amt=parseFloat(document.getElementById('ftx-amount').value.replace(',','.'));
   if(!amt||amt<=0){ document.getElementById('ftx-amount').focus(); return; }
-  const items=FAMILY[finBoardId]||[];
-  items.unshift({id:items.reduce((m,i)=>Math.max(m,i.id),0)+1,type:finTxType,amount:amt,cat:document.getElementById('ftx-cat').value,note:document.getElementById('ftx-note').value.trim(),date:document.getElementById('ftx-date').value||today()});
-  jsave(K.family,FAMILY); closeOv('ov-fin'); renderFamily(); toast(finTxType==='in'?'💚 Доход добавлен':'🔴 Расход добавлен');
+  BUDGET.push({id:BUDGET.reduce((m,i)=>Math.max(m,i.id),0)+1,type:finTxType,amount:amt,cat:document.getElementById('ftx-cat').value,note:document.getElementById('ftx-note').value.trim(),date:document.getElementById('ftx-date').value||today()});
+  jsave(K.budget,BUDGET); closeOv('ov-fin'); renderBudget(); toast(finTxType==='in'?'💚 Доход добавлен':'🔴 Расход добавлен');
 }
-function deleteFinTx(boardId,id){ FAMILY[boardId]=(FAMILY[boardId]||[]).filter(i=>i.id!==id); jsave(K.family,FAMILY); renderFamily(); }
 function fmtMoney(n){ return Math.abs(n).toLocaleString('ru-RU'); }
 // ──────────────────────────────────────────────────────────
 
