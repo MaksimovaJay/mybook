@@ -780,8 +780,7 @@ firebase.initializeApp({
   appId:"1:393438806255:web:23b8eedce013483ff49b1a",
 });
 const db   = firebase.firestore();
-// iOS WKWebView блокирует WebSocket — форсируем long-polling
-db.settings({ experimentalForceLongPolling: true, merge: true });
+try { db.settings({ experimentalForceLongPolling: true }); } catch(e) {}
 const auth = firebase.auth();
 let currentUser=null, familyId=null, _syncTimer=null, _myLastSync=0, _unsubListen=null;
 
