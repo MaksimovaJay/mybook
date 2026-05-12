@@ -1,537 +1,683 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>MyBook</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --bg:#0d0d0f; --s1:#141417; --s2:#1c1c21; --s3:#242429;
-      --border:#2a2a32; --border2:#35353f;
-      --text:#eeeef2; --text2:#8e8ea0; --text3:#55556a;
-      --accent:#c9a96e; --r:12px;
+    *{box-sizing:border-box;margin:0;padding:0;}
+    :root{
+      --bg:#0d0d0f;--s1:#141417;--s2:#1c1c21;--s3:#242429;
+      --border:#2a2a32;--border2:#35353f;
+      --text:#eeeef2;--text2:#8e8ea0;--text3:#55556a;
+      --accent:#c9a96e;--r:12px;
+      --nav-h:62px;
     }
-    html { height:100%; }
-    body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif; font-size:14px; line-height:1.6; min-height:100%; }
+    html,body{height:100%;}
+    body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;font-size:14px;line-height:1.6;}
 
-    /* ── App ── */
-    .app { display:flex; min-height:100vh; }
+    /* ══ Layout ══ */
+    .app{display:flex;min-height:100vh;}
+    .main{flex:1;display:flex;flex-direction:column;min-width:0;padding-bottom:0;}
 
-    /* ── Sidebar ── */
-    .sidebar { width:220px; flex-shrink:0; background:var(--s1); border-right:1px solid var(--border); display:flex; flex-direction:column; position:sticky; top:0; height:100vh; overflow-y:auto; }
-    .logo { padding:22px 18px 18px; font-size:17px; font-weight:700; letter-spacing:-.4px; display:flex; align-items:center; gap:8px; }
-    .logo-dot { width:8px; height:8px; border-radius:50%; background:var(--accent); flex-shrink:0; }
-    .sb-section { padding:0 8px 8px; }
-    .sb-label { font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--text3); padding:10px 8px 4px; }
-    .sb-btn { display:flex; align-items:center; gap:8px; width:100%; background:none; border:none; color:var(--text2); padding:7px 10px; border-radius:8px; cursor:pointer; font-size:13px; text-align:left; transition:background .15s,color .15s; }
-    .sb-btn:hover  { background:var(--s2); color:var(--text); }
-    .sb-btn.active { background:rgba(201,169,110,.13); color:var(--accent); }
-    .sb-btn .icon  { width:18px; text-align:center; font-size:14px; flex-shrink:0; }
-    .sb-count { margin-left:auto; font-size:11px; color:var(--text3); background:var(--s3); padding:1px 7px; border-radius:20px; min-width:22px; text-align:center; }
-    .sb-divider { height:1px; background:var(--border); margin:6px 8px; }
-    .sb-bottom { margin-top:auto; padding:12px 8px; border-top:1px solid var(--border); }
-
-    /* ── Buttons ── */
-    .btn { display:inline-flex; align-items:center; gap:6px; border:none; border-radius:8px; cursor:pointer; font-size:13px; font-weight:500; padding:8px 14px; transition:opacity .15s,background .15s; }
-    .btn-primary { background:var(--accent); color:#1a1206; font-weight:700; }
-    .btn-primary:hover { opacity:.88; }
-    .btn-ghost { background:var(--s2); color:var(--text2); border:1px solid var(--border); }
-    .btn-ghost:hover { background:var(--s3); color:var(--text); }
-    .btn-danger { background:#c0314f; color:#fff; }
-    .btn-danger:hover { opacity:.88; }
-
-    /* ── Notes page ── */
-    .main { flex:1; display:flex; flex-direction:column; min-width:0; }
-    .topbar { display:flex; align-items:center; gap:10px; padding:12px 24px; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--bg); z-index:20; }
-    .search-wrap { flex:1; max-width:420px; position:relative; }
-    .search-wrap svg { position:absolute; left:10px; top:50%; transform:translateY(-50%); opacity:.4; pointer-events:none; }
-    #search { width:100%; background:var(--s2); border:1px solid var(--border); border-radius:8px; padding:8px 12px 8px 34px; color:var(--text); font-size:13px; outline:none; transition:border-color .2s; }
-    #search:focus { border-color:var(--accent); }
-    #search::placeholder { color:var(--text3); }
-    .topbar-actions { margin-left:auto; display:flex; gap:8px; align-items:center; }
-    .content { padding:24px; flex:1; }
-    .page-head { display:flex; align-items:baseline; gap:10px; margin-bottom:18px; }
-    .page-title { font-size:19px; font-weight:700; }
-    .page-count { font-size:13px; color:var(--text3); }
-
-    /* ── Cards ── */
-    .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:12px; }
-    .card { background:var(--s1); border:1px solid var(--border); border-radius:var(--r); padding:16px; cursor:pointer; transition:border-color .2s,transform .15s,box-shadow .2s; position:relative; display:flex; flex-direction:column; gap:8px; border-left:3px solid transparent; }
-    .card:hover { border-color:var(--border2); transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,.35); }
-    .card-top { display:flex; align-items:center; gap:6px; }
-    .card-cat-label { font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
-    .card-pin { margin-left:auto; font-size:12px; opacity:.5; }
-    .card-date { font-size:11px; color:var(--text3); margin-left:auto; }
-    .card-title { font-size:14px; font-weight:600; line-height:1.4; }
-    .card-body { font-size:12.5px; color:var(--text2); line-height:1.55; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; flex:1; }
-    .card-tags { display:flex; flex-wrap:wrap; gap:4px; margin-top:2px; }
-    .tag { font-size:11px; color:var(--text3); background:var(--s3); border-radius:5px; padding:2px 7px; cursor:pointer; transition:color .15s,background .15s; }
-    .tag:hover { color:var(--accent); background:var(--s2); }
-    .card-actions { display:flex; gap:4px; margin-top:4px; opacity:0; transition:opacity .15s; }
-    .card:hover .card-actions { opacity:1; }
-    .card-btn { background:var(--s3); border:none; border-radius:6px; color:var(--text3); font-size:12px; padding:4px 9px; cursor:pointer; transition:color .15s,background .15s; }
-    .card-btn:hover { background:var(--border2); color:var(--text); }
-    .card-btn.del:hover { color:#e05577; }
-    .empty { flex-direction:column; align-items:center; justify-content:center; padding:80px 20px; color:var(--text3); text-align:center; gap:10px; }
-    .empty-icon { font-size:38px; }
-    .empty-text { font-size:15px; }
-    .empty-sub  { font-size:13px; }
-
-    /* ══ FAMILY PAGE ══ */
-    #family-page { display:none; flex-direction:column; flex:1; min-width:0; }
-    #family-page.visible { display:flex; }
-    .fam-topbar { display:flex; align-items:center; gap:12px; padding:14px 24px; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--bg); z-index:20; }
-    .fam-title { font-size:18px; font-weight:700; display:flex; align-items:center; gap:8px; }
-    .fam-stats { color:var(--text3); font-size:13px; font-weight:400; }
-    .fam-content { padding:20px 24px; flex:1; }
-
-    /* Boards grid */
-    .boards { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; align-items:start; }
-
-    /* Single board */
-    .board { background:var(--s1); border:1px solid var(--border); border-radius:14px; display:flex; flex-direction:column; overflow:hidden; }
-    .board-accent { height:3px; }
-    .board-header { display:flex; align-items:center; gap:8px; padding:12px 14px 10px; border-bottom:1px solid var(--border); position:relative; }
-    .board-icon { font-size:16px; flex-shrink:0; }
-    .board-name { font-size:13.5px; font-weight:700; flex:1; cursor:default; }
-    .board-name-input { font-size:13.5px; font-weight:700; flex:1; background:none; border:none; border-bottom:1px solid var(--accent); outline:none; color:var(--text); font-family:inherit; padding:1px 2px; }
-    .board-count { font-size:11px; color:var(--text3); flex-shrink:0; }
-    .board-add { background:none; border:none; color:var(--text3); font-size:18px; cursor:pointer; padding:0 2px; line-height:1; transition:color .15s; flex-shrink:0; }
-    .board-add:hover { color:var(--accent); }
-
-    /* Board menu (⋯) */
-    .board-menu-wrap { position:relative; flex-shrink:0; }
-    .board-menu-btn { background:none; border:none; color:var(--text3); font-size:16px; cursor:pointer; padding:2px 4px; border-radius:5px; opacity:0; transition:opacity .15s,color .15s,background .15s; line-height:1; }
-    .board:hover .board-menu-btn { opacity:1; }
-    .board-menu-btn:hover { color:var(--text); background:var(--s3); }
-    .board-menu {
-      display:none; position:absolute; right:0; top:calc(100% + 4px);
-      background:var(--s2); border:1px solid var(--border2); border-radius:10px;
-      min-width:160px; z-index:50; overflow:hidden;
-      box-shadow:0 8px 24px rgba(0,0,0,.4);
+    /* ══ Sidebar (desktop) ══ */
+    .sidebar{
+      width:230px;flex-shrink:0;background:var(--s1);
+      border-right:1px solid var(--border);
+      display:flex;flex-direction:column;
+      position:sticky;top:0;height:100vh;overflow-y:auto;
     }
-    .board-menu.open { display:block; }
-    .board-menu-item { display:flex; align-items:center; gap:8px; width:100%; background:none; border:none; color:var(--text2); padding:9px 14px; font-size:13px; cursor:pointer; text-align:left; transition:background .15s,color .15s; }
-    .board-menu-item:hover { background:var(--s3); color:var(--text); }
-    .board-menu-item.danger:hover { color:#e05577; }
+    .logo{padding:20px 18px 14px;font-size:17px;font-weight:700;letter-spacing:-.4px;display:flex;align-items:center;gap:8px;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);}
 
-    /* Items */
-    .board-list { padding:8px; display:flex; flex-direction:column; gap:2px; }
-    .fam-item { display:flex; align-items:flex-start; gap:8px; padding:7px 8px; border-radius:8px; transition:background .15s; }
-    .fam-item:hover { background:var(--s2); }
-    .fam-cb { width:16px; height:16px; border-radius:4px; border:1.5px solid var(--border2); background:none; flex-shrink:0; cursor:pointer; margin-top:2px; appearance:none; -webkit-appearance:none; transition:background .15s,border-color .15s; position:relative; }
-    .fam-cb:checked { background:var(--accent); border-color:var(--accent); }
-    .fam-cb:checked::after { content:''; position:absolute; left:4px; top:1.5px; width:5px; height:8px; border:2px solid #1a1206; border-top:none; border-left:none; transform:rotate(45deg); }
-    .fam-text { flex:1; font-size:13.5px; color:var(--text); word-break:break-word; line-height:1.45; }
-    .fam-text.done { color:var(--text3); text-decoration:line-through; }
-    .fam-del { background:none; border:none; color:transparent; font-size:13px; cursor:pointer; padding:0; line-height:1; transition:color .15s; flex-shrink:0; }
-    .fam-item:hover .fam-del { color:var(--text3); }
-    .fam-item:hover .fam-del:hover { color:#e05577; }
-
-    .board-input-row { padding:6px 8px 10px; display:flex; gap:6px; align-items:center; }
-    .board-input { flex:1; background:var(--s2); border:1px solid var(--border); border-radius:7px; padding:6px 10px; color:var(--text); font-size:13px; font-family:inherit; outline:none; transition:border-color .2s; }
-    .board-input:focus { border-color:var(--accent); }
-    .board-input::placeholder { color:var(--text3); }
-    .board-submit { background:var(--s3); border:none; border-radius:7px; color:var(--text2); width:28px; height:28px; cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center; transition:background .15s,color .15s; flex-shrink:0; }
-    .board-submit:hover { background:var(--accent); color:#1a1206; }
-
-    /* Text board notes */
-    .note-item { margin:0 8px 6px; background:var(--s2); border:1px solid var(--border); border-radius:8px; padding:10px 12px 10px 12px; font-size:13px; color:var(--text2); line-height:1.5; position:relative; }
-    .note-item-del { position:absolute; top:7px; right:8px; background:none; border:none; color:transparent; font-size:12px; cursor:pointer; transition:color .15s; }
-    .note-item:hover .note-item-del { color:var(--text3); }
-    .note-item:hover .note-item-del:hover { color:#e05577; }
-
-    .done-section { padding:4px 8px 2px; }
-    .done-toggle { background:none; border:none; color:var(--text3); font-size:11px; cursor:pointer; padding:4px 8px; border-radius:6px; transition:color .15s; }
-    .done-toggle:hover { color:var(--text2); }
-    .done-list { padding:2px 8px 6px; }
-
-    /* Add board tile */
-    .board-add-tile {
-      border:2px dashed var(--border); border-radius:14px;
-      display:flex; flex-direction:column; align-items:center; justify-content:center;
-      gap:8px; padding:32px 16px; cursor:pointer;
-      transition:border-color .2s, background .2s; color:var(--text3); min-height:120px;
+    .sb-group{padding:4px 8px;}
+    .sb-group-head{
+      display:flex;align-items:center;gap:8px;
+      padding:8px 10px 4px;cursor:pointer;border-radius:8px;
+      transition:background .15s;
     }
-    .board-add-tile:hover { border-color:var(--accent); background:rgba(201,169,110,.04); color:var(--accent); }
-    .board-add-tile-icon { font-size:24px; }
-    .board-add-tile-label { font-size:13px; font-weight:500; }
+    .sb-group-head:hover{background:var(--s2);}
+    .sb-group-icon{font-size:15px;width:20px;text-align:center;}
+    .sb-group-label{font-size:13px;font-weight:700;color:var(--text2);flex:1;}
+    .sb-group-head.active .sb-group-label{color:var(--text);}
+    .sb-group-head.section-active{background:rgba(201,169,110,.12);}
+    .sb-group-head.section-active .sb-group-label{color:var(--accent);}
 
-    /* ── Modals ── */
-    .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:100; align-items:center; justify-content:center; padding:20px; }
-    .overlay.open { display:flex; }
-    .read-modal { background:var(--s1); border:1px solid var(--border2); border-radius:16px; width:100%; max-width:660px; max-height:88vh; overflow-y:auto; padding:28px; position:relative; }
-    .rm-top { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
-    .rm-cat { font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
-    .rm-date { font-size:11px; color:var(--text3); margin-left:auto; margin-right:36px; }
-    .rm-title { font-size:22px; font-weight:700; line-height:1.3; margin-bottom:16px; }
-    .rm-body { color:var(--text2); line-height:1.75; font-size:14px; white-space:pre-wrap; word-break:break-word; }
-    .rm-body a { color:var(--accent); text-decoration:none; }
-    .rm-body a:hover { text-decoration:underline; }
-    .rm-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:20px; }
-    .rm-actions { display:flex; gap:8px; margin-top:20px; padding-top:16px; border-top:1px solid var(--border); }
-    .close-btn { position:absolute; top:16px; right:16px; background:var(--s3); border:none; color:var(--text2); width:28px; height:28px; border-radius:7px; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; transition:background .15s; }
-    .close-btn:hover { background:var(--border2); color:var(--text); }
+    .sb-sub{padding:0 8px 8px 36px;}
+    .sb-item{
+      display:flex;align-items:center;gap:7px;
+      padding:6px 8px;border-radius:7px;cursor:pointer;
+      font-size:12.5px;color:var(--text3);transition:background .15s,color .15s;
+      background:none;border:none;width:100%;text-align:left;
+    }
+    .sb-item:hover{background:var(--s2);color:var(--text2);}
+    .sb-item.active{background:rgba(201,169,110,.1);color:var(--accent);}
+    .sb-item .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+    .sb-count{margin-left:auto;font-size:10px;color:var(--text3);background:var(--s3);padding:1px 6px;border-radius:10px;}
 
-    .form-box { background:var(--s1); border:1px solid var(--border2); border-radius:16px; width:100%; max-width:580px; max-height:92vh; overflow-y:auto; padding:26px; position:relative; }
-    .form-sm { max-width:400px; }
-    .form-title { font-size:17px; font-weight:700; margin-bottom:20px; }
-    .fg { margin-bottom:13px; }
-    .fl { display:block; font-size:11px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--text3); margin-bottom:5px; }
-    .fi,.fs,.fta { width:100%; background:var(--s2); border:1px solid var(--border); border-radius:8px; padding:9px 12px; color:var(--text); font-size:13.5px; font-family:inherit; outline:none; transition:border-color .2s; }
-    .fi:focus,.fs:focus,.fta:focus { border-color:var(--accent); }
-    .fta { min-height:130px; resize:vertical; line-height:1.6; }
-    .fs option { background:var(--s2); }
-    .frow { display:flex; align-items:center; gap:8px; }
-    .frow input[type=checkbox] { width:15px; height:15px; cursor:pointer; accent-color:var(--accent); }
-    .frow label { font-size:13px; color:var(--text2); cursor:pointer; }
-    .form-actions { display:flex; gap:8px; margin-top:18px; justify-content:flex-end; }
+    .sb-divider{height:1px;background:var(--border);margin:4px 8px;}
+    .sb-bottom{margin-top:auto;padding:10px 8px;border-top:1px solid var(--border);}
+    .sb-btn{display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;color:var(--text3);padding:7px 10px;border-radius:8px;cursor:pointer;font-size:13px;transition:background .15s,color .15s;}
+    .sb-btn:hover{background:var(--s2);color:var(--text2);}
 
-    /* Color swatches */
-    .swatches { display:flex; flex-wrap:wrap; gap:8px; }
-    .swatch { width:26px; height:26px; border-radius:7px; cursor:pointer; border:2px solid transparent; transition:transform .15s,border-color .15s; flex-shrink:0; }
-    .swatch:hover { transform:scale(1.15); }
-    .swatch.sel { border-color:var(--text); }
+    /* ══ Bottom nav (mobile) ══ */
+    .bottom-nav{
+      display:none;
+      position:fixed;bottom:0;left:0;right:0;
+      height:var(--nav-h);
+      background:var(--s1);border-top:1px solid var(--border);
+      z-index:50;
+      display:flex;align-items:stretch;
+    }
+    .bn-item{
+      flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:3px;background:none;border:none;cursor:pointer;
+      color:var(--text3);padding:6px 4px;
+      transition:color .15s;font-family:inherit;
+    }
+    .bn-item.active{color:var(--accent);}
+    .bn-item .bn-icon{font-size:20px;line-height:1;}
+    .bn-item .bn-label{font-size:10px;font-weight:600;letter-spacing:.02em;}
 
-    /* Icon picker */
-    .icon-grid { display:flex; flex-wrap:wrap; gap:6px; }
-    .icon-opt { font-size:20px; width:36px; height:36px; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; background:var(--s2); border:2px solid transparent; transition:border-color .15s,background .15s; }
-    .icon-opt:hover { background:var(--s3); }
-    .icon-opt.sel { border-color:var(--accent); background:var(--s3); }
+    /* ══ Topbar ══ */
+    .topbar{
+      display:flex;align-items:center;gap:10px;
+      padding:12px 20px;border-bottom:1px solid var(--border);
+      position:sticky;top:0;background:var(--bg);z-index:20;
+    }
+    .topbar-title{font-size:16px;font-weight:700;}
+    .search-wrap{flex:1;max-width:380px;position:relative;}
+    .search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);opacity:.4;pointer-events:none;}
+    .si{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:7px 11px 7px 32px;color:var(--text);font-size:13px;outline:none;transition:border-color .2s;}
+    .si:focus{border-color:var(--accent);}
+    .si::placeholder{color:var(--text3);}
+    .topbar-right{margin-left:auto;display:flex;gap:8px;}
 
-    .confirm-box { background:var(--s1); border:1px solid var(--border2); border-radius:14px; width:100%; max-width:340px; padding:24px; text-align:center; }
-    .confirm-title { font-size:16px; font-weight:600; margin-bottom:8px; }
-    .confirm-sub { font-size:13px; color:var(--text2); margin-bottom:20px; }
-    .confirm-actions { display:flex; gap:8px; justify-content:center; }
+    /* ══ Buttons ══ */
+    .btn{display:inline-flex;align-items:center;gap:5px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;padding:7px 14px;transition:opacity .15s,background .15s;font-family:inherit;}
+    .btn-p{background:var(--accent);color:#1a1206;font-weight:700;}
+    .btn-p:hover{opacity:.88;}
+    .btn-g{background:var(--s2);color:var(--text2);border:1px solid var(--border);}
+    .btn-g:hover{background:var(--s3);color:var(--text);}
+    .btn-d{background:#c0314f;color:#fff;}
+    .btn-d:hover{opacity:.88;}
+
+    /* ══ Sections wrapper ══ */
+    .section{display:none;flex-direction:column;flex:1;}
+    .section.active{display:flex;}
+    .section-content{padding:20px;flex:1;}
+
+    /* ══ Note cards ══ */
+    .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:11px;}
+    .card{
+      background:var(--s1);border:1px solid var(--border);border-radius:var(--r);
+      padding:15px;cursor:pointer;border-left:3px solid transparent;
+      display:flex;flex-direction:column;gap:7px;
+      transition:border-color .2s,transform .15s,box-shadow .2s;
+    }
+    .card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.3);}
+    .card-top{display:flex;align-items:center;gap:6px;}
+    .card-cat{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+    .card-date{font-size:11px;color:var(--text3);margin-left:auto;}
+    .card-pin{font-size:11px;opacity:.5;margin-left:auto;}
+    .card-title{font-size:14px;font-weight:600;line-height:1.4;}
+    .card-body{font-size:12.5px;color:var(--text2);line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;flex:1;}
+    .card-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px;}
+    .tag{font-size:11px;color:var(--text3);background:var(--s3);border-radius:5px;padding:2px 7px;cursor:pointer;transition:color .15s;}
+    .tag:hover{color:var(--accent);}
+    .card-actions{display:flex;gap:4px;margin-top:4px;opacity:0;transition:opacity .15s;}
+    .card:hover .card-actions{opacity:1;}
+    .ca{background:var(--s3);border:none;border-radius:6px;color:var(--text3);font-size:11.5px;padding:4px 8px;cursor:pointer;transition:color .15s,background .15s;}
+    .ca:hover{background:var(--border2);color:var(--text);}
+    .ca.del:hover{color:#e05577;}
+
+    /* ══ Page head ══ */
+    .ph{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+    .ph-title{font-size:17px;font-weight:700;}
+    .ph-count{font-size:12px;color:var(--text3);}
+
+    /* ══ Tabs ══ */
+    .tabs{display:flex;gap:2px;padding:0 20px;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;}
+    .tabs::-webkit-scrollbar{display:none;}
+    .tab{
+      background:none;border:none;color:var(--text3);
+      padding:10px 14px;font-size:13px;font-weight:500;cursor:pointer;
+      border-bottom:2px solid transparent;margin-bottom:-1px;
+      white-space:nowrap;transition:color .15s,border-color .15s;font-family:inherit;
+    }
+    .tab:hover{color:var(--text2);}
+    .tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+    .tab-add{color:var(--text3);font-size:16px;padding:10px 10px;}
+    .tab-add:hover{color:var(--accent);}
+
+    /* ══ Link cards ══ */
+    .links-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:11px;}
+    .link-card{
+      background:var(--s1);border:1px solid var(--border);border-radius:var(--r);
+      padding:14px;display:flex;gap:12px;align-items:flex-start;
+      transition:border-color .2s,transform .15s;position:relative;cursor:pointer;
+    }
+    .link-card:hover{border-color:var(--border2);transform:translateY(-1px);}
+    .link-fav{width:32px;height:32px;border-radius:8px;background:var(--s2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;overflow:hidden;}
+    .link-fav img{width:20px;height:20px;object-fit:contain;}
+    .link-info{flex:1;min-width:0;}
+    .link-title{font-size:13.5px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .link-url{font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
+    .link-desc{font-size:12px;color:var(--text2);margin-top:5px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+    .link-del{position:absolute;top:10px;right:10px;background:none;border:none;color:transparent;font-size:13px;cursor:pointer;transition:color .15s;padding:2px;}
+    .link-card:hover .link-del{color:var(--text3);}
+    .link-del:hover{color:#e05577!important;}
+
+    /* ══ Family boards ══ */
+    .fam-topbar{display:flex;align-items:center;gap:10px;padding:12px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:20;}
+    .boards{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:12px;align-items:start;}
+    .board{background:var(--s1);border:1px solid var(--border);border-radius:14px;display:flex;flex-direction:column;overflow:hidden;}
+    .board-accent{height:3px;}
+    .board-header{display:flex;align-items:center;gap:8px;padding:12px 13px 9px;border-bottom:1px solid var(--border);}
+    .board-icon{font-size:15px;flex-shrink:0;}
+    .board-name{font-size:13px;font-weight:700;flex:1;}
+    .board-cnt{font-size:11px;color:var(--text3);}
+    .board-add-btn{background:none;border:none;color:var(--text3);font-size:17px;cursor:pointer;padding:0 2px;line-height:1;transition:color .15s;}
+    .board-add-btn:hover{color:var(--accent);}
+    .bmw{position:relative;flex-shrink:0;}
+    .bm-btn{background:none;border:none;color:var(--text3);font-size:15px;cursor:pointer;padding:2px 4px;border-radius:5px;opacity:0;transition:opacity .15s,color .15s;line-height:1;}
+    .board:hover .bm-btn{opacity:1;}
+    .bm-btn:hover{color:var(--text);background:var(--s3);}
+    .bm{display:none;position:absolute;right:0;top:calc(100% + 4px);background:var(--s2);border:1px solid var(--border2);border-radius:10px;min-width:155px;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.4);overflow:hidden;}
+    .bm.open{display:block;}
+    .bmi{display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;color:var(--text2);padding:9px 13px;font-size:13px;cursor:pointer;text-align:left;transition:background .15s,color .15s;font-family:inherit;}
+    .bmi:hover{background:var(--s3);color:var(--text);}
+    .bmi.danger:hover{color:#e05577;}
+    .board-list{padding:6px;display:flex;flex-direction:column;gap:1px;}
+    .fi-row{display:flex;align-items:flex-start;gap:8px;padding:6px 8px;border-radius:7px;transition:background .15s;}
+    .fi-row:hover{background:var(--s2);}
+    .fam-cb{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border2);background:none;flex-shrink:0;cursor:pointer;margin-top:2px;appearance:none;-webkit-appearance:none;transition:background .15s,border-color .15s;position:relative;}
+    .fam-cb:checked{background:var(--accent);border-color:var(--accent);}
+    .fam-cb:checked::after{content:'';position:absolute;left:4px;top:1.5px;width:5px;height:8px;border:2px solid #1a1206;border-top:none;border-left:none;transform:rotate(45deg);}
+    .fi-text{flex:1;font-size:13px;color:var(--text);word-break:break-word;line-height:1.4;}
+    .fi-text.done{color:var(--text3);text-decoration:line-through;}
+    .fi-del{background:none;border:none;color:transparent;font-size:12px;cursor:pointer;padding:0;line-height:1;transition:color .15s;flex-shrink:0;}
+    .fi-row:hover .fi-del{color:var(--text3);}
+    .fi-row:hover .fi-del:hover{color:#e05577;}
+    .note-item{margin:0 6px 5px;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;font-size:13px;color:var(--text2);line-height:1.5;position:relative;}
+    .ni-del{position:absolute;top:7px;right:8px;background:none;border:none;color:transparent;font-size:12px;cursor:pointer;transition:color .15s;}
+    .note-item:hover .ni-del{color:var(--text3);}
+    .note-item:hover .ni-del:hover{color:#e05577;}
+    .done-sec{padding:3px 6px 2px;}
+    .done-tog{background:none;border:none;color:var(--text3);font-size:11px;cursor:pointer;padding:3px 8px;border-radius:6px;font-family:inherit;transition:color .15s;}
+    .done-tog:hover{color:var(--text2);}
+    .done-list{padding:2px 6px 5px;}
+    .board-inp-row{padding:5px 6px 9px;display:flex;gap:5px;align-items:center;}
+    .bi{flex:1;background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:6px 10px;color:var(--text);font-size:13px;font-family:inherit;outline:none;transition:border-color .2s;}
+    .bi:focus{border-color:var(--accent);}
+    .bi::placeholder{color:var(--text3);}
+    .bs{background:var(--s3);border:none;border-radius:7px;color:var(--text2);width:27px;height:27px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s;flex-shrink:0;}
+    .bs:hover{background:var(--accent);color:#1a1206;}
+    .board-add-tile{border:2px dashed var(--border);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:28px 16px;cursor:pointer;transition:border-color .2s,background .2s;color:var(--text3);min-height:110px;}
+    .board-add-tile:hover{border-color:var(--accent);background:rgba(201,169,110,.04);color:var(--accent);}
+
+    /* ══ Empty state ══ */
+    .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;color:var(--text3);text-align:center;gap:8px;}
+    .empty-icon{font-size:34px;}
+    .empty-txt{font-size:14px;}
+
+    /* ══ Modals ══ */
+    .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;align-items:center;justify-content:center;padding:16px;}
+    .overlay.open{display:flex;}
+    .modal{background:var(--s1);border:1px solid var(--border2);border-radius:16px;width:100%;max-width:580px;max-height:90vh;overflow-y:auto;padding:24px;position:relative;}
+    .modal-sm{max-width:400px;}
+    .modal-title{font-size:16px;font-weight:700;margin-bottom:18px;}
+    .close-x{position:absolute;top:14px;right:14px;background:var(--s3);border:none;color:var(--text2);width:27px;height:27px;border-radius:7px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:background .15s;}
+    .close-x:hover{background:var(--border2);color:var(--text);}
+    .fg{margin-bottom:12px;}
+    .fl{display:block;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);margin-bottom:5px;}
+    .fi,.fs,.fta{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:8px 11px;color:var(--text);font-size:13.5px;font-family:inherit;outline:none;transition:border-color .2s;}
+    .fi:focus,.fs:focus,.fta:focus{border-color:var(--accent);}
+    .fta{min-height:110px;resize:vertical;line-height:1.6;}
+    .fs option{background:var(--s2);}
+    .frow{display:flex;align-items:center;gap:8px;}
+    .frow input[type=checkbox]{width:14px;height:14px;cursor:pointer;accent-color:var(--accent);}
+    .frow label{font-size:13px;color:var(--text2);cursor:pointer;}
+    .form-actions{display:flex;gap:8px;margin-top:16px;justify-content:flex-end;}
+
+    /* Read modal */
+    .rm-cat{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;}
+    .rm-title{font-size:20px;font-weight:700;line-height:1.3;margin-bottom:14px;}
+    .rm-body{color:var(--text2);line-height:1.75;font-size:14px;white-space:pre-wrap;word-break:break-word;}
+    .rm-body a{color:var(--accent);text-decoration:none;}
+    .rm-body a:hover{text-decoration:underline;}
+    .rm-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:16px;}
+    .rm-actions{display:flex;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--border);flex-wrap:wrap;}
+
+    /* Icon + color pickers */
+    .icon-grid{display:flex;flex-wrap:wrap;gap:5px;}
+    .ico{font-size:19px;width:34px;height:34px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;background:var(--s2);border:2px solid transparent;transition:border-color .15s,background .15s;}
+    .ico:hover{background:var(--s3);}
+    .ico.sel{border-color:var(--accent);}
+    .swatches{display:flex;flex-wrap:wrap;gap:7px;}
+    .sw{width:24px;height:24px;border-radius:6px;cursor:pointer;border:2px solid transparent;transition:transform .15s,border-color .15s;}
+    .sw:hover{transform:scale(1.15);}
+    .sw.sel{border-color:var(--text);}
+
+    /* Confirm */
+    .confirm-box{background:var(--s1);border:1px solid var(--border2);border-radius:14px;width:100%;max-width:320px;padding:22px;text-align:center;}
+    .confirm-title{font-size:15px;font-weight:600;margin-bottom:7px;}
+    .confirm-sub{font-size:13px;color:var(--text2);margin-bottom:18px;}
+    .confirm-actions{display:flex;gap:8px;justify-content:center;}
 
     /* Toast */
-    .toast { position:fixed; bottom:22px; right:22px; background:var(--s2); border:1px solid var(--border2); color:var(--text); padding:11px 16px; border-radius:10px; font-size:13px; z-index:999; box-shadow:0 4px 20px rgba(0,0,0,.45); animation:fadeup .25s ease; }
-    @keyframes fadeup { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+    .toast{position:fixed;bottom:76px;right:16px;background:var(--s2);border:1px solid var(--border2);color:var(--text);padding:10px 15px;border-radius:10px;font-size:13px;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,.45);animation:fu .2s ease;}
+    @keyframes fu{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
-    ::-webkit-scrollbar { width:5px; }
-    ::-webkit-scrollbar-track { background:transparent; }
-    ::-webkit-scrollbar-thumb { background:var(--border2); border-radius:3px; }
+    ::-webkit-scrollbar{width:4px;}
+    ::-webkit-scrollbar-track{background:transparent;}
+    ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
 
-    @media(max-width:600px) {
-      .sidebar { display:none; }
-      .content,.fam-content { padding:16px; }
-      .topbar,.fam-topbar { padding:10px 16px; }
-      .grid,.boards { grid-template-columns:1fr; }
+    /* ══ RESPONSIVE ══ */
+    @media(max-width:700px){
+      .sidebar{display:none;}
+      .main{padding-bottom:var(--nav-h);}
+      .section-content{padding:14px;}
+      .topbar,.fam-topbar{padding:10px 14px;}
+      .tabs{padding:0 14px;}
+      .cards-grid,.links-grid,.boards{grid-template-columns:1fr;}
+      .toast{bottom:calc(var(--nav-h) + 10px);}
+    }
+    @media(min-width:701px){
+      .bottom-nav{display:none;}
     }
   </style>
 </head>
 <body>
 <div class="app">
 
-  <!-- ── Sidebar ── -->
+  <!-- ══ SIDEBAR (desktop) ══ -->
   <aside class="sidebar">
     <div class="logo"><span class="logo-dot"></span>MyBook</div>
-    <div class="sb-section">
-      <div class="sb-label">Обзор</div>
-      <button class="sb-btn active" data-cat="all" onclick="switchView('notes');setCat('all',this)">
-        <span class="icon">◈</span> Все записи <span class="sb-count" id="cnt-all">0</span>
-      </button>
-      <button class="sb-btn" data-cat="pinned" onclick="switchView('notes');setCat('pinned',this)">
-        <span class="icon">📌</span> Закреплённые <span class="sb-count" id="cnt-pinned">0</span>
-      </button>
+
+    <!-- Семья -->
+    <div class="sb-group">
+      <div class="sb-group-head" id="sg-family" onclick="setSection('family')">
+        <span class="sb-group-icon">🏠</span>
+        <span class="sb-group-label">Семья</span>
+      </div>
+      <div class="sb-sub" id="sb-family-sub">
+        <div id="sb-boards-list"></div>
+        <button class="sb-item" onclick="openBoardForm()">
+          <span style="font-size:13px;color:var(--text3)">＋</span> Новый раздел
+        </button>
+      </div>
     </div>
+
     <div class="sb-divider"></div>
-    <div class="sb-section">
-      <div class="sb-label">Категории</div>
-      <div id="sb-cats"></div>
+
+    <!-- Мои заметки -->
+    <div class="sb-group">
+      <div class="sb-group-head" id="sg-notes" onclick="setSection('notes')">
+        <span class="sb-group-icon">📝</span>
+        <span class="sb-group-label">Мои заметки</span>
+      </div>
+      <div class="sb-sub" id="sb-notes-sub">
+        <div id="sb-notes-list"></div>
+      </div>
     </div>
+
     <div class="sb-divider"></div>
-    <div class="sb-section">
-      <div class="sb-label">Личное</div>
-      <button class="sb-btn" data-view="family" onclick="switchView('family',this)">
-        <span class="icon">🏠</span> Семья
-      </button>
+
+    <!-- Работа -->
+    <div class="sb-group">
+      <div class="sb-group-head" id="sg-work" onclick="setSection('work')">
+        <span class="sb-group-icon">💼</span>
+        <span class="sb-group-label">Работа</span>
+      </div>
+      <div class="sb-sub" id="sb-work-sub">
+        <div id="sb-work-list"></div>
+      </div>
     </div>
+
+    <div class="sb-divider"></div>
+
+    <!-- Ссылки -->
+    <div class="sb-group">
+      <div class="sb-group-head" id="sg-links" onclick="setSection('links')">
+        <span class="sb-group-icon">🔗</span>
+        <span class="sb-group-label">Ссылки</span>
+      </div>
+      <div class="sb-sub" id="sb-links-sub">
+        <div id="sb-links-list"></div>
+        <button class="sb-item" onclick="openLinkCatForm()">
+          <span style="font-size:13px;color:var(--text3)">＋</span> Новая категория
+        </button>
+      </div>
+    </div>
+
     <div class="sb-bottom">
-      <button class="sb-btn" onclick="exportNotes()"><span class="icon">⬇</span> Экспорт</button>
+      <button class="sb-btn" onclick="exportAll()"><span>⬇</span> Экспорт</button>
     </div>
   </aside>
 
-  <!-- ══ NOTES VIEW ══ -->
-  <div class="main" id="notes-page">
-    <div class="topbar">
-      <div class="search-wrap">
-        <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8.5" cy="8.5" r="5.5"/><line x1="13.5" y1="13.5" x2="18" y2="18"/></svg>
-        <input id="search" type="text" placeholder="Поиск…  [/]" oninput="render()" />
-      </div>
-      <div class="topbar-actions">
-        <button class="btn btn-primary" onclick="openForm()">＋ Добавить</button>
-      </div>
-    </div>
-    <div class="content">
-      <div class="page-head">
-        <div class="page-title" id="page-title">Все записи</div>
-        <div class="page-count" id="page-count"></div>
-      </div>
-      <div id="grid" class="grid"></div>
-      <div id="empty" class="empty" style="display:none">
-        <div class="empty-icon">🔍</div>
-        <div class="empty-text">Ничего не найдено</div>
-        <div class="empty-sub">Попробуй другой запрос или добавь новую запись</div>
-      </div>
-    </div>
-  </div>
+  <!-- ══ MAIN ══ -->
+  <div class="main">
 
-  <!-- ══ FAMILY VIEW ══ -->
-  <div id="family-page">
-    <div class="fam-topbar">
-      <div class="fam-title">🏠 Семья <span class="fam-stats" id="fam-stats"></span></div>
-      <div style="margin-left:auto;display:flex;gap:8px">
-        <button class="btn btn-ghost" onclick="clearDoneAll()">🧹 Очистить выполненные</button>
+    <!-- ── СЕМЬЯ ── -->
+    <div class="section" id="sec-family">
+      <div class="fam-topbar">
+        <span style="font-size:16px;font-weight:700;">🏠 Семья</span>
+        <span id="fam-stats" style="font-size:12px;color:var(--text3);"></span>
+        <div style="margin-left:auto;display:flex;gap:8px;">
+          <button class="btn btn-g" onclick="clearDoneAll()">🧹 Очистить выполненные</button>
+        </div>
+      </div>
+      <div class="section-content">
+        <div class="boards" id="boards-grid"></div>
       </div>
     </div>
-    <div class="fam-content">
-      <div class="boards" id="boards-grid"></div>
+
+    <!-- ── МОИ ЗАМЕТКИ ── -->
+    <div class="section" id="sec-notes">
+      <div class="topbar">
+        <div class="search-wrap">
+          <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8.5" cy="8.5" r="5.5"/><line x1="13.5" y1="13.5" x2="18" y2="18"/></svg>
+          <input class="si" id="notes-search" type="text" placeholder="Поиск…" oninput="renderNotes()" />
+        </div>
+        <div class="topbar-right">
+          <button class="btn btn-p" onclick="openNoteForm('notes')">＋ Добавить</button>
+        </div>
+      </div>
+      <div class="tabs" id="notes-tabs"></div>
+      <div class="section-content">
+        <div id="notes-grid" class="cards-grid"></div>
+        <div id="notes-empty" class="empty" style="display:none"><div class="empty-icon">📝</div><div class="empty-txt">Пока пусто — добавь первую заметку</div></div>
+      </div>
     </div>
-  </div>
 
-</div>
+    <!-- ── РАБОТА ── -->
+    <div class="section" id="sec-work">
+      <div class="topbar">
+        <div class="search-wrap">
+          <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8.5" cy="8.5" r="5.5"/><line x1="13.5" y1="13.5" x2="18" y2="18"/></svg>
+          <input class="si" id="work-search" type="text" placeholder="Поиск…" oninput="renderWork()" />
+        </div>
+        <div class="topbar-right">
+          <button class="btn btn-p" onclick="openNoteForm('work')">＋ Добавить</button>
+        </div>
+      </div>
+      <div class="tabs" id="work-tabs"></div>
+      <div class="section-content">
+        <div id="work-grid" class="cards-grid"></div>
+        <div id="work-empty" class="empty" style="display:none"><div class="empty-icon">💼</div><div class="empty-txt">Пока пусто — добавь запись</div></div>
+      </div>
+    </div>
 
-<!-- ── Read modal ── -->
+    <!-- ── ССЫЛКИ ── -->
+    <div class="section" id="sec-links">
+      <div class="topbar">
+        <div class="search-wrap">
+          <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8.5" cy="8.5" r="5.5"/><line x1="13.5" y1="13.5" x2="18" y2="18"/></svg>
+          <input class="si" id="links-search" type="text" placeholder="Поиск…" oninput="renderLinks()" />
+        </div>
+        <div class="topbar-right">
+          <button class="btn btn-p" onclick="openLinkForm()">＋ Добавить ссылку</button>
+        </div>
+      </div>
+      <div class="tabs" id="links-tabs"></div>
+      <div class="section-content">
+        <div id="links-grid" class="links-grid"></div>
+        <div id="links-empty" class="empty" style="display:none"><div class="empty-icon">🔗</div><div class="empty-txt">Пока пусто — добавь первую ссылку</div></div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ══ BOTTOM NAV ══ -->
+<nav class="bottom-nav">
+  <button class="bn-item" id="bn-family" onclick="setSection('family')">
+    <span class="bn-icon">🏠</span><span class="bn-label">Семья</span>
+  </button>
+  <button class="bn-item" id="bn-notes" onclick="setSection('notes')">
+    <span class="bn-icon">📝</span><span class="bn-label">Заметки</span>
+  </button>
+  <button class="bn-item" id="bn-work" onclick="setSection('work')">
+    <span class="bn-icon">💼</span><span class="bn-label">Работа</span>
+  </button>
+  <button class="bn-item" id="bn-links" onclick="setSection('links')">
+    <span class="bn-icon">🔗</span><span class="bn-label">Ссылки</span>
+  </button>
+</nav>
+
+<!-- ── Note read modal ── -->
 <div class="overlay" id="ov-read" onclick="closeOv('ov-read',event)">
-  <div class="read-modal">
-    <button class="close-btn" onclick="closeOv('ov-read')">✕</button>
-    <div class="rm-top"><span class="rm-cat" id="rm-cat"></span><span class="rm-date" id="rm-date"></span></div>
+  <div class="modal">
+    <button class="close-x" onclick="closeOv('ov-read')">✕</button>
+    <div class="rm-cat" id="rm-cat"></div>
     <div class="rm-title" id="rm-title"></div>
     <div class="rm-body"  id="rm-body"></div>
     <div class="rm-tags"  id="rm-tags"></div>
     <div class="rm-actions">
-      <button class="btn btn-ghost" onclick="copyContent()">📋 Копировать</button>
-      <button class="btn btn-ghost" id="rm-edit-btn">✏️ Изменить</button>
-      <button class="btn btn-ghost" style="color:#e05577" id="rm-del-btn">🗑 Удалить</button>
+      <button class="btn btn-g" onclick="copyContent()">📋 Копировать</button>
+      <button class="btn btn-g" id="rm-edit">✏️ Изменить</button>
+      <button class="btn btn-g" style="color:#e05577" id="rm-del">🗑 Удалить</button>
     </div>
   </div>
 </div>
 
-<!-- ── Notes form modal ── -->
-<div class="overlay" id="ov-form" onclick="closeOv('ov-form',event)">
-  <div class="form-box">
-    <button class="close-btn" onclick="closeOv('ov-form')">✕</button>
-    <div class="form-title" id="f-modal-title">Новая запись</div>
-    <div class="fg"><label class="fl">Заголовок</label><input class="fi" id="f-title" type="text" placeholder="Название записи…" /></div>
-    <div class="fg"><label class="fl">Категория</label><select class="fs" id="f-cat"></select></div>
-    <div class="fg"><label class="fl">Содержимое</label><textarea class="fta" id="f-body" placeholder="Текст, ссылки, заметки…"></textarea></div>
-    <div class="fg"><label class="fl">Теги (через запятую)</label><input class="fi" id="f-tags" type="text" placeholder="дизайн, клиент, важное…" /></div>
-    <div class="fg frow"><input type="checkbox" id="f-pin" /><label for="f-pin">Закрепить</label></div>
+<!-- ── Note form modal ── -->
+<div class="overlay" id="ov-note" onclick="closeOv('ov-note',event)">
+  <div class="modal">
+    <button class="close-x" onclick="closeOv('ov-note')">✕</button>
+    <div class="modal-title" id="nf-title">Новая запись</div>
+    <div class="fg"><label class="fl">Заголовок</label><input class="fi" id="nf-name" type="text" placeholder="Название…"/></div>
+    <div class="fg"><label class="fl">Категория</label><select class="fs" id="nf-cat"></select></div>
+    <div class="fg"><label class="fl">Содержимое</label><textarea class="fta" id="nf-body" placeholder="Текст, заметки…"></textarea></div>
+    <div class="fg"><label class="fl">Теги (через запятую)</label><input class="fi" id="nf-tags" type="text" placeholder="тег1, тег2…"/></div>
+    <div class="fg frow"><input type="checkbox" id="nf-pin"/><label for="nf-pin">Закрепить</label></div>
     <div class="form-actions">
-      <button class="btn btn-ghost" onclick="closeOv('ov-form')">Отмена</button>
-      <button class="btn btn-primary" onclick="submitForm()">Сохранить</button>
+      <button class="btn btn-g" onclick="closeOv('ov-note')">Отмена</button>
+      <button class="btn btn-p" onclick="submitNote()">Сохранить</button>
     </div>
   </div>
 </div>
 
-<!-- ── Add / Edit board modal ── -->
+<!-- ── Link form modal ── -->
+<div class="overlay" id="ov-link" onclick="closeOv('ov-link',event)">
+  <div class="modal modal-sm">
+    <button class="close-x" onclick="closeOv('ov-link')">✕</button>
+    <div class="modal-title">Добавить ссылку</div>
+    <div class="fg"><label class="fl">URL</label><input class="fi" id="lf-url" type="text" placeholder="https://…" oninput="autoFillLink()"/></div>
+    <div class="fg"><label class="fl">Название</label><input class="fi" id="lf-name" type="text" placeholder="Название…"/></div>
+    <div class="fg"><label class="fl">Описание</label><input class="fi" id="lf-desc" type="text" placeholder="Коротко о чём…"/></div>
+    <div class="fg"><label class="fl">Категория</label><select class="fs" id="lf-cat"></select></div>
+    <div class="form-actions">
+      <button class="btn btn-g" onclick="closeOv('ov-link')">Отмена</button>
+      <button class="btn btn-p" onclick="submitLink()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Board form modal ── -->
 <div class="overlay" id="ov-board" onclick="closeOv('ov-board',event)">
-  <div class="form-box form-sm">
-    <button class="close-btn" onclick="closeOv('ov-board')">✕</button>
-    <div class="form-title" id="fb-title">Новый раздел</div>
-    <div class="fg">
-      <label class="fl">Название</label>
-      <input class="fi" id="fb-name" type="text" placeholder="Название раздела…" />
-    </div>
-    <div class="fg">
-      <label class="fl">Иконка</label>
-      <div class="icon-grid" id="fb-icons"></div>
-    </div>
-    <div class="fg">
-      <label class="fl">Цвет</label>
-      <div class="swatches" id="fb-colors"></div>
-    </div>
-    <div class="fg">
-      <label class="fl">Тип</label>
-      <select class="fs" id="fb-type">
-        <option value="check">Чеклист (с галочками)</option>
-        <option value="text">Текстовые заметки</option>
-      </select>
-    </div>
+  <div class="modal modal-sm">
+    <button class="close-x" onclick="closeOv('ov-board')">✕</button>
+    <div class="modal-title" id="bf-title">Новый раздел</div>
+    <div class="fg"><label class="fl">Название</label><input class="fi" id="bf-name" type="text" placeholder="Название раздела…"/></div>
+    <div class="fg"><label class="fl">Иконка</label><div class="icon-grid" id="bf-icons"></div></div>
+    <div class="fg"><label class="fl">Цвет</label><div class="swatches" id="bf-colors"></div></div>
+    <div class="fg"><label class="fl">Тип</label><select class="fs" id="bf-type"><option value="check">Чеклист</option><option value="text">Текстовые заметки</option></select></div>
     <div class="form-actions">
-      <button class="btn btn-ghost" onclick="closeOv('ov-board')">Отмена</button>
-      <button class="btn btn-primary" onclick="submitBoard()">Сохранить</button>
+      <button class="btn btn-g" onclick="closeOv('ov-board')">Отмена</button>
+      <button class="btn btn-p" onclick="submitBoard()">Сохранить</button>
     </div>
   </div>
 </div>
 
-<!-- ── Confirm modal ── -->
+<!-- ── Link cat form ── -->
+<div class="overlay" id="ov-lcat" onclick="closeOv('ov-lcat',event)">
+  <div class="modal modal-sm">
+    <button class="close-x" onclick="closeOv('ov-lcat')">✕</button>
+    <div class="modal-title" id="lc-title">Новая категория</div>
+    <div class="fg"><label class="fl">Название</label><input class="fi" id="lc-name" type="text" placeholder="Семья, Работа…"/></div>
+    <div class="fg"><label class="fl">Иконка</label><div class="icon-grid" id="lc-icons"></div></div>
+    <div class="form-actions">
+      <button class="btn btn-g" onclick="closeOv('ov-lcat')">Отмена</button>
+      <button class="btn btn-p" onclick="submitLinkCat()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Confirm ── -->
 <div class="overlay" id="ov-confirm" onclick="closeOv('ov-confirm',event)">
   <div class="confirm-box">
-    <div class="confirm-title" id="confirm-title">Удалить?</div>
-    <div class="confirm-sub" id="confirm-sub">Это действие нельзя отменить</div>
+    <div class="confirm-title" id="cx-title">Удалить?</div>
+    <div class="confirm-sub" id="cx-sub">Это нельзя отменить</div>
     <div class="confirm-actions">
-      <button class="btn btn-ghost" onclick="closeOv('ov-confirm')">Отмена</button>
-      <button class="btn btn-danger" id="confirm-ok">Удалить</button>
+      <button class="btn btn-g" onclick="closeOv('ov-confirm')">Отмена</button>
+      <button class="btn btn-d" id="cx-ok">Удалить</button>
     </div>
   </div>
 </div>
 
 <script>
-// ════════════════════════════════════════════
-//  NOTES
-// ════════════════════════════════════════════
-const CATS = [
-  { id:'work',      label:'Работа',       icon:'💼', color:'#c9a96e' },
-  { id:'clients',   label:'Клиенты',      icon:'🤝', color:'#9b7fe8' },
-  { id:'templates', label:'Шаблоны',      icon:'📄', color:'#5eaee0' },
-  { id:'ideas',     label:'Идеи',         icon:'💡', color:'#e07b50' },
-  { id:'learn',     label:'Учёба / Инфо', icon:'📚', color:'#5bbf7a' },
-  { id:'links',     label:'Ссылки',       icon:'🔗', color:'#e05577' },
-  { id:'notes',     label:'Заметки',      icon:'🗒️', color:'#8e8ea0' },
-  { id:'misc',      label:'Разное',       icon:'🗃️', color:'#55556a' },
-];
+// ══════════════════════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════════════════════
 
-const SEED_NOTES = [
-  { id:1, cat:'notes', pin:true, tags:['старт'], created:'2026-05-12',
-    title:'Добро пожаловать в MyBook!',
-    body:`Это твоя личная база знаний ✨
+const NOTE_CATS = {
+  notes: [
+    {id:'ideas',  label:'Идеи',        icon:'💡', color:'#e07b50'},
+    {id:'learn',  label:'Учёба / Инфо',icon:'📚', color:'#5bbf7a'},
+    {id:'diary',  label:'Дневник',     icon:'🗒️', color:'#9b7fe8'},
+    {id:'misc',   label:'Разное',      icon:'🗃️', color:'#55556a'},
+  ],
+  work: [
+    {id:'tasks',      label:'Задачи',    icon:'📋', color:'#c9a96e'},
+    {id:'clients',    label:'Клиенты',   icon:'🤝', color:'#9b7fe8'},
+    {id:'templates',  label:'Шаблоны',   icon:'📄', color:'#5eaee0'},
+    {id:'ideas-work', label:'Идеи',      icon:'💡', color:'#e07b50'},
+  ],
+};
 
-Как пользоваться:
-• "＋ Добавить" — новая запись
-• Кликни карточку — читать полный текст
-• Поиск вверху (или "/") — по заголовку, тексту, тегам
-• Слева — фильтр по категориям и раздел Семья
-• Теги кликабельны (фильтр)
-
-На карточке при наведении: ✏️ Изменить  🗑 Удалить  📌 Закрепить` },
-  { id:2, cat:'templates', pin:false, tags:['клиент','шаблон'], created:'2026-05-12',
-    title:'Шаблон ответа клиенту',
-    body:`Привет! Спасибо за обращение 🙏
-
-Чтобы рассчитать стоимость и время, нужно уточнить:
-
-1. Размер и место на теле
-2. Цвет или чёрно-белая?
-3. Примеры референсов (если есть)
-4. Примерная дата записи
-
-Жду ответа ✨` },
-];
-
-const NOTES_KEY = 'mybook_v2';
-let NOTES = [];
-let activeCat='all', activeTag=null, editingId=null, readingId=null;
-
-function loadNotes(){
-  try { const s=localStorage.getItem(NOTES_KEY); NOTES=s?JSON.parse(s):JSON.parse(JSON.stringify(SEED_NOTES)); if(!s)saveNotes(); }
-  catch{ NOTES=JSON.parse(JSON.stringify(SEED_NOTES)); saveNotes(); }
-}
-function saveNotes(){ localStorage.setItem(NOTES_KEY,JSON.stringify(NOTES)); }
-
-// ════════════════════════════════════════════
-//  FAMILY BOARDS (dynamic)
-// ════════════════════════════════════════════
-const DEFAULT_BOARDS = [
-  { id:'tasks',    label:'Задачи',   icon:'✅', color:'#5bbf7a', type:'check', placeholder:'Добавить задачу…' },
-  { id:'shopping', label:'Покупки',  icon:'🛒', color:'#5eaee0', type:'check', placeholder:'Добавить в список…' },
-  { id:'wishes',   label:'Желания',  icon:'💫', color:'#9b7fe8', type:'check', placeholder:'Добавить желание…' },
-  { id:'todos',    label:'Дела',     icon:'📅', color:'#e07b50', type:'check', placeholder:'Добавить дело…' },
-  { id:'notes',    label:'Заметки',  icon:'🗒️', color:'#8e8ea0', type:'text',  placeholder:'Написать заметку…' },
-];
-
-const FAM_KEY    = 'mybook_family';
-const BOARDS_KEY = 'mybook_boards';
-let FAMILY = {};
-let BOARDS = [];
-
-const BOARD_ICONS  = ['✅','🛒','💫','📅','🗒️','💡','📌','🎯','💪','🏃','🍕','🎵','📷','✈️','🏠','💰','📚','🔗','⭐','❤️','🎁','🌿','🔥','💎'];
+const BOARD_ICONS  = ['✅','🛒','💫','📅','🗒️','💡','📌','🎯','💪','🍕','🎵','📷','✈️','🏠','💰','📚','🔗','⭐','❤️','🎁','🌿','🔥','💎','🎀'];
 const BOARD_COLORS = ['#5bbf7a','#5eaee0','#9b7fe8','#e07b50','#e05577','#c9a96e','#8e8ea0','#4ecdc4','#ff6b6b','#ffd166'];
+const LINK_ICONS   = ['👨‍👩‍👧','💼','📚','🎵','🎮','🍕','✈️','💡','🔧','🛍️','🎨','🏃','💰','📰','🌿','❤️','⭐','🔗'];
 
-let editingBoardId = null;
-let fbSelIcon  = '✅';
-let fbSelColor = '#5bbf7a';
+// ══════════════════════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════════════════════
 
-function loadFamily(){
-  try {
-    const sb = localStorage.getItem(BOARDS_KEY);
-    BOARDS = sb ? JSON.parse(sb) : JSON.parse(JSON.stringify(DEFAULT_BOARDS));
-    if(!sb) saveBoards();
-  } catch { BOARDS=JSON.parse(JSON.stringify(DEFAULT_BOARDS)); saveBoards(); }
+// Notes (personal)
+let NOTES = [], WORK = [];
+let LINKS = [], LINK_CATS = [];
+let BOARDS = [], FAMILY = {};
 
-  try {
-    const sf = localStorage.getItem(FAM_KEY);
-    FAMILY = sf ? JSON.parse(sf) : {};
-  } catch { FAMILY={}; }
+const K = {
+  notes:'mb_notes', work:'mb_work',
+  links:'mb_links', lcats:'mb_lcats',
+  boards:'mb_boards', family:'mb_family',
+};
 
+function loadAll(){
+  NOTES = jload(K.notes, [{id:1,cat:'ideas',pin:false,tags:[],created:'2026-05-12',title:'Первая идея',body:'Сюда пиши свои идеи, мысли, планы ✨'}]);
+  WORK  = jload(K.work,  [{id:1,cat:'tasks',pin:false,tags:[],created:'2026-05-12',title:'Шаблон ответа клиенту',body:'Привет! Спасибо за обращение 🙏\n\nЧтобы рассчитать стоимость:\n1. Размер и место\n2. Цвет или ч/б?\n3. Референсы\n4. Дата записи'}]);
+  LINK_CATS = jload(K.lcats, [
+    {id:'family', label:'Семья',  icon:'👨‍👩‍👧'},
+    {id:'work',   label:'Работа', icon:'💼'},
+  ]);
+  LINKS = jload(K.links, []);
+  BOARDS = jload(K.boards, [
+    {id:'tasks',   label:'Задачи',  icon:'✅', color:'#5bbf7a', type:'check', placeholder:'Добавить задачу…'},
+    {id:'shop',    label:'Покупки', icon:'🛒', color:'#5eaee0', type:'check', placeholder:'Добавить в список…'},
+    {id:'wishes',  label:'Желания', icon:'💫', color:'#9b7fe8', type:'check', placeholder:'Добавить желание…'},
+    {id:'todos',   label:'Дела',    icon:'📅', color:'#e07b50', type:'check', placeholder:'Добавить дело…'},
+    {id:'fnotes',  label:'Заметки', icon:'🗒️', color:'#8e8ea0', type:'text',  placeholder:'Написать…'},
+  ]);
+  FAMILY = jload(K.family, {});
   BOARDS.forEach(b=>{ if(!FAMILY[b.id]) FAMILY[b.id]=[]; });
-  if(!localStorage.getItem(FAM_KEY)) saveFamily();
 }
-function saveBoards(){ localStorage.setItem(BOARDS_KEY,JSON.stringify(BOARDS)); }
-function saveFamily(){ localStorage.setItem(FAM_KEY,JSON.stringify(FAMILY)); }
+function jload(key, def){ try{ const s=localStorage.getItem(key); return s?JSON.parse(s):JSON.parse(JSON.stringify(def)); }catch{ return JSON.parse(JSON.stringify(def)); } }
+function jsave(key,val){ localStorage.setItem(key,JSON.stringify(val)); }
 
-// ════════════════════════════════════════════
-//  View switching
-// ════════════════════════════════════════════
-let currentView='notes';
+// ══════════════════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════════════════
 
-function switchView(view, btn){
-  currentView=view;
-  document.getElementById('notes-page').style.display = view==='notes' ? 'flex':'none';
-  document.getElementById('family-page').classList.toggle('visible', view==='family');
-  if(view==='family'){
-    document.querySelectorAll('.sb-btn').forEach(b=>b.classList.remove('active'));
-    if(btn) btn.classList.add('active');
-    renderFamily();
-  }
+let curSection = 'family';
+let noteFilter = {notes:'all', work:'all', links:'all'};
+let editingNoteId = null, editingNoteSection = null, readingNote = null;
+let editingBoardId = null, bfSelIcon='✅', bfSelColor='#5bbf7a';
+let editingLcatId = null, lcSelIcon='👨‍👩‍👧';
+
+function setSection(s){
+  curSection=s;
+  document.querySelectorAll('.section').forEach(el=>el.classList.remove('active'));
+  document.getElementById('sec-'+s).classList.add('active');
+
+  // bottom nav
+  document.querySelectorAll('.bn-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('bn-'+s)?.classList.add('active');
+
+  // sidebar
+  document.querySelectorAll('.sb-group-head').forEach(b=>b.classList.remove('section-active'));
+  document.getElementById('sg-'+s)?.classList.add('section-active');
+
+  if(s==='family') renderFamily();
+  if(s==='notes')  renderNotes();
+  if(s==='work')   renderWork();
+  if(s==='links')  renderLinks();
 }
 
-// ════════════════════════════════════════════
-//  NOTES logic
-// ════════════════════════════════════════════
-function buildSidebar(){
-  document.getElementById('sb-cats').innerHTML = CATS.map(c=>`
-    <button class="sb-btn" data-cat="${c.id}" onclick="switchView('notes');setCat('${c.id}',this)">
-      <span class="icon">${c.icon}</span> ${c.label}
-      <span class="sb-count" id="cnt-${c.id}">0</span>
-    </button>`).join('');
+// ══════════════════════════════════════════════════════════
+//  NOTES section (personal + work share logic)
+// ══════════════════════════════════════════════════════════
+
+function buildNoteTabs(secId, cats){
+  const all = [{id:'all',label:'Все',icon:''},...cats];
+  document.getElementById(secId+'-tabs').innerHTML = all.map(c=>
+    `<button class="tab ${noteFilter[secId]===c.id?'active':''}" onclick="setNoteTab('${secId}','${c.id}')">
+      ${c.icon?c.icon+' ':''}${c.label}
+    </button>`
+  ).join('') + `<button class="tab tab-add" onclick="openNoteForm('${secId}')" title="Добавить">＋</button>`;
 }
-function buildCatSelect(){
-  document.getElementById('f-cat').innerHTML=CATS.map(c=>`<option value="${c.id}">${c.icon} ${c.label}</option>`).join('');
+
+function setNoteTab(sec, cat){
+  noteFilter[sec]=cat;
+  if(sec==='notes') renderNotes();
+  else renderWork();
 }
-function updateCounts(){
-  document.getElementById('cnt-all').textContent=NOTES.length;
-  document.getElementById('cnt-pinned').textContent=NOTES.filter(n=>n.pin).length;
-  CATS.forEach(c=>{ const el=document.getElementById('cnt-'+c.id); if(el) el.textContent=NOTES.filter(n=>n.cat===c.id).length; });
+
+function renderNotes(){
+  const cats = NOTE_CATS.notes;
+  buildNoteTabs('notes', cats);
+  buildSidebarItems('sb-notes-list', cats, 'notes');
+  _renderNoteSection('notes', NOTES, cats);
 }
-function setCat(cat,btn){
-  activeCat=cat; activeTag=null;
-  document.querySelectorAll('.sb-btn').forEach(b=>b.classList.remove('active'));
-  if(btn) btn.classList.add('active');
-  const c=CATS.find(x=>x.id===cat);
-  document.getElementById('page-title').textContent =
-    cat==='all'?'Все записи':cat==='pinned'?'📌 Закреплённые':(c?c.icon+' '+c.label:'Все записи');
-  render();
+function renderWork(){
+  const cats = NOTE_CATS.work;
+  buildNoteTabs('work', cats);
+  buildSidebarItems('sb-work-list', cats, 'work');
+  _renderNoteSection('work', WORK, cats);
 }
-function setTag(tag){
-  activeTag=tag; activeCat='all';
-  document.querySelectorAll('.sb-btn').forEach(b=>b.classList.remove('active'));
-  document.querySelector('[data-cat="all"]')?.classList.add('active');
-  document.getElementById('page-title').textContent='# '+tag;
-  render();
-}
-function render(){
-  if(currentView!=='notes') return;
-  const q=document.getElementById('search').value.toLowerCase();
-  let list=NOTES.slice();
-  if(activeCat==='pinned') list=list.filter(n=>n.pin);
-  else if(activeCat!=='all') list=list.filter(n=>n.cat===activeCat);
-  if(activeTag) list=list.filter(n=>n.tags?.includes(activeTag));
+
+function _renderNoteSection(secId, data, cats){
+  const q = document.getElementById(secId+'-search').value.toLowerCase();
+  let list = data.slice();
+  const f = noteFilter[secId];
+  if(f!=='all') list=list.filter(n=>n.cat===f);
   if(q) list=list.filter(n=>n.title.toLowerCase().includes(q)||(n.body||'').toLowerCase().includes(q)||n.tags?.some(t=>t.toLowerCase().includes(q)));
   list.sort((a,b)=>(b.pin?1:0)-(a.pin?1:0));
-  updateCounts();
-  const grid=document.getElementById('grid'), empty=document.getElementById('empty');
-  document.getElementById('page-count').textContent=list.length?list.length+' '+plural(list.length,'запись','записи','записей'):'';
+
+  const grid=document.getElementById(secId+'-grid');
+  const empty=document.getElementById(secId+'-empty');
+
   if(!list.length){ grid.innerHTML=''; empty.style.display='flex'; return; }
   empty.style.display='none';
+
   grid.innerHTML=list.map(n=>{
-    const c=CATS.find(x=>x.id===n.cat)||{icon:'',label:'',color:'#555'};
-    const tags=(n.tags||[]).map(t=>`<span class="tag" onclick="event.stopPropagation();setTag('${esc(t)}')">#${esc(t)}</span>`).join('');
-    return `<div class="card" style="border-left-color:${c.color}" onclick="openRead(${n.id})">
+    const c=cats.find(x=>x.id===n.cat)||{icon:'',label:'',color:'#555'};
+    const tags=(n.tags||[]).map(t=>`<span class="tag" onclick="event.stopPropagation()">#${esc(t)}</span>`).join('');
+    return `<div class="card" style="border-left-color:${c.color}" onclick="openRead('${secId}',${n.id})">
       <div class="card-top">
-        <span class="card-cat-label" style="color:${c.color}">${c.icon} ${c.label}</span>
+        <span class="card-cat" style="color:${c.color}">${c.icon} ${c.label}</span>
         ${n.pin?'<span class="card-pin">📌</span>':''}
         <span class="card-date">${n.created?fmtDate(n.created):''}</span>
       </div>
@@ -539,267 +685,336 @@ function render(){
       <div class="card-body">${esc(n.body||'')}</div>
       ${tags?`<div class="card-tags">${tags}</div>`:''}
       <div class="card-actions" onclick="event.stopPropagation()">
-        <button class="card-btn" onclick="openForm(${n.id})">✏️ Изменить</button>
-        <button class="card-btn del" onclick="confirmAction('Удалить запись?','',()=>{deleteNote(${n.id})})">🗑 Удалить</button>
-        ${n.pin?`<button class="card-btn" onclick="togglePin(${n.id})">📌 Открепить</button>`
-               :`<button class="card-btn" onclick="togglePin(${n.id})">📌 Закрепить</button>`}
+        <button class="ca" onclick="openNoteForm('${secId}',${n.id})">✏️</button>
+        <button class="ca del" onclick="confirmAction('Удалить запись?','',()=>deleteNote('${secId}',${n.id}))">🗑</button>
+        <button class="ca" onclick="togglePin('${secId}',${n.id})">${n.pin?'📌 Открепить':'📌 Закрепить'}</button>
       </div>
     </div>`;
   }).join('');
 }
 
-function openRead(id){
-  const n=NOTES.find(x=>x.id===id); if(!n) return;
-  readingId=id;
-  const c=CATS.find(x=>x.id===n.cat)||{icon:'',label:'',color:'#555'};
+function buildSidebarItems(elId, cats, secId){
+  document.getElementById(elId).innerHTML = cats.map(c=>`
+    <button class="sb-item ${noteFilter[secId]===c.id?'active':''}" onclick="setSection('${secId}');setNoteTab('${secId}','${c.id}')">
+      <span>${c.icon}</span> ${c.label}
+      <span class="sb-count">${(secId==='notes'?NOTES:WORK).filter(n=>n.cat===c.id).length}</span>
+    </button>`).join('');
+}
+
+// ── Note CRUD ──
+function openRead(secId, id){
+  const data = secId==='notes'?NOTES:WORK;
+  const cats  = NOTE_CATS[secId];
+  const n=data.find(x=>x.id===id); if(!n) return;
+  readingNote={secId,id};
+  const c=cats.find(x=>x.id===n.cat)||{icon:'',label:'',color:'#555'};
   document.getElementById('rm-cat').textContent=c.icon+' '+c.label;
   document.getElementById('rm-cat').style.color=c.color;
-  document.getElementById('rm-date').textContent=n.created?fmtDate(n.created):'';
   document.getElementById('rm-title').textContent=n.title;
   document.getElementById('rm-body').innerHTML=linkify(esc(n.body||''));
-  document.getElementById('rm-tags').innerHTML=(n.tags||[]).map(t=>`<span class="tag" onclick="setTag('${esc(t)}');closeOv('ov-read')">#${esc(t)}</span>`).join('');
-  document.getElementById('rm-edit-btn').onclick=()=>{ closeOv('ov-read'); openForm(id); };
-  document.getElementById('rm-del-btn').onclick =()=>{ closeOv('ov-read'); confirmAction('Удалить запись?','',()=>deleteNote(id)); };
+  document.getElementById('rm-tags').innerHTML=(n.tags||[]).map(t=>`<span class="tag">#${esc(t)}</span>`).join('');
+  document.getElementById('rm-edit').onclick=()=>{ closeOv('ov-read'); openNoteForm(secId,id); };
+  document.getElementById('rm-del').onclick=()=>{ closeOv('ov-read'); confirmAction('Удалить запись?','',()=>deleteNote(secId,id)); };
   openOv('ov-read');
 }
-function copyContent(){ const n=NOTES.find(x=>x.id===readingId); if(!n) return; navigator.clipboard?.writeText(n.body||''); toast('📋 Скопировано'); }
-
-function openForm(id){
-  editingId=id||null;
-  document.getElementById('f-modal-title').textContent=id?'Изменить запись':'Новая запись';
-  if(id){ const n=NOTES.find(x=>x.id===id); if(!n) return;
-    document.getElementById('f-title').value=n.title; document.getElementById('f-cat').value=n.cat;
-    document.getElementById('f-body').value=n.body||''; document.getElementById('f-tags').value=(n.tags||[]).join(', ');
-    document.getElementById('f-pin').checked=!!n.pin;
-  } else {
-    document.getElementById('f-title').value=''; document.getElementById('f-cat').value=CATS[0].id;
-    document.getElementById('f-body').value=''; document.getElementById('f-tags').value=''; document.getElementById('f-pin').checked=false;
-  }
-  openOv('ov-form'); setTimeout(()=>document.getElementById('f-title').focus(),80);
+function copyContent(){
+  if(!readingNote) return;
+  const data=readingNote.secId==='notes'?NOTES:WORK;
+  const n=data.find(x=>x.id===readingNote.id);
+  navigator.clipboard?.writeText(n?.body||''); toast('📋 Скопировано');
 }
-function submitForm(){
-  const title=document.getElementById('f-title').value.trim(); if(!title){ document.getElementById('f-title').focus(); return; }
-  const tags=document.getElementById('f-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
-  if(editingId){ const n=NOTES.find(x=>x.id===editingId);
-    if(n){ n.title=title; n.cat=document.getElementById('f-cat').value; n.body=document.getElementById('f-body').value; n.tags=tags; n.pin=document.getElementById('f-pin').checked; }
+function openNoteForm(secId, id){
+  editingNoteSection=secId; editingNoteId=id||null;
+  const cats=NOTE_CATS[secId];
+  document.getElementById('nf-title').textContent=id?'Изменить запись':'Новая запись';
+  document.getElementById('nf-cat').innerHTML=cats.map(c=>`<option value="${c.id}">${c.icon} ${c.label}</option>`).join('');
+  if(id){
+    const n=(secId==='notes'?NOTES:WORK).find(x=>x.id===id); if(!n) return;
+    document.getElementById('nf-name').value=n.title;
+    document.getElementById('nf-cat').value=n.cat;
+    document.getElementById('nf-body').value=n.body||'';
+    document.getElementById('nf-tags').value=(n.tags||[]).join(', ');
+    document.getElementById('nf-pin').checked=!!n.pin;
+  } else {
+    document.getElementById('nf-name').value='';
+    document.getElementById('nf-body').value='';
+    document.getElementById('nf-tags').value='';
+    document.getElementById('nf-pin').checked=false;
+    if(noteFilter[secId]!=='all') document.getElementById('nf-cat').value=noteFilter[secId];
+  }
+  openOv('ov-note'); setTimeout(()=>document.getElementById('nf-name').focus(),80);
+}
+function submitNote(){
+  const title=document.getElementById('nf-name').value.trim(); if(!title){ document.getElementById('nf-name').focus(); return; }
+  const tags=document.getElementById('nf-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
+  const secId=editingNoteSection;
+  const store=secId==='notes'?NOTES:WORK;
+  if(editingNoteId){
+    const n=store.find(x=>x.id===editingNoteId);
+    if(n){ n.title=title; n.cat=document.getElementById('nf-cat').value; n.body=document.getElementById('nf-body').value; n.tags=tags; n.pin=document.getElementById('nf-pin').checked; }
     toast('✅ Изменено');
   } else {
-    NOTES.unshift({ id:NOTES.reduce((m,n)=>Math.max(m,n.id),0)+1, title, cat:document.getElementById('f-cat').value,
-      body:document.getElementById('f-body').value, tags, pin:document.getElementById('f-pin').checked, created:today() });
+    store.unshift({id:store.reduce((m,n)=>Math.max(m,n.id),0)+1,title,cat:document.getElementById('nf-cat').value,body:document.getElementById('nf-body').value,tags,pin:document.getElementById('nf-pin').checked,created:today()});
     toast('✅ Сохранено');
   }
-  saveNotes(); render(); closeOv('ov-form');
+  jsave(secId==='notes'?K.notes:K.work, store);
+  closeOv('ov-note');
+  if(secId==='notes') renderNotes(); else renderWork();
 }
-function deleteNote(id){ NOTES=NOTES.filter(n=>n.id!==id); saveNotes(); render(); toast('🗑 Удалено'); }
-function togglePin(id){ const n=NOTES.find(x=>x.id===id); if(n){ n.pin=!n.pin; saveNotes(); render(); toast(n.pin?'📌 Закреплено':'Откреплено'); } }
-function exportNotes(){ const b=new Blob([JSON.stringify(NOTES,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='mybook-backup-'+today()+'.json'; a.click(); }
+function deleteNote(secId,id){
+  if(secId==='notes'){ NOTES=NOTES.filter(n=>n.id!==id); jsave(K.notes,NOTES); renderNotes(); }
+  else { WORK=WORK.filter(n=>n.id!==id); jsave(K.work,WORK); renderWork(); }
+  toast('🗑 Удалено');
+}
+function togglePin(secId,id){
+  const store=secId==='notes'?NOTES:WORK;
+  const n=store.find(x=>x.id===id);
+  if(n){ n.pin=!n.pin; jsave(secId==='notes'?K.notes:K.work,store); if(secId==='notes') renderNotes(); else renderWork(); toast(n.pin?'📌 Закреплено':'Откреплено'); }
+}
 
-// ════════════════════════════════════════════
-//  FAMILY render
-// ════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
+//  LINKS
+// ══════════════════════════════════════════════════════════
+
+function renderLinks(){
+  buildSidebarLinkCats();
+  // tabs
+  const all=[{id:'all',label:'Все',icon:''},...LINK_CATS];
+  document.getElementById('links-tabs').innerHTML = all.map(c=>
+    `<button class="tab ${noteFilter.links===c.id?'active':''}" onclick="setNoteTab('links','${c.id}')">
+      ${c.icon?c.icon+' ':''}${c.label}
+    </button>`
+  ).join('') + `<button class="tab tab-add" onclick="openLinkCatForm()" title="Добавить категорию">⊕</button>`;
+
+  const q=document.getElementById('links-search').value.toLowerCase();
+  let list=LINKS.slice();
+  if(noteFilter.links!=='all') list=list.filter(l=>l.cat===noteFilter.links);
+  if(q) list=list.filter(l=>l.title.toLowerCase().includes(q)||l.url.toLowerCase().includes(q)||(l.desc||'').toLowerCase().includes(q));
+
+  const grid=document.getElementById('links-grid');
+  const empty=document.getElementById('links-empty');
+  if(!list.length){ grid.innerHTML=''; empty.style.display='flex'; return; }
+  empty.style.display='none';
+
+  grid.innerHTML=list.map(l=>{
+    let domain=''; try{ domain=new URL(l.url).hostname; }catch{}
+    const favUrl=domain?`https://www.google.com/s2/favicons?domain=${domain}&sz=32`:'';
+    return `<div class="link-card" onclick="window.open('${esc(l.url)}','_blank')">
+      <div class="link-fav">${favUrl?`<img src="${favUrl}" onerror="this.parentElement.textContent='🔗'" />`:'🔗'}</div>
+      <div class="link-info">
+        <div class="link-title">${esc(l.title||domain||l.url)}</div>
+        <div class="link-url">${esc(domain||l.url)}</div>
+        ${l.desc?`<div class="link-desc">${esc(l.desc)}</div>`:''}
+      </div>
+      <button class="link-del" onclick="event.stopPropagation();confirmAction('Удалить ссылку?','',()=>deleteLink(${l.id}))">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function buildSidebarLinkCats(){
+  document.getElementById('sb-links-list').innerHTML = LINK_CATS.map(c=>
+    `<button class="sb-item ${noteFilter.links===c.id?'active':''}" onclick="setSection('links');setNoteTab('links','${c.id}')">
+      <span>${c.icon}</span> ${c.label}
+      <span class="sb-count">${LINKS.filter(l=>l.cat===c.id).length}</span>
+    </button>`
+  ).join('');
+}
+
+function openLinkForm(){
+  document.getElementById('lf-url').value='';
+  document.getElementById('lf-name').value='';
+  document.getElementById('lf-desc').value='';
+  document.getElementById('lf-cat').innerHTML=LINK_CATS.map(c=>`<option value="${c.id}">${c.icon} ${c.label}</option>`).join('');
+  if(noteFilter.links!=='all') document.getElementById('lf-cat').value=noteFilter.links;
+  openOv('ov-link'); setTimeout(()=>document.getElementById('lf-url').focus(),80);
+}
+function autoFillLink(){
+  const url=document.getElementById('lf-url').value.trim();
+  if(!url) return;
+  try{
+    const domain=new URL(url.startsWith('http')?url:'https://'+url).hostname;
+    if(!document.getElementById('lf-name').value) document.getElementById('lf-name').value=domain.replace('www.','');
+  }catch{}
+}
+function submitLink(){
+  const url=document.getElementById('lf-url').value.trim(); if(!url){ document.getElementById('lf-url').focus(); return; }
+  const fullUrl=url.startsWith('http')?url:'https://'+url;
+  LINKS.unshift({id:LINKS.reduce((m,l)=>Math.max(m,l.id),0)+1,url:fullUrl,title:document.getElementById('lf-name').value.trim(),desc:document.getElementById('lf-desc').value.trim(),cat:document.getElementById('lf-cat').value,created:today()});
+  jsave(K.links,LINKS); closeOv('ov-link'); renderLinks(); toast('🔗 Ссылка сохранена');
+}
+function deleteLink(id){ LINKS=LINKS.filter(l=>l.id!==id); jsave(K.links,LINKS); renderLinks(); toast('🗑 Удалено'); }
+
+// Link categories
+function openLinkCatForm(catId){
+  editingLcatId=catId||null;
+  document.getElementById('lc-title').textContent=catId?'Изменить категорию':'Новая категория';
+  const cat=catId?LINK_CATS.find(c=>c.id===catId):null;
+  lcSelIcon=cat?cat.icon:LINK_ICONS[0];
+  document.getElementById('lc-name').value=cat?cat.label:'';
+  document.getElementById('lc-icons').innerHTML=LINK_ICONS.map(ic=>
+    `<div class="ico ${ic===lcSelIcon?'sel':''}" onclick="lcSelIcon='${ic}';document.querySelectorAll('#lc-icons .ico').forEach(e=>e.classList.remove('sel'));this.classList.add('sel')">${ic}</div>`
+  ).join('');
+  openOv('ov-lcat'); setTimeout(()=>document.getElementById('lc-name').focus(),80);
+}
+function submitLinkCat(){
+  const name=document.getElementById('lc-name').value.trim(); if(!name){ document.getElementById('lc-name').focus(); return; }
+  if(editingLcatId){ const c=LINK_CATS.find(x=>x.id===editingLcatId); if(c){ c.label=name; c.icon=lcSelIcon; } }
+  else { LINK_CATS.push({id:'lc_'+Date.now(),label:name,icon:lcSelIcon}); FAMILY['lc_'+Date.now()]=[];}
+  jsave(K.lcats,LINK_CATS); closeOv('ov-lcat'); renderLinks(); toast('✅ Категория сохранена');
+}
+
+// ══════════════════════════════════════════════════════════
+//  FAMILY (boards)
+// ══════════════════════════════════════════════════════════
+
 function renderFamily(){
   let total=0,done=0;
   BOARDS.filter(b=>b.type==='check').forEach(b=>{ total+=FAMILY[b.id]?.length||0; done+=(FAMILY[b.id]||[]).filter(i=>i.done).length; });
-  document.getElementById('fam-stats').textContent=total?`${done} / ${total} выполнено`:'';
+  document.getElementById('fam-stats').textContent=total?`${done}/${total} выполнено`:'';
 
-  const html = BOARDS.map(b=>renderBoard(b)).join('') +
+  buildSidebarBoards();
+
+  document.getElementById('boards-grid').innerHTML=
+    BOARDS.map(b=>renderBoard(b)).join('') +
     `<div class="board-add-tile" onclick="openBoardForm()">
-       <div class="board-add-tile-icon">＋</div>
-       <div class="board-add-tile-label">Добавить раздел</div>
-     </div>`;
-  document.getElementById('boards-grid').innerHTML = html;
+      <div style="font-size:22px">＋</div>
+      <div style="font-size:13px">Добавить раздел</div>
+    </div>`;
+}
+
+function buildSidebarBoards(){
+  document.getElementById('sb-boards-list').innerHTML=BOARDS.map(b=>
+    `<button class="sb-item" onclick="setSection('family')">
+      <span>${b.icon}</span> ${b.label}
+      <span class="sb-count">${(FAMILY[b.id]||[]).filter(i=>!i.done).length}</span>
+    </button>`
+  ).join('');
 }
 
 function renderBoard(b){
   const items=FAMILY[b.id]||[];
   if(b.type==='text') return renderTextBoard(b,items);
-  const active=items.filter(i=>!i.done);
-  const doneItems=items.filter(i=>i.done);
-  const activeHTML=active.map(i=>itemRow(b.id,i)).join('');
-  const doneHTML=doneItems.length?`<div class="done-section">
-    <button class="done-toggle" onclick="toggleDoneSection('${b.id}')">▸ Выполнено (${doneItems.length})</button>
-    <div class="done-list" id="done-${b.id}" style="display:none">${doneItems.map(i=>itemRow(b.id,i)).join('')}</div>
-  </div>`:'';
+  const active=items.filter(i=>!i.done), doneItems=items.filter(i=>i.done);
   return `<div class="board">
     <div class="board-accent" style="background:${b.color}"></div>
     <div class="board-header">
       <span class="board-icon">${b.icon}</span>
       <span class="board-name">${esc(b.label)}</span>
-      <span class="board-count">${active.length}</span>
-      <button class="board-add" onclick="focusBoardInput('inp-${b.id}')" title="Добавить">＋</button>
-      <div class="board-menu-wrap">
-        <button class="board-menu-btn" onclick="toggleBoardMenu('bm-${b.id}')">⋯</button>
-        <div class="board-menu" id="bm-${b.id}">
-          <button class="board-menu-item" onclick="openBoardForm('${b.id}');closeBoardMenus()">✏️ Переименовать</button>
-          <button class="board-menu-item danger" onclick="closeBoardMenus();confirmAction('Удалить раздел «${esc(b.label)}»?','Все задачи в нём будут удалены',()=>deleteBoard('${b.id}'))">🗑 Удалить раздел</button>
+      <span class="board-cnt">${active.length}</span>
+      <button class="board-add-btn" onclick="document.getElementById('bi-${b.id}').focus()">＋</button>
+      <div class="bmw">
+        <button class="bm-btn" onclick="toggleBM('bm-${b.id}')">⋯</button>
+        <div class="bm" id="bm-${b.id}">
+          <button class="bmi" onclick="openBoardForm('${b.id}');closeBMs()">✏️ Переименовать</button>
+          <button class="bmi danger" onclick="closeBMs();confirmAction('Удалить раздел «${esc(b.label)}»?','Все задачи будут удалены',()=>deleteBoard('${b.id}'))">🗑 Удалить</button>
         </div>
       </div>
     </div>
-    <div class="board-list">${activeHTML}</div>
-    ${doneHTML}
-    <div class="board-input-row">
-      <input class="board-input" id="inp-${b.id}" placeholder="${b.placeholder||'Добавить…'}"
-        onkeydown="if(event.key==='Enter')addFamItem('${b.id}',this)" />
-      <button class="board-submit" onclick="addFamItem('${b.id}',document.getElementById('inp-${b.id}'))">↵</button>
+    <div class="board-list">${active.map(i=>itemRow(b.id,i)).join('')}</div>
+    ${doneItems.length?`<div class="done-sec"><button class="done-tog" onclick="toggleDoneSec('${b.id}')">▸ Выполнено (${doneItems.length})</button><div class="done-list" id="done-${b.id}" style="display:none">${doneItems.map(i=>itemRow(b.id,i)).join('')}</div></div>`:''}
+    <div class="board-inp-row">
+      <input class="bi" id="bi-${b.id}" placeholder="${b.placeholder||'Добавить…'}" onkeydown="if(event.key==='Enter')addFamItem('${b.id}',this)"/>
+      <button class="bs" onclick="addFamItem('${b.id}',document.getElementById('bi-${b.id}'))">↵</button>
     </div>
   </div>`;
 }
 
 function renderTextBoard(b,items){
-  const notesHTML=items.map(i=>`<div class="note-item" id="fn-${b.id}-${i.id}">
-    ${esc(i.text)}<button class="note-item-del" onclick="deleteFamItem('${b.id}',${i.id})">✕</button>
-  </div>`).join('');
   return `<div class="board">
     <div class="board-accent" style="background:${b.color}"></div>
     <div class="board-header">
       <span class="board-icon">${b.icon}</span>
       <span class="board-name">${esc(b.label)}</span>
-      <span class="board-count">${items.length}</span>
-      <button class="board-add" onclick="focusBoardInput('inp-${b.id}')" title="Добавить">＋</button>
-      <div class="board-menu-wrap">
-        <button class="board-menu-btn" onclick="toggleBoardMenu('bm-${b.id}')">⋯</button>
-        <div class="board-menu" id="bm-${b.id}">
-          <button class="board-menu-item" onclick="openBoardForm('${b.id}');closeBoardMenus()">✏️ Переименовать</button>
-          <button class="board-menu-item danger" onclick="closeBoardMenus();confirmAction('Удалить раздел «${esc(b.label)}»?','Все записи в нём будут удалены',()=>deleteBoard('${b.id}'))">🗑 Удалить раздел</button>
+      <span class="board-cnt">${items.length}</span>
+      <button class="board-add-btn" onclick="document.getElementById('bi-${b.id}').focus()">＋</button>
+      <div class="bmw">
+        <button class="bm-btn" onclick="toggleBM('bm-${b.id}')">⋯</button>
+        <div class="bm" id="bm-${b.id}">
+          <button class="bmi" onclick="openBoardForm('${b.id}');closeBMs()">✏️ Переименовать</button>
+          <button class="bmi danger" onclick="closeBMs();confirmAction('Удалить раздел?','',()=>deleteBoard('${b.id}'))">🗑 Удалить</button>
         </div>
       </div>
     </div>
-    ${notesHTML}
-    <div class="board-input-row">
-      <input class="board-input" id="inp-${b.id}" placeholder="${b.placeholder||'Написать…'}"
-        onkeydown="if(event.key==='Enter')addFamItem('${b.id}',this)" />
-      <button class="board-submit" onclick="addFamItem('${b.id}',document.getElementById('inp-${b.id}'))">↵</button>
+    ${items.map(i=>`<div class="note-item">${esc(i.text)}<button class="ni-del" onclick="deleteFamItem('${b.id}',${i.id})">✕</button></div>`).join('')}
+    <div class="board-inp-row">
+      <input class="bi" id="bi-${b.id}" placeholder="${b.placeholder||'Написать…'}" onkeydown="if(event.key==='Enter')addFamItem('${b.id}',this)"/>
+      <button class="bs" onclick="addFamItem('${b.id}',document.getElementById('bi-${b.id}'))">↵</button>
     </div>
   </div>`;
 }
 
 function itemRow(boardId,item){
-  return `<div class="fam-item">
-    <input type="checkbox" class="fam-cb" ${item.done?'checked':''} onchange="toggleFamItem('${boardId}',${item.id})" />
-    <span class="fam-text ${item.done?'done':''}">${esc(item.text)}</span>
-    <button class="fam-del" onclick="deleteFamItem('${boardId}',${item.id})">✕</button>
+  return `<div class="fi-row">
+    <input type="checkbox" class="fam-cb" ${item.done?'checked':''} onchange="toggleFamItem('${boardId}',${item.id})"/>
+    <span class="fi-text ${item.done?'done':''}">${esc(item.text)}</span>
+    <button class="fi-del" onclick="deleteFamItem('${boardId}',${item.id})">✕</button>
   </div>`;
 }
 
-// ── Board menu ────────────────────────────────
-function toggleBoardMenu(id){
-  const el=document.getElementById(id); if(!el) return;
-  const wasOpen=el.classList.contains('open');
-  closeBoardMenus();
-  if(!wasOpen) el.classList.add('open');
-}
-function closeBoardMenus(){ document.querySelectorAll('.board-menu.open').forEach(m=>m.classList.remove('open')); }
-document.addEventListener('click',e=>{ if(!e.target.closest('.board-menu-wrap')) closeBoardMenus(); });
-
-// ── Board form ────────────────────────────────
-function openBoardForm(boardId){
-  editingBoardId = boardId||null;
-  document.getElementById('fb-title').textContent = boardId ? 'Переименовать раздел' : 'Новый раздел';
-
-  const b = boardId ? BOARDS.find(x=>x.id===boardId) : null;
-  fbSelIcon  = b ? b.icon  : BOARD_ICONS[0];
-  fbSelColor = b ? b.color : BOARD_COLORS[0];
-
-  document.getElementById('fb-name').value  = b ? b.label : '';
-  document.getElementById('fb-type').value  = b ? b.type  : 'check';
-
-  // Icons
-  document.getElementById('fb-icons').innerHTML = BOARD_ICONS.map(ic=>
-    `<div class="icon-opt ${ic===fbSelIcon?'sel':''}" onclick="selIcon(this,'${ic}')">${ic}</div>`
-  ).join('');
-
-  // Colors
-  document.getElementById('fb-colors').innerHTML = BOARD_COLORS.map(cl=>
-    `<div class="swatch ${cl===fbSelColor?'sel':''}" style="background:${cl}" onclick="selColor(this,'${cl}')" title="${cl}"></div>`
-  ).join('');
-
-  openOv('ov-board');
-  setTimeout(()=>document.getElementById('fb-name').focus(),80);
-}
-function selIcon(el,ic){
-  fbSelIcon=ic;
-  document.querySelectorAll('.icon-opt').forEach(e=>e.classList.remove('sel'));
-  el.classList.add('sel');
-}
-function selColor(el,cl){
-  fbSelColor=cl;
-  document.querySelectorAll('.swatch').forEach(e=>e.classList.remove('sel'));
-  el.classList.add('sel');
-}
-function submitBoard(){
-  const name=document.getElementById('fb-name').value.trim(); if(!name){ document.getElementById('fb-name').focus(); return; }
-  const type=document.getElementById('fb-type').value;
-  const ph = type==='check' ? 'Добавить…' : 'Написать…';
-
-  if(editingBoardId){
-    const b=BOARDS.find(x=>x.id===editingBoardId);
-    if(b){ b.label=name; b.icon=fbSelIcon; b.color=fbSelColor; b.type=type; b.placeholder=ph; }
-    toast('✅ Раздел обновлён');
-  } else {
-    const id='b_'+Date.now();
-    BOARDS.push({ id, label:name, icon:fbSelIcon, color:fbSelColor, type, placeholder:ph });
-    FAMILY[id]=[];
-    toast('✅ Раздел добавлен');
-  }
-  saveBoards(); saveFamily(); renderFamily(); closeOv('ov-board');
-}
-function deleteBoard(id){
-  BOARDS=BOARDS.filter(b=>b.id!==id);
-  delete FAMILY[id];
-  saveBoards(); saveFamily(); renderFamily(); toast('🗑 Раздел удалён');
-}
-
-// ── Family item actions ───────────────────────
 function addFamItem(boardId,input){
   const text=input.value.trim(); if(!text) return;
-  const items=FAMILY[boardId]; const maxId=items.reduce((m,i)=>Math.max(m,i.id),0);
-  items.push({ id:maxId+1, text, done:false });
-  saveFamily(); input.value=''; renderFamily();
+  const items=FAMILY[boardId]||[]; const maxId=items.reduce((m,i)=>Math.max(m,i.id),0);
+  items.push({id:maxId+1,text,done:false});
+  jsave(K.family,FAMILY); input.value=''; renderFamily();
 }
-function toggleFamItem(boardId,id){ const i=FAMILY[boardId].find(x=>x.id===id); if(i){ i.done=!i.done; saveFamily(); renderFamily(); } }
-function deleteFamItem(boardId,id){ FAMILY[boardId]=FAMILY[boardId].filter(i=>i.id!==id); saveFamily(); renderFamily(); }
-function toggleDoneSection(boardId){
-  const el=document.getElementById('done-'+boardId); if(!el) return;
-  const btn=el.previousElementSibling;
-  if(el.style.display==='none'){ el.style.display='block'; btn.textContent=btn.textContent.replace('▸','▾'); }
-  else{ el.style.display='none'; btn.textContent=btn.textContent.replace('▾','▸'); }
-}
-function clearDoneAll(){
-  BOARDS.filter(b=>b.type==='check').forEach(b=>{ FAMILY[b.id]=FAMILY[b.id].filter(i=>!i.done); });
-  saveFamily(); renderFamily(); toast('🧹 Выполненные удалены');
-}
-function focusBoardInput(id){ const el=document.getElementById(id); if(el) el.focus(); }
+function toggleFamItem(boardId,id){ const i=(FAMILY[boardId]||[]).find(x=>x.id===id); if(i){ i.done=!i.done; jsave(K.family,FAMILY); renderFamily(); } }
+function deleteFamItem(boardId,id){ FAMILY[boardId]=(FAMILY[boardId]||[]).filter(i=>i.id!==id); jsave(K.family,FAMILY); renderFamily(); }
+function toggleDoneSec(id){ const el=document.getElementById('done-'+id); if(!el) return; const b=el.previousElementSibling; if(el.style.display==='none'){ el.style.display='block'; b.textContent=b.textContent.replace('▸','▾'); }else{ el.style.display='none'; b.textContent=b.textContent.replace('▾','▸'); } }
+function clearDoneAll(){ BOARDS.filter(b=>b.type==='check').forEach(b=>{ FAMILY[b.id]=(FAMILY[b.id]||[]).filter(i=>!i.done); }); jsave(K.family,FAMILY); renderFamily(); toast('🧹 Готово'); }
 
-// ════════════════════════════════════════════
-//  Shared helpers
-// ════════════════════════════════════════════
+function toggleBM(id){ const el=document.getElementById(id); if(!el) return; const was=el.classList.contains('open'); closeBMs(); if(!was) el.classList.add('open'); }
+function closeBMs(){ document.querySelectorAll('.bm.open').forEach(m=>m.classList.remove('open')); }
+document.addEventListener('click',e=>{ if(!e.target.closest('.bmw')) closeBMs(); });
+
+function openBoardForm(boardId){
+  editingBoardId=boardId||null;
+  document.getElementById('bf-title').textContent=boardId?'Переименовать раздел':'Новый раздел';
+  const b=boardId?BOARDS.find(x=>x.id===boardId):null;
+  bfSelIcon=b?b.icon:BOARD_ICONS[0]; bfSelColor=b?b.color:BOARD_COLORS[0];
+  document.getElementById('bf-name').value=b?b.label:'';
+  document.getElementById('bf-type').value=b?b.type:'check';
+  document.getElementById('bf-icons').innerHTML=BOARD_ICONS.map(ic=>`<div class="ico ${ic===bfSelIcon?'sel':''}" onclick="bfSelIcon='${ic}';document.querySelectorAll('#bf-icons .ico').forEach(e=>e.classList.remove('sel'));this.classList.add('sel')">${ic}</div>`).join('');
+  document.getElementById('bf-colors').innerHTML=BOARD_COLORS.map(cl=>`<div class="sw ${cl===bfSelColor?'sel':''}" style="background:${cl}" onclick="bfSelColor='${cl}';document.querySelectorAll('#bf-colors .sw').forEach(e=>e.classList.remove('sel'));this.classList.add('sel')"></div>`).join('');
+  openOv('ov-board'); setTimeout(()=>document.getElementById('bf-name').focus(),80);
+}
+function submitBoard(){
+  const name=document.getElementById('bf-name').value.trim(); if(!name){ document.getElementById('bf-name').focus(); return; }
+  const type=document.getElementById('bf-type').value;
+  if(editingBoardId){ const b=BOARDS.find(x=>x.id===editingBoardId); if(b){ b.label=name; b.icon=bfSelIcon; b.color=bfSelColor; b.type=type; } toast('✅ Обновлено'); }
+  else { const id='b_'+Date.now(); BOARDS.push({id,label:name,icon:bfSelIcon,color:bfSelColor,type,placeholder:type==='check'?'Добавить…':'Написать…'}); FAMILY[id]=[]; toast('✅ Раздел добавлен'); }
+  jsave(K.boards,BOARDS); jsave(K.family,FAMILY); closeOv('ov-board'); renderFamily();
+}
+function deleteBoard(id){ BOARDS=BOARDS.filter(b=>b.id!==id); delete FAMILY[id]; jsave(K.boards,BOARDS); jsave(K.family,FAMILY); renderFamily(); toast('🗑 Удалено'); }
+
+// ══════════════════════════════════════════════════════════
+//  EXPORT
+// ══════════════════════════════════════════════════════════
+function exportAll(){
+  const data={notes:NOTES,work:WORK,links:LINKS,link_cats:LINK_CATS,boards:BOARDS,family:FAMILY};
+  const b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='mybook-'+today()+'.json'; a.click();
+}
+
+// ══════════════════════════════════════════════════════════
+//  SHARED HELPERS
+// ══════════════════════════════════════════════════════════
 function openOv(id){ document.getElementById(id).classList.add('open'); }
 function closeOv(id,e){ if(e&&e.target!==document.getElementById(id)) return; document.getElementById(id).classList.remove('open'); }
-
-function confirmAction(title, sub, cb){
-  document.getElementById('confirm-title').textContent = title;
-  document.getElementById('confirm-sub').textContent   = sub || 'Это действие нельзя отменить';
-  document.getElementById('confirm-ok').onclick = ()=>{ cb(); closeOv('ov-confirm'); };
-  openOv('ov-confirm');
-}
-
+function confirmAction(title,sub,cb){ document.getElementById('cx-title').textContent=title; document.getElementById('cx-sub').textContent=sub||'Это нельзя отменить'; document.getElementById('cx-ok').onclick=()=>{ cb(); closeOv('ov-confirm'); }; openOv('ov-confirm'); }
 function toast(msg){ const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity .3s'; setTimeout(()=>t.remove(),300); },2200); }
 function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function linkify(s){ return s.replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>'); }
-function fmtDate(iso){ return new Date(iso).toLocaleDateString('ru-RU',{day:'numeric',month:'short',year:'numeric'}); }
+function fmtDate(iso){ return new Date(iso).toLocaleDateString('ru-RU',{day:'numeric',month:'short'}); }
 function today(){ return new Date().toISOString().slice(0,10); }
-function plural(n,one,few,many){ const m=n%10,h=n%100; if(m===1&&h!==11)return one; if(m>=2&&m<=4&&(h<10||h>=20))return few; return many; }
+function plural(n,a,b,c){ const m=n%10,h=n%100; if(m===1&&h!==11)return a; if(m>=2&&m<=4&&(h<10||h>=20))return b; return c; }
 
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape') ['ov-read','ov-form','ov-board','ov-confirm'].forEach(id=>document.getElementById(id).classList.remove('open'));
-  if(e.key==='/'&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)){
-    e.preventDefault(); if(currentView==='notes') document.getElementById('search').focus();
-  }
+  if(e.key==='Escape') ['ov-read','ov-note','ov-link','ov-board','ov-lcat','ov-confirm'].forEach(id=>document.getElementById(id)?.classList.remove('open'));
 });
 
-// ── Boot ──
-loadNotes(); loadFamily();
-buildSidebar(); buildCatSelect(); render();
+// ══ BOOT ══
+loadAll();
+setSection('family');
 </script>
 </body>
 </html>
