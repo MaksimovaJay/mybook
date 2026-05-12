@@ -928,7 +928,7 @@ function bootWithFamily(){
 }
 function updateFamilyCodeMob(){ const el=document.getElementById('fcode-val-mob'); if(el&&familyId) el.textContent=familyId; }
 
-function signOutUser(){ if(_unsubListen){_unsubListen();_unsubListen=null;} familyId=null; localStorage.removeItem('mb_fid'); auth.signOut(); }
+function signOutUser(){ if(_unsubListen){_unsubListen();_unsubListen=null;} familyId=null; auth.signOut(); }
 
 // ══════════════════════════════════════════════════════════
 //  CONFIG
