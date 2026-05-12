@@ -898,20 +898,11 @@ async function signInGoogle(){
   }
 }
 async function createFamilyFromLogin(){
-  const btn=document.getElementById('login-create-btn');
-  const errEl=document.getElementById('login-err');
-  errEl.style.display='none';
-  btn.textContent='Создаём…'; btn.disabled=true;
   const code=Math.random().toString(36).slice(2,8).toUpperCase();
-  try{
-    await db.collection('families').doc(code).collection('data').doc('all').set({_created:Date.now()});
-    familyId=code; localStorage.setItem('mb_fid',code);
-    bootWithFamily();
-  }catch(e){
-    errEl.textContent='Ошибка: '+e.message;
-    errEl.style.display='block';
-    btn.textContent='✨ Создать новое пространство'; btn.disabled=false;
-  }
+  familyId=code; localStorage.setItem('mb_fid',code);
+  // Сразу в приложение, Firestore пишем в фоне
+  bootWithFamily();
+  db.collection('families').doc(code).collection('data').doc('all').set({_created:Date.now()}).catch(()=>{});
 }
 async function signInByCode(){
   const code=(document.getElementById('login-code').value||'').trim().toUpperCase();
