@@ -772,17 +772,23 @@ let currentUser=null, familyId=null, _syncTimer=null, _myLastSync=0, _unsubListe
 function getDocRef(){ return familyId?db.collection('families').doc(familyId).collection('data').doc('all'):null; }
 
 async function initUser(user){
-  try{
-    const ud=await db.collection('users').doc(user.uid).get();
-    if(ud.exists&&ud.data().familyId){ familyId=ud.data().familyId; localStorage.setItem('mb_fid',familyId); return true; }
-  }catch(e){}
+  // localStorage — источник истины: если код уже есть, сразу в приложение
   const cached=localStorage.getItem('mb_fid');
   if(cached){
-    try{
-      const fd=await db.collection('families').doc(cached).collection('data').doc('all').get();
-      if(fd.exists){ familyId=cached; await db.collection('users').doc(user.uid).set({familyId:cached},{merge:true}); return true; }
-    }catch(e){}
+    familyId=cached;
+    // фоново регистрируем uid → familyId в Firestore (не блокируем загрузку)
+    db.collection('users').doc(user.uid).set({familyId:cached},{merge:true}).catch(()=>{});
+    return true;
   }
+  // Первый вход на новом устройстве — ищем в Firestore
+  try{
+    const ud=await db.collection('users').doc(user.uid).get();
+    if(ud.exists&&ud.data().familyId){
+      familyId=ud.data().familyId;
+      localStorage.setItem('mb_fid',familyId);
+      return true;
+    }
+  }catch(e){ console.warn('initUser Firestore:',e); }
   return false;
 }
 async function createFamily(){
