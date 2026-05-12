@@ -217,6 +217,36 @@
     .board-add-tile{border:2px dashed var(--border);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:28px 16px;cursor:pointer;transition:border-color .2s,background .2s;color:var(--text3);min-height:110px;}
     .board-add-tile:hover{border-color:var(--accent);background:rgba(201,169,110,.04);color:var(--accent);}
 
+    /* ── Finance board ── */
+    .fin-summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border);margin:0;border-bottom:1px solid var(--border);}
+    .fin-sum-box{background:var(--s1);padding:10px 12px;text-align:center;}
+    .fin-sum-val{font-size:14px;font-weight:700;line-height:1.2;}
+    .fin-sum-lbl{font-size:10px;color:var(--text3);margin-top:2px;}
+    .fin-in{color:#5bbf7a;}
+    .fin-out{color:#e05577;}
+    .fin-bal-pos{color:#5bbf7a;}
+    .fin-bal-neg{color:#e05577;}
+    .fin-list{display:flex;flex-direction:column;padding:6px;}
+    .fin-tx{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:8px;transition:background .15s;}
+    .fin-tx:hover{background:var(--s2);}
+    .fin-tx-icon{font-size:17px;width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--s2);}
+    .fin-tx-info{flex:1;min-width:0;}
+    .fin-tx-cat{font-size:12.5px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .fin-tx-note{font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .fin-tx-right{text-align:right;flex-shrink:0;}
+    .fin-tx-amt{font-size:13.5px;font-weight:700;}
+    .fin-tx-date{font-size:10px;color:var(--text3);}
+    .fin-tx-del{background:none;border:none;color:transparent;font-size:12px;cursor:pointer;padding:0 2px;flex-shrink:0;}
+    .fin-tx:hover .fin-tx-del{color:var(--text3);}
+    .fin-tx-del:hover{color:#e05577!important;}
+    .fin-add-row{padding:6px 8px 10px;display:flex;justify-content:center;}
+
+    /* Finance form toggles */
+    .type-toggle{display:flex;gap:6px;margin-bottom:2px;}
+    .type-btn{flex:1;padding:8px;border-radius:8px;border:1.5px solid var(--border);background:none;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit;}
+    .type-btn.sel-out{background:rgba(224,85,119,.15);border-color:#e05577;color:#e05577;}
+    .type-btn.sel-in{background:rgba(91,191,122,.15);border-color:#5bbf7a;color:#5bbf7a;}
+
     /* ══ Empty state ══ */
     .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;color:var(--text3);text-align:center;gap:8px;}
     .empty-icon{font-size:34px;}
@@ -502,7 +532,7 @@
     <div class="fg"><label class="fl">Название</label><input class="fi" id="bf-name" type="text" placeholder="Название раздела…"/></div>
     <div class="fg"><label class="fl">Иконка</label><div class="icon-grid" id="bf-icons"></div></div>
     <div class="fg"><label class="fl">Цвет</label><div class="swatches" id="bf-colors"></div></div>
-    <div class="fg"><label class="fl">Тип</label><select class="fs" id="bf-type"><option value="check">Чеклист</option><option value="text">Текстовые заметки</option></select></div>
+    <div class="fg"><label class="fl">Тип</label><select class="fs" id="bf-type"><option value="check">Чеклист</option><option value="text">Текстовые заметки</option><option value="finance">Расходы / Доходы</option></select></div>
     <div class="form-actions">
       <button class="btn btn-g" onclick="closeOv('ov-board')">Отмена</button>
       <button class="btn btn-p" onclick="submitBoard()">Сохранить</button>
@@ -520,6 +550,29 @@
     <div class="form-actions">
       <button class="btn btn-g" onclick="closeOv('ov-lcat')">Отмена</button>
       <button class="btn btn-p" onclick="submitLinkCat()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Finance transaction form ── -->
+<div class="overlay" id="ov-fin" onclick="closeOv('ov-fin',event)">
+  <div class="modal modal-sm">
+    <button class="close-x" onclick="closeOv('ov-fin')">✕</button>
+    <div class="modal-title">Добавить операцию</div>
+    <div class="fg">
+      <label class="fl">Тип</label>
+      <div class="type-toggle">
+        <button class="type-btn sel-out" id="ftx-out" onclick="setFinType('out')">🔴 Расход</button>
+        <button class="type-btn" id="ftx-in"  onclick="setFinType('in')">💚 Доход</button>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">Сумма (₽)</label><input class="fi" id="ftx-amount" type="number" placeholder="0" min="0" inputmode="decimal"/></div>
+    <div class="fg"><label class="fl">Категория</label><select class="fs" id="ftx-cat"></select></div>
+    <div class="fg"><label class="fl">Комментарий</label><input class="fi" id="ftx-note" type="text" placeholder="Необязательно…"/></div>
+    <div class="fg"><label class="fl">Дата</label><input class="fi" id="ftx-date" type="date"/></div>
+    <div class="form-actions">
+      <button class="btn btn-g" onclick="closeOv('ov-fin')">Отмена</button>
+      <button class="btn btn-p" onclick="submitFinTx()">Сохранить</button>
     </div>
   </div>
 </div>
@@ -584,11 +637,12 @@ function loadAll(){
   ]);
   LINKS = jload(K.links, []);
   BOARDS = jload(K.boards, [
-    {id:'tasks',   label:'Задачи',  icon:'✅', color:'#5bbf7a', type:'check', placeholder:'Добавить задачу…'},
-    {id:'shop',    label:'Покупки', icon:'🛒', color:'#5eaee0', type:'check', placeholder:'Добавить в список…'},
-    {id:'wishes',  label:'Желания', icon:'💫', color:'#9b7fe8', type:'check', placeholder:'Добавить желание…'},
-    {id:'todos',   label:'Дела',    icon:'📅', color:'#e07b50', type:'check', placeholder:'Добавить дело…'},
-    {id:'fnotes',  label:'Заметки', icon:'🗒️', color:'#8e8ea0', type:'text',  placeholder:'Написать…'},
+    {id:'tasks',   label:'Задачи',  icon:'✅', color:'#5bbf7a', type:'check',   placeholder:'Добавить задачу…'},
+    {id:'shop',    label:'Покупки', icon:'🛒', color:'#5eaee0', type:'check',   placeholder:'Добавить в список…'},
+    {id:'wishes',  label:'Желания', icon:'💫', color:'#9b7fe8', type:'check',   placeholder:'Добавить желание…'},
+    {id:'todos',   label:'Дела',    icon:'📅', color:'#e07b50', type:'check',   placeholder:'Добавить дело…'},
+    {id:'fnotes',  label:'Заметки', icon:'🗒️', color:'#8e8ea0', type:'text',   placeholder:'Написать…'},
+    {id:'budget',  label:'Бюджет',  icon:'💰', color:'#ffd166', type:'finance', placeholder:''},
   ]);
   FAMILY = jload(K.family, {});
   BOARDS.forEach(b=>{ if(!FAMILY[b.id]) FAMILY[b.id]=[]; });
@@ -892,7 +946,8 @@ function buildSidebarBoards(){
 
 function renderBoard(b){
   const items=FAMILY[b.id]||[];
-  if(b.type==='text') return renderTextBoard(b,items);
+  if(b.type==='text')    return renderTextBoard(b,items);
+  if(b.type==='finance') return renderFinanceBoard(b,items);
   const active=items.filter(i=>!i.done), doneItems=items.filter(i=>i.done);
   return `<div class="board">
     <div class="board-accent" style="background:${b.color}"></div>
@@ -941,6 +996,94 @@ function renderTextBoard(b,items){
     </div>
   </div>`;
 }
+
+// ── Finance board ─────────────────────────────────────────
+const FIN_CATS = {
+  out:['🍕 Еда','🚗 Транспорт','🏠 Дом','👕 Одежда','💊 Здоровье','🎮 Развлечения','📱 Связь','🛍 Покупки','🎓 Учёба','🌿 Прочее'],
+  in: ['💼 Зарплата','💻 Фриланс','🎁 Подарок','💰 Другое'],
+};
+
+let finBoardId=null, finTxType='out';
+
+function renderFinanceBoard(b,items){
+  const totalIn  = items.filter(t=>t.type==='in' ).reduce((s,t)=>s+t.amount,0);
+  const totalOut = items.filter(t=>t.type==='out').reduce((s,t)=>s+t.amount,0);
+  const bal = totalIn - totalOut;
+  const balClass = bal>=0?'fin-bal-pos':'fin-bal-neg';
+  const sorted = items.slice().sort((a,z)=>z.date.localeCompare(a.date));
+  return `<div class="board">
+    <div class="board-accent" style="background:${b.color}"></div>
+    <div class="board-header">
+      <span class="board-icon">${b.icon}</span>
+      <span class="board-name">${esc(b.label)}</span>
+      <span class="board-cnt">${items.length} записей</span>
+      <div class="bmw">
+        <button class="bm-btn" onclick="toggleBM('bm-${b.id}')">⋯</button>
+        <div class="bm" id="bm-${b.id}">
+          <button class="bmi" onclick="openBoardForm('${b.id}');closeBMs()">✏️ Переименовать</button>
+          <button class="bmi danger" onclick="closeBMs();confirmAction('Удалить раздел?','Все записи будут удалены',()=>deleteBoard('${b.id}'))">🗑 Удалить</button>
+        </div>
+      </div>
+    </div>
+    <div class="fin-summary">
+      <div class="fin-sum-box"><div class="fin-sum-val fin-in">+${fmtMoney(totalIn)}</div><div class="fin-sum-lbl">Доходы</div></div>
+      <div class="fin-sum-box"><div class="fin-sum-val fin-out">-${fmtMoney(totalOut)}</div><div class="fin-sum-lbl">Расходы</div></div>
+      <div class="fin-sum-box"><div class="fin-sum-val ${balClass}">${bal>=0?'+':''}${fmtMoney(bal)}</div><div class="fin-sum-lbl">Остаток</div></div>
+    </div>
+    <div class="fin-list">
+      ${sorted.slice(0,30).map(t=>{
+        const parts=t.cat.split(' '); const icon=parts[0]; const label=parts.slice(1).join(' ');
+        return `<div class="fin-tx">
+          <div class="fin-tx-icon">${icon}</div>
+          <div class="fin-tx-info">
+            <div class="fin-tx-cat">${esc(label)}</div>
+            ${t.note?`<div class="fin-tx-note">${esc(t.note)}</div>`:''}
+          </div>
+          <div class="fin-tx-right">
+            <div class="fin-tx-amt ${t.type==='in'?'fin-in':'fin-out'}">${t.type==='in'?'+':'-'}${fmtMoney(t.amount)}</div>
+            <div class="fin-tx-date">${fmtDate(t.date)}</div>
+          </div>
+          <button class="fin-tx-del" onclick="deleteFinTx('${b.id}',${t.id})">✕</button>
+        </div>`;
+      }).join('')}
+      ${sorted.length===0?`<div style="text-align:center;color:var(--text3);padding:16px;font-size:13px">Пока пусто</div>`:''}
+    </div>
+    <div class="fin-add-row">
+      <button class="btn btn-p" style="width:100%" onclick="openFinForm('${b.id}')">＋ Добавить операцию</button>
+    </div>
+  </div>`;
+}
+
+function openFinForm(boardId){
+  finBoardId=boardId; finTxType='out';
+  document.getElementById('ftx-out').classList.add('sel-out');
+  document.getElementById('ftx-in').classList.remove('sel-in');
+  document.getElementById('ftx-amount').value='';
+  document.getElementById('ftx-note').value='';
+  document.getElementById('ftx-date').value=today();
+  updateFinCats();
+  openOv('ov-fin');
+  setTimeout(()=>document.getElementById('ftx-amount').focus(),80);
+}
+function setFinType(type){
+  finTxType=type;
+  document.getElementById('ftx-out').className='type-btn'+(type==='out'?' sel-out':'');
+  document.getElementById('ftx-in').className='type-btn'+(type==='in'?' sel-in':'');
+  updateFinCats();
+}
+function updateFinCats(){
+  document.getElementById('ftx-cat').innerHTML=FIN_CATS[finTxType].map(c=>`<option value="${c}">${c}</option>`).join('');
+}
+function submitFinTx(){
+  const amt=parseFloat(document.getElementById('ftx-amount').value.replace(',','.'));
+  if(!amt||amt<=0){ document.getElementById('ftx-amount').focus(); return; }
+  const items=FAMILY[finBoardId]||[];
+  items.unshift({id:items.reduce((m,i)=>Math.max(m,i.id),0)+1,type:finTxType,amount:amt,cat:document.getElementById('ftx-cat').value,note:document.getElementById('ftx-note').value.trim(),date:document.getElementById('ftx-date').value||today()});
+  jsave(K.family,FAMILY); closeOv('ov-fin'); renderFamily(); toast(finTxType==='in'?'💚 Доход добавлен':'🔴 Расход добавлен');
+}
+function deleteFinTx(boardId,id){ FAMILY[boardId]=(FAMILY[boardId]||[]).filter(i=>i.id!==id); jsave(K.family,FAMILY); renderFamily(); }
+function fmtMoney(n){ return Math.abs(n).toLocaleString('ru-RU'); }
+// ──────────────────────────────────────────────────────────
 
 function itemRow(boardId,item){
   return `<div class="fi-row">
@@ -1008,7 +1151,7 @@ function today(){ return new Date().toISOString().slice(0,10); }
 function plural(n,a,b,c){ const m=n%10,h=n%100; if(m===1&&h!==11)return a; if(m>=2&&m<=4&&(h<10||h>=20))return b; return c; }
 
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape') ['ov-read','ov-note','ov-link','ov-board','ov-lcat','ov-confirm'].forEach(id=>document.getElementById(id)?.classList.remove('open'));
+  if(e.key==='Escape') ['ov-read','ov-note','ov-link','ov-board','ov-lcat','ov-fin','ov-confirm'].forEach(id=>document.getElementById(id)?.classList.remove('open'));
 });
 
 // ══ BOOT ══
