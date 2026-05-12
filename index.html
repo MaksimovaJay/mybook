@@ -508,12 +508,13 @@
       <div class="fam-topbar">
         <button class="fam-tab active" id="ftab-boards" onclick="setFamView('boards')">📋 Семья</button>
         <button class="fam-tab" id="ftab-budget" onclick="setFamView('budget')">💰 Бюджет</button>
-        <div style="margin-left:auto;display:flex;gap:6px;align-items:center;">
-          <div id="fam-topbar-actions" style="display:flex;gap:6px;align-items:center;">
-            <button class="btn btn-g" onclick="clearDoneAll()">🧹</button>
+        <div style="margin-left:auto;" class="bmw">
+          <button class="bm-btn" onclick="toggleBM('fam-menu')" style="font-size:18px;padding:4px 8px;">☰</button>
+          <div class="bm" id="fam-menu" style="right:0;min-width:190px;">
+            <button class="bmi" id="fam-menu-code" onclick="copyFamilyCode();closeBMs()">🔑 Код: <span id="fcode-val-mob" style="font-weight:700;letter-spacing:1px;color:var(--accent);margin-left:4px;"></span></button>
+            <button class="bmi" id="fam-topbar-actions" onclick="clearDoneAll();closeBMs()">🧹 Очистить выполненное</button>
+            <button class="bmi danger" onclick="signOutUser();closeBMs()">🚪 Выйти</button>
           </div>
-          <button class="btn btn-g" onclick="copyFamilyCode()" title="Скопировать код" style="font-size:12px;gap:4px;">🔑 <span id="fcode-val-mob" style="font-weight:700;letter-spacing:1px;color:var(--accent);"></span></button>
-          <button class="btn btn-g" onclick="signOutUser()" title="Выйти" style="padding:6px 10px;">🚪</button>
         </div>
       </div>
 
@@ -1381,8 +1382,7 @@ function setFamView(view){
   document.getElementById('fam-view-boards').style.display = view==='boards' ? '' : 'none';
   const bv = document.getElementById('fam-view-budget');
   bv.style.display = view==='budget' ? 'flex' : 'none';
-  // topbar actions
-  document.getElementById('fam-topbar-actions').style.display = view==='boards' ? 'flex' : 'none';
+  // topbar actions (now in burger menu — always visible)
   if(view==='budget') renderBudget();
   else renderFamily();
 }
