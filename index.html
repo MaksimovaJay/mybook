@@ -393,7 +393,15 @@
     <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.34-8.16 2.34-6.26 0-11.57-3.59-13.46-8.83l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
     Войти через Google
   </button>
-  <div id="login-err" style="font-size:12px;color:#e05577;display:none;">Ошибка входа — попробуй ещё раз</div>
+  <div style="color:var(--text3);font-size:12px;margin:2px 0;">— или войди по коду семьи —</div>
+  <div style="display:flex;gap:8px;width:260px;">
+    <input id="login-code" placeholder="Код (6 букв)" maxlength="8"
+      style="flex:1;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:11px 13px;color:var(--text);font-size:15px;font-family:inherit;outline:none;text-transform:uppercase;letter-spacing:.12em;"
+      oninput="this.value=this.value.toUpperCase()"
+      onkeydown="if(event.key==='Enter')signInByCode()"/>
+    <button onclick="signInByCode()" class="btn btn-p" style="padding:11px 18px;font-size:14px;">Войти</button>
+  </div>
+  <div id="login-err" style="font-size:12px;color:#e05577;display:none;text-align:center;max-width:260px;"></div>
 </div>
 
 <!-- ══ FAMILY SETUP ══ -->
@@ -887,7 +895,29 @@ async function signInGoogle(){
     console.error(e);
   }
 }
-function signOutUser(){ if(_unsubListen){_unsubListen();_unsubListen=null;} familyId=null; auth.signOut(); }
+async function signInByCode(){
+  const code=(document.getElementById('login-code').value||'').trim().toUpperCase();
+  const errEl=document.getElementById('login-err');
+  errEl.style.display='none';
+  if(code.length<4){errEl.textContent='Введи код';errEl.style.display='block';return;}
+  try{
+    const fd=await db.collection('families').doc(code).collection('data').doc('all').get();
+    if(!fd.exists){errEl.textContent='Код не найден — проверь правильность';errEl.style.display='block';return;}
+    familyId=code; localStorage.setItem('mb_fid',code);
+    bootWithFamily();
+  }catch(e){
+    errEl.textContent='Ошибка соединения: '+e.message;
+    errEl.style.display='block';
+  }
+}
+
+function bootWithFamily(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('family-setup').style.display='none';
+  loadAll().then(()=>{ setSection('family'); updateFamilyCodeUI(); });
+}
+
+function signOutUser(){ if(_unsubListen){_unsubListen();_unsubListen=null;} familyId=null; localStorage.removeItem('mb_fid'); auth.signOut(); }
 
 // ══════════════════════════════════════════════════════════
 //  CONFIG
@@ -1720,16 +1750,23 @@ auth.onAuthStateChanged(async user=>{
     document.getElementById('signout-btn').style.display='flex';
     const hasFamily=await initUser(user);
     if(hasFamily){
-      document.getElementById('family-setup').style.display='none';
-      await loadAll(); setSection('family'); updateFamilyCodeUI();
+      bootWithFamily();
     } else {
       document.getElementById('family-setup').style.display='flex';
     }
   } else {
-    currentUser=null; familyId=null;
-    document.getElementById('login-screen').style.display='flex';
-    document.getElementById('family-setup').style.display='none';
-    document.getElementById('signout-btn').style.display='none';
+    // Нет Google-аккаунта — проверяем есть ли сохранённый код семьи
+    currentUser=null;
+    const cached=localStorage.getItem('mb_fid');
+    if(cached){
+      familyId=cached;
+      bootWithFamily();
+    } else {
+      familyId=null;
+      document.getElementById('login-screen').style.display='flex';
+      document.getElementById('family-setup').style.display='none';
+      document.getElementById('signout-btn').style.display='none';
+    }
   }
 });
 </script>
