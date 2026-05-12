@@ -329,6 +329,11 @@
     .budget-tx-conv{font-size:10.5px;color:var(--text3);margin-top:2px;}
     .cur-flag{font-size:14px;}
 
+    /* Field validation */
+    .field-err{font-size:11.5px;color:#e05577;margin-top:5px;display:none;animation:fu .15s ease;}
+    .field-err.show{display:block;}
+    .fi.err,.fs.err{border-color:#e05577!important;box-shadow:0 0 0 2px rgba(224,85,119,.15);}
+
     /* Who toggle & badge */
     .who-btn{flex:1;padding:8px;border-radius:8px;border:1.5px solid var(--border);background:none;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit;}
     .who-btn.sel-me{background:rgba(201,169,110,.15);border-color:var(--accent);color:var(--accent);}
@@ -661,10 +666,18 @@
       <label class="fl">Валюта</label>
       <div class="cur-grid" id="ftx-cur-grid"></div>
     </div>
-    <div class="fg"><label class="fl" id="ftx-amt-lbl">Сумма</label><input class="fi" id="ftx-amount" type="number" placeholder="0" min="0" inputmode="decimal"/></div>
+    <div class="fg">
+      <label class="fl" id="ftx-amt-lbl">Сумма</label>
+      <input class="fi" id="ftx-amount" type="number" placeholder="0" min="0" inputmode="decimal" oninput="clearFErr('ftx-amount','ferr-amount')"/>
+      <div class="field-err" id="ferr-amount">⚠️ Введи сумму — без неё не сохранить</div>
+    </div>
     <div class="fg"><label class="fl">Категория</label><select class="fs" id="ftx-cat"></select></div>
     <div class="fg"><label class="fl">Комментарий</label><input class="fi" id="ftx-note" type="text" placeholder="Необязательно…"/></div>
-    <div class="fg"><label class="fl">Дата</label><input class="fi" id="ftx-date" type="date"/></div>
+    <div class="fg">
+      <label class="fl">Дата</label>
+      <input class="fi" id="ftx-date" type="date" onchange="clearFErr('ftx-date','ferr-date')"/>
+      <div class="field-err" id="ferr-date">⚠️ Укажи дату операции</div>
+    </div>
     <div class="form-actions">
       <button class="btn btn-g" onclick="closeOv('ov-fin')">Отмена</button>
       <button class="btn btn-p" onclick="submitFinTx()">Сохранить</button>
@@ -1276,6 +1289,7 @@ function openFinForm(type){
   document.getElementById('ftx-amount').value='';
   document.getElementById('ftx-note').value='';
   document.getElementById('ftx-date').value=`${budgetYear}-${String(budgetMon+1).padStart(2,'0')}-${String(new Date().getDate()).padStart(2,'0')}`;
+  clearAllFinErrs();
   renderCurButtons();
   updateFinCats();
   openOv('ov-fin');
@@ -1304,10 +1318,31 @@ function setFinType(type){
 function updateFinCats(){
   document.getElementById('ftx-cat').innerHTML=FIN_CATS[finTxType].map(c=>`<option value="${c}">${c}</option>`).join('');
 }
+function clearFErr(inputId, errId){
+  document.getElementById(inputId)?.classList.remove('err');
+  document.getElementById(errId)?.classList.remove('show');
+}
+function clearAllFinErrs(){
+  ['ftx-amount','ftx-date'].forEach(id=>document.getElementById(id)?.classList.remove('err'));
+  ['ferr-amount','ferr-date'].forEach(id=>document.getElementById(id)?.classList.remove('show'));
+}
 function submitFinTx(){
+  clearAllFinErrs();
   const amt=parseFloat(document.getElementById('ftx-amount').value.replace(',','.'));
-  if(!amt||amt<=0){ document.getElementById('ftx-amount').focus(); return; }
-  BUDGET.push({id:BUDGET.reduce((m,i)=>Math.max(m,i.id),0)+1,type:finTxType,who:finWho,currency:finCurrency,amount:amt,cat:document.getElementById('ftx-cat').value,note:document.getElementById('ftx-note').value.trim(),date:document.getElementById('ftx-date').value||today()});
+  const date=document.getElementById('ftx-date').value;
+  let ok=true;
+  if(!amt||amt<=0){
+    document.getElementById('ftx-amount').classList.add('err');
+    document.getElementById('ferr-amount').classList.add('show');
+    ok=false;
+  }
+  if(!date){
+    document.getElementById('ftx-date').classList.add('err');
+    document.getElementById('ferr-date').classList.add('show');
+    ok=false;
+  }
+  if(!ok){ if(!amt||amt<=0) document.getElementById('ftx-amount').focus(); return; }
+  BUDGET.push({id:BUDGET.reduce((m,i)=>Math.max(m,i.id),0)+1,type:finTxType,who:finWho,currency:finCurrency,amount:amt,cat:document.getElementById('ftx-cat').value,note:document.getElementById('ftx-note').value.trim(),date});
   jsave(K.budget,BUDGET); closeOv('ov-fin'); renderBudget(); toast(finTxType==='in'?'💚 Доход добавлен':'🔴 Расход добавлен');
 }
 function fmtMoney(n){ return Math.abs(n).toLocaleString('ru-RU'); }
