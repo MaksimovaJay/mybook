@@ -781,9 +781,8 @@ firebase.initializeApp({
   appId:"1:393438806255:web:23b8eedce013483ff49b1a",
 });
 const db   = firebase.firestore();
+db.settings({ experimentalForceLongPolling: true, merge: true });
 const auth = firebase.auth();
-const FBASE = 'https://firestore.googleapis.com/v1/projects/mybook-6748b/databases/(default)/documents';
-const FKEY  = '?key=AIzaSyBFWM450IARr2gb78oD48pT6f3AkY6tDvI';
 let currentUser=null, familyId=null, _syncTimer=null, _myLastSync=0, _unsubListen=null, _pollInterval=null;
 
 function getDocRef(){ return familyId?db.collection('families').doc(familyId).collection('data').doc('all'):null; }
@@ -848,18 +847,12 @@ function updateFamilyCodeUI(){ const el=document.getElementById('fcode-val'); if
 function copyFamilyCode(){ if(!familyId) return; navigator.clipboard?.writeText(familyId); toast('📋 Код скопирован: '+familyId); }
 
 function syncToFirestore(){
-  if(!familyId) return;
+  const ref=getDocRef(); if(!ref) return;
   clearTimeout(_syncTimer);
   _syncTimer=setTimeout(async()=>{
     _myLastSync=Date.now();
-    const payload=JSON.stringify({notes:NOTES,work:WORK,links:LINKS,lcats:LINK_CATS,boards:BOARDS,family:FAMILY,budget:BUDGET,ncats_notes:NOTE_CATS.notes,ncats_work:NOTE_CATS.work,_ts:_myLastSync});
-    try{
-      await fetch(`${FBASE}/families/${familyId}/data/all${FKEY}`,{
-        method:'PATCH',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({fields:{raw:{stringValue:payload}}})
-      });
-    }catch(e){ console.warn('Sync failed:',e); }
+    try{ await ref.set({notes:NOTES,work:WORK,links:LINKS,lcats:LINK_CATS,boards:BOARDS,family:FAMILY,budget:BUDGET,ncats_notes:NOTE_CATS.notes,ncats_work:NOTE_CATS.work,_ts:_myLastSync}); }
+    catch(e){ console.warn('Sync failed:',e); }
   },800);
 }
 
@@ -878,31 +871,19 @@ function applyFirestoreData(d){
   BOARDS.forEach(b=>{ if(!FAMILY[b.id]) FAMILY[b.id]=[]; });
 }
 
-async function loadFromCloud(){
-  if(!familyId) return null;
-  try{
-    const resp=await fetch(`${FBASE}/families/${familyId}/data/all${FKEY}`);
-    if(!resp.ok) return null;
-    const doc=await resp.json();
-    const raw=doc.fields?.raw?.stringValue;
-    return raw?JSON.parse(raw):null;
-  }catch(e){ return null; }
-}
-
 function setupListener(){
   if(_unsubListen){ _unsubListen(); _unsubListen=null; }
-  if(_pollInterval){ clearInterval(_pollInterval); _pollInterval=null; }
-  if(!familyId) return;
-  _pollInterval=setInterval(async()=>{
-    const d=await loadFromCloud();
-    if(!d||d._ts===_myLastSync) return;
+  const ref=getDocRef(); if(!ref) return;
+  _unsubListen=ref.onSnapshot(snap=>{
+    if(snap.metadata.hasPendingWrites) return;
+    const d=snap.data(); if(!d||d._ts===_myLastSync) return;
     applyFirestoreData(d);
     if(curSection==='family') famView==='budget'?renderBudget():renderFamily();
     else if(curSection==='notes') renderNotes();
     else if(curSection==='work') renderWork();
     else if(curSection==='links') renderLinks();
     toast('🔄 Синхронизировано');
-  },15000);
+  });
 }
 
 async function signInGoogle(){
@@ -1027,9 +1008,11 @@ async function loadAll(){
   BUDGET = jload(K.budget, []);
   FAMILY = jload(K.family, {});
   BOARDS.forEach(b=>{ if(!FAMILY[b.id]) FAMILY[b.id]=[]; });
-  // Load from cloud (overrides localStorage)
-  const cloud=await loadFromCloud();
-  if(cloud) applyFirestoreData(cloud);
+  // Load from Firestore (overrides localStorage)
+  try{
+    const ref=getDocRef();
+    if(ref){ const snap=await ref.get(); if(snap.exists) applyFirestoreData(snap.data()); }
+  }catch(e){ console.warn('Firestore load failed:',e); }
   setupListener();
 }
 function jload(key, def){ try{ const s=localStorage.getItem(key); return s?JSON.parse(s):JSON.parse(JSON.stringify(def)); }catch{ return JSON.parse(JSON.stringify(def)); } }
