@@ -8,255 +8,283 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:       #0d0d0f;
-      --s1:       #141417;
-      --s2:       #1c1c21;
-      --s3:       #242429;
-      --border:   #2a2a32;
-      --border2:  #35353f;
-      --text:     #eeeef2;
-      --text2:    #8e8ea0;
-      --text3:    #55556a;
-      --accent:   #c9a96e;
-      --radius:   12px;
+      --bg:      #0d0d0f;
+      --s1:      #141417;
+      --s2:      #1c1c21;
+      --s3:      #242429;
+      --border:  #2a2a32;
+      --border2: #35353f;
+      --text:    #eeeef2;
+      --text2:   #8e8ea0;
+      --text3:   #55556a;
+      --accent:  #c9a96e;
+      --r:       12px;
     }
-
-    /* Cat colours */
-    --c-work:      #c9a96e;
-    --c-clients:   #9b7fe8;
-    --c-templates: #5eaee0;
-    --c-ideas:     #e07b50;
-    --c-learn:     #5bbf7a;
-    --c-links:     #e05577;
-    --c-notes:     #8e8ea0;
-    --c-misc:      #55556a;
 
     html { height: 100%; }
     body {
-      background: var(--bg);
-      color: var(--text);
+      background: var(--bg); color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-      font-size: 14px;
-      line-height: 1.6;
-      min-height: 100%;
+      font-size: 14px; line-height: 1.6; min-height: 100%;
     }
 
-    /* ── Layout ─────────────────────────────────── */
+    /* ── App shell ── */
     .app { display: flex; min-height: 100vh; }
 
-    /* ── Sidebar ────────────────────────────────── */
+    /* ── Sidebar ── */
     .sidebar {
-      width: 220px;
-      flex-shrink: 0;
-      background: var(--s1);
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      position: sticky;
-      top: 0;
-      height: 100vh;
-      overflow-y: auto;
+      width: 220px; flex-shrink: 0;
+      background: var(--s1); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      position: sticky; top: 0; height: 100vh; overflow-y: auto;
     }
-
     .logo {
-      padding: 22px 18px 18px;
-      font-size: 17px;
-      font-weight: 700;
-      letter-spacing: -0.4px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      padding: 22px 18px 18px; font-size: 17px; font-weight: 700;
+      letter-spacing: -.4px; display: flex; align-items: center; gap: 8px;
     }
-    .logo-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--accent);
-      flex-shrink: 0;
-    }
+    .logo-dot { width:8px; height:8px; border-radius:50%; background:var(--accent); flex-shrink:0; }
 
     .sb-section { padding: 0 8px 8px; }
     .sb-label {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text3);
-      padding: 10px 8px 4px;
+      font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--text3); padding: 10px 8px 4px;
     }
-
     .sb-btn {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      width: 100%;
-      background: none;
-      border: none;
-      color: var(--text2);
-      padding: 7px 10px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 13px;
-      text-align: left;
-      transition: background 0.15s, color 0.15s;
+      display: flex; align-items: center; gap: 8px; width: 100%;
+      background: none; border: none; color: var(--text2);
+      padding: 7px 10px; border-radius: 8px; cursor: pointer;
+      font-size: 13px; text-align: left; transition: background .15s, color .15s;
     }
     .sb-btn:hover  { background: var(--s2); color: var(--text); }
     .sb-btn.active { background: rgba(201,169,110,.13); color: var(--accent); }
     .sb-btn .icon  { width: 18px; text-align: center; font-size: 14px; flex-shrink: 0; }
     .sb-count {
-      margin-left: auto;
-      font-size: 11px;
-      color: var(--text3);
-      background: var(--s3);
-      padding: 1px 7px;
-      border-radius: 20px;
-      min-width: 22px;
-      text-align: center;
+      margin-left: auto; font-size: 11px; color: var(--text3);
+      background: var(--s3); padding: 1px 7px; border-radius: 20px; min-width: 22px; text-align: center;
     }
-
     .sb-divider { height: 1px; background: var(--border); margin: 6px 8px; }
+    .sb-bottom { margin-top: auto; padding: 12px 8px; border-top: 1px solid var(--border); }
 
-    .sb-bottom {
-      margin-top: auto;
-      padding: 12px 8px;
-      border-top: 1px solid var(--border);
-    }
-
-    /* ── Main area ──────────────────────────────── */
+    /* ── Main area ── */
     .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-
     .topbar {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 24px;
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      background: var(--bg);
-      z-index: 20;
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 24px; border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; background: var(--bg); z-index: 20;
     }
-
     .search-wrap { flex: 1; max-width: 420px; position: relative; }
-    .search-wrap svg {
-      position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
-      opacity: .4; pointer-events: none;
-    }
+    .search-wrap svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); opacity: .4; pointer-events: none; }
     #search {
-      width: 100%;
-      background: var(--s2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px 12px 8px 34px;
-      color: var(--text);
-      font-size: 13px;
-      outline: none;
-      transition: border-color .2s;
+      width: 100%; background: var(--s2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 12px 8px 34px; color: var(--text);
+      font-size: 13px; outline: none; transition: border-color .2s;
     }
     #search:focus { border-color: var(--accent); }
     #search::placeholder { color: var(--text3); }
-
     .topbar-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
-
     .btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      border: none; border-radius: 8px; cursor: pointer;
-      font-size: 13px; font-weight: 500; padding: 8px 14px;
-      transition: opacity .15s, background .15s;
+      display: inline-flex; align-items: center; gap: 6px; border: none;
+      border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500;
+      padding: 8px 14px; transition: opacity .15s, background .15s;
     }
     .btn-primary { background: var(--accent); color: #1a1206; font-weight: 700; }
     .btn-primary:hover { opacity: .88; }
-    .btn-ghost {
-      background: var(--s2); color: var(--text2);
-      border: 1px solid var(--border);
-    }
+    .btn-ghost { background: var(--s2); color: var(--text2); border: 1px solid var(--border); }
     .btn-ghost:hover { background: var(--s3); color: var(--text); }
+    .btn-danger { background: #c0314f; color: #fff; }
+    .btn-danger:hover { opacity: .88; }
 
     .content { padding: 24px; flex: 1; }
-
-    .page-head {
-      display: flex; align-items: baseline; gap: 10px;
-      margin-bottom: 18px;
-    }
+    .page-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 18px; }
     .page-title { font-size: 19px; font-weight: 700; }
     .page-count { font-size: 13px; color: var(--text3); }
 
-    /* ── Cards ──────────────────────────────────── */
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 12px;
-    }
-
+    /* ── Notes grid ── */
+    .grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(280px,1fr)); gap: 12px; }
     .card {
-      background: var(--s1);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px;
-      cursor: pointer;
-      transition: border-color .2s, transform .15s, box-shadow .2s;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+      background: var(--s1); border: 1px solid var(--border); border-radius: var(--r);
+      padding: 16px; cursor: pointer; transition: border-color .2s, transform .15s, box-shadow .2s;
+      position: relative; display: flex; flex-direction: column; gap: 8px;
       border-left: 3px solid transparent;
     }
-    .card:hover {
-      border-color: var(--border2);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0,0,0,.35);
-    }
-
+    .card:hover { border-color: var(--border2); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.35); }
     .card-top { display: flex; align-items: center; gap: 6px; }
-    .card-cat-label {
-      font-size: 10px; font-weight: 700;
-      letter-spacing: .08em; text-transform: uppercase;
-    }
+    .card-cat-label { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
     .card-pin { margin-left: auto; font-size: 12px; opacity: .5; }
     .card-date { font-size: 11px; color: var(--text3); margin-left: auto; }
-
     .card-title { font-size: 14px; font-weight: 600; line-height: 1.4; }
-
     .card-body {
       font-size: 12.5px; color: var(--text2); line-height: 1.55;
-      display: -webkit-box; -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical; overflow: hidden;
-      flex: 1;
+      display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+      overflow: hidden; flex: 1;
     }
-
     .card-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
     .tag {
-      font-size: 11px; color: var(--text3);
-      background: var(--s3); border-radius: 5px;
-      padding: 2px 7px; cursor: pointer;
+      font-size: 11px; color: var(--text3); background: var(--s3);
+      border-radius: 5px; padding: 2px 7px; cursor: pointer;
       transition: color .15s, background .15s;
     }
     .tag:hover { color: var(--accent); background: var(--s2); }
-
-    .card-actions {
-      display: flex; gap: 4px; margin-top: 4px;
-      opacity: 0; transition: opacity .15s;
-    }
+    .card-actions { display: flex; gap: 4px; margin-top: 4px; opacity: 0; transition: opacity .15s; }
     .card:hover .card-actions { opacity: 1; }
-
     .card-btn {
-      background: var(--s3); border: none; border-radius: 6px;
-      color: var(--text3); font-size: 12px; padding: 4px 9px;
-      cursor: pointer; transition: color .15s, background .15s;
+      background: var(--s3); border: none; border-radius: 6px; color: var(--text3);
+      font-size: 12px; padding: 4px 9px; cursor: pointer; transition: color .15s, background .15s;
     }
     .card-btn:hover { background: var(--border2); color: var(--text); }
     .card-btn.del:hover { color: #e05577; }
 
-    /* ── Empty ──────────────────────────────────── */
+    /* ── Empty ── */
     .empty {
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
+      flex-direction: column; align-items: center; justify-content: center;
       padding: 80px 20px; color: var(--text3); text-align: center; gap: 10px;
     }
     .empty-icon { font-size: 38px; }
     .empty-text { font-size: 15px; }
-    .empty-sub { font-size: 13px; color: var(--text3); }
+    .empty-sub  { font-size: 13px; }
 
-    /* ── Modal base ─────────────────────────────── */
+    /* ════════════════════════════════════════════════════
+       СЕМЬЯ — мини-страница
+    ════════════════════════════════════════════════════ */
+    #family-page {
+      display: none;
+      flex-direction: column;
+      flex: 1;
+      min-width: 0;
+    }
+    #family-page.visible { display: flex; }
+
+    .fam-topbar {
+      display: flex; align-items: center; gap: 12px;
+      padding: 16px 24px; border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; background: var(--bg); z-index: 20;
+    }
+    .fam-title { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .fam-title span { color: var(--text3); font-size: 13px; font-weight: 400; }
+
+    .fam-content { padding: 20px 24px; flex: 1; }
+
+    /* Boards grid */
+    .boards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 14px;
+      align-items: start;
+    }
+
+    /* Single board */
+    .board {
+      background: var(--s1); border: 1px solid var(--border);
+      border-radius: 14px; display: flex; flex-direction: column; overflow: hidden;
+    }
+
+    .board-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 14px 16px 10px; border-bottom: 1px solid var(--border);
+    }
+    .board-icon { font-size: 16px; }
+    .board-name { font-size: 13.5px; font-weight: 700; flex: 1; }
+    .board-count { font-size: 11px; color: var(--text3); }
+    .board-add {
+      background: none; border: none; color: var(--text3);
+      font-size: 18px; cursor: pointer; padding: 0 2px; line-height: 1;
+      transition: color .15s;
+    }
+    .board-add:hover { color: var(--accent); }
+
+    /* Item list */
+    .board-list { padding: 8px; display: flex; flex-direction: column; gap: 2px; }
+
+    .fam-item {
+      display: flex; align-items: flex-start; gap: 8px;
+      padding: 7px 8px; border-radius: 8px;
+      transition: background .15s; group: true;
+    }
+    .fam-item:hover { background: var(--s2); }
+
+    /* checkbox */
+    .fam-cb {
+      width: 16px; height: 16px; border-radius: 4px;
+      border: 1.5px solid var(--border2); background: none;
+      flex-shrink: 0; cursor: pointer; margin-top: 1px;
+      appearance: none; -webkit-appearance: none;
+      transition: background .15s, border-color .15s;
+      position: relative;
+    }
+    .fam-cb:checked {
+      background: var(--accent); border-color: var(--accent);
+    }
+    .fam-cb:checked::after {
+      content: '';
+      position: absolute; left: 4px; top: 1.5px;
+      width: 5px; height: 8px;
+      border: 2px solid #1a1206; border-top: none; border-left: none;
+      transform: rotate(45deg);
+    }
+
+    .fam-text {
+      flex: 1; font-size: 13.5px; color: var(--text);
+      cursor: text; word-break: break-word; line-height: 1.45;
+    }
+    .fam-text.done { color: var(--text3); text-decoration: line-through; }
+
+    .fam-del {
+      background: none; border: none; color: transparent;
+      font-size: 13px; cursor: pointer; padding: 0; line-height: 1;
+      transition: color .15s; flex-shrink: 0;
+    }
+    .fam-item:hover .fam-del { color: var(--text3); }
+    .fam-item:hover .fam-del:hover { color: #e05577; }
+
+    /* Add row */
+    .board-input-row {
+      padding: 6px 8px 10px; display: flex; gap: 6px; align-items: center;
+    }
+    .board-input {
+      flex: 1; background: var(--s2); border: 1px solid var(--border);
+      border-radius: 7px; padding: 6px 10px; color: var(--text);
+      font-size: 13px; font-family: inherit; outline: none;
+      transition: border-color .2s;
+    }
+    .board-input:focus { border-color: var(--accent); }
+    .board-input::placeholder { color: var(--text3); }
+    .board-submit {
+      background: var(--s3); border: none; border-radius: 7px;
+      color: var(--text2); width: 28px; height: 28px;
+      cursor: pointer; font-size: 16px; display: flex;
+      align-items: center; justify-content: center;
+      transition: background .15s, color .15s; flex-shrink: 0;
+    }
+    .board-submit:hover { background: var(--accent); color: #1a1206; }
+
+    /* Notes board (special) */
+    .note-item {
+      margin: 0 8px 6px; background: var(--s2);
+      border: 1px solid var(--border); border-radius: 8px;
+      padding: 10px 12px; font-size: 13px; color: var(--text2);
+      line-height: 1.5; position: relative; cursor: default;
+    }
+    .note-item-del {
+      position: absolute; top: 7px; right: 8px;
+      background: none; border: none; color: transparent;
+      font-size: 12px; cursor: pointer; transition: color .15s;
+    }
+    .note-item:hover .note-item-del { color: var(--text3); }
+    .note-item:hover .note-item-del:hover { color: #e05577; }
+
+    .done-section { padding: 4px 8px 2px; }
+    .done-toggle {
+      background: none; border: none; color: var(--text3);
+      font-size: 11px; cursor: pointer; padding: 4px 8px;
+      border-radius: 6px; transition: color .15s;
+    }
+    .done-toggle:hover { color: var(--text2); }
+    .done-list { padding: 2px 8px 6px; }
+
+    /* board accent top bar */
+    .board-accent { height: 3px; }
+
+    /* ── Modals ── */
     .overlay {
       display: none; position: fixed; inset: 0;
       background: rgba(0,0,0,.75); z-index: 100;
@@ -264,62 +292,42 @@
     }
     .overlay.open { display: flex; }
 
-    /* ── Read modal ─────────────────────────────── */
     .read-modal {
-      background: var(--s1);
-      border: 1px solid var(--border2);
-      border-radius: 16px;
-      width: 100%; max-width: 660px; max-height: 88vh;
-      overflow-y: auto; padding: 28px; position: relative;
+      background: var(--s1); border: 1px solid var(--border2);
+      border-radius: 16px; width: 100%; max-width: 660px;
+      max-height: 88vh; overflow-y: auto; padding: 28px; position: relative;
     }
-
     .rm-top { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
     .rm-cat { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
     .rm-date { font-size: 11px; color: var(--text3); margin-left: auto; margin-right: 36px; }
     .rm-title { font-size: 22px; font-weight: 700; line-height: 1.3; margin-bottom: 16px; }
-    .rm-body {
-      color: var(--text2); line-height: 1.75; font-size: 14px;
-      white-space: pre-wrap; word-break: break-word;
-    }
+    .rm-body { color: var(--text2); line-height: 1.75; font-size: 14px; white-space: pre-wrap; word-break: break-word; }
     .rm-body a { color: var(--accent); text-decoration: none; }
     .rm-body a:hover { text-decoration: underline; }
     .rm-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 20px; }
-    .rm-actions {
-      display: flex; gap: 8px; margin-top: 20px;
-      padding-top: 16px; border-top: 1px solid var(--border);
-    }
+    .rm-actions { display: flex; gap: 8px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
 
     .close-btn {
       position: absolute; top: 16px; right: 16px;
       background: var(--s3); border: none; color: var(--text2);
-      width: 28px; height: 28px; border-radius: 7px;
-      cursor: pointer; font-size: 14px;
-      display: flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; border-radius: 7px; cursor: pointer;
+      font-size: 14px; display: flex; align-items: center; justify-content: center;
       transition: background .15s;
     }
     .close-btn:hover { background: var(--border2); color: var(--text); }
 
-    /* ── Form modal ─────────────────────────────── */
     .form-box {
-      background: var(--s1);
-      border: 1px solid var(--border2);
-      border-radius: 16px;
-      width: 100%; max-width: 580px; max-height: 92vh;
-      overflow-y: auto; padding: 26px; position: relative;
+      background: var(--s1); border: 1px solid var(--border2); border-radius: 16px;
+      width: 100%; max-width: 580px; max-height: 92vh; overflow-y: auto;
+      padding: 26px; position: relative;
     }
     .form-title { font-size: 17px; font-weight: 700; margin-bottom: 20px; }
     .fg { margin-bottom: 13px; }
-    .fl {
-      display: block; font-size: 11px; font-weight: 700;
-      letter-spacing: .07em; text-transform: uppercase;
-      color: var(--text3); margin-bottom: 5px;
-    }
+    .fl { display: block; font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--text3); margin-bottom: 5px; }
     .fi, .fs, .fta {
-      width: 100%; background: var(--s2);
-      border: 1px solid var(--border); border-radius: 8px;
-      padding: 9px 12px; color: var(--text);
-      font-size: 13.5px; font-family: inherit;
-      outline: none; transition: border-color .2s;
+      width: 100%; background: var(--s2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 9px 12px; color: var(--text);
+      font-size: 13.5px; font-family: inherit; outline: none; transition: border-color .2s;
     }
     .fi:focus, .fs:focus, .fta:focus { border-color: var(--accent); }
     .fta { min-height: 130px; resize: vertical; line-height: 1.6; }
@@ -329,7 +337,6 @@
     .frow label { font-size: 13px; color: var(--text2); cursor: pointer; }
     .form-actions { display: flex; gap: 8px; margin-top: 18px; justify-content: flex-end; }
 
-    /* ── Confirm modal ──────────────────────────── */
     .confirm-box {
       background: var(--s1); border: 1px solid var(--border2);
       border-radius: 14px; width: 100%; max-width: 340px;
@@ -338,34 +345,27 @@
     .confirm-title { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
     .confirm-sub { font-size: 13px; color: var(--text2); margin-bottom: 20px; }
     .confirm-actions { display: flex; gap: 8px; justify-content: center; }
-    .btn-danger { background: #c0314f; color: #fff; }
-    .btn-danger:hover { opacity: .88; }
 
-    /* ── Toast ──────────────────────────────────── */
+    /* Toast */
     .toast {
       position: fixed; bottom: 22px; right: 22px;
       background: var(--s2); border: 1px solid var(--border2);
       color: var(--text); padding: 11px 16px; border-radius: 10px;
-      font-size: 13px; z-index: 999;
-      box-shadow: 0 4px 20px rgba(0,0,0,.45);
+      font-size: 13px; z-index: 999; box-shadow: 0 4px 20px rgba(0,0,0,.45);
       animation: fadeup .25s ease;
     }
-    @keyframes fadeup {
-      from { opacity: 0; transform: translateY(8px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+    @keyframes fadeup { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 
-    /* ── Scrollbar ──────────────────────────────── */
     ::-webkit-scrollbar { width: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
 
-    /* ── Responsive ─────────────────────────────── */
     @media (max-width: 600px) {
       .sidebar { display: none; }
       .content { padding: 16px; }
-      .topbar { padding: 10px 16px; }
-      .grid { grid-template-columns: 1fr; }
+      .topbar, .fam-topbar { padding: 10px 16px; }
+      .grid, .boards { grid-template-columns: 1fr; }
+      .fam-content { padding: 16px; }
     }
   </style>
 </head>
@@ -378,11 +378,11 @@
 
     <div class="sb-section">
       <div class="sb-label">Обзор</div>
-      <button class="sb-btn active" data-cat="all" onclick="setCat('all',this)">
+      <button class="sb-btn active" data-view="notes" data-cat="all" onclick="switchView('notes');setCat('all',this)">
         <span class="icon">◈</span> Все записи
         <span class="sb-count" id="cnt-all">0</span>
       </button>
-      <button class="sb-btn" data-cat="pinned" onclick="setCat('pinned',this)">
+      <button class="sb-btn" data-view="notes" data-cat="pinned" onclick="switchView('notes');setCat('pinned',this)">
         <span class="icon">📌</span> Закреплённые
         <span class="sb-count" id="cnt-pinned">0</span>
       </button>
@@ -395,15 +395,24 @@
       <div id="sb-cats"></div>
     </div>
 
+    <div class="sb-divider"></div>
+
+    <div class="sb-section">
+      <div class="sb-label">Личное</div>
+      <button class="sb-btn" data-view="family" onclick="switchView('family',this)">
+        <span class="icon">🏠</span> Семья
+      </button>
+    </div>
+
     <div class="sb-bottom">
-      <button class="sb-btn" onclick="exportNotes()" title="Скачать резервную копию">
+      <button class="sb-btn" onclick="exportNotes()">
         <span class="icon">⬇</span> Экспорт
       </button>
     </div>
   </aside>
 
-  <!-- ── Main ── -->
-  <div class="main">
+  <!-- ══ NOTES view ══ -->
+  <div class="main" id="notes-page">
     <div class="topbar">
       <div class="search-wrap">
         <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
@@ -415,7 +424,6 @@
         <button class="btn btn-primary" onclick="openForm()">＋ Добавить</button>
       </div>
     </div>
-
     <div class="content">
       <div class="page-head">
         <div class="page-title" id="page-title">Все записи</div>
@@ -429,9 +437,23 @@
       </div>
     </div>
   </div>
+
+  <!-- ══ FAMILY view ══ -->
+  <div id="family-page">
+    <div class="fam-topbar">
+      <div class="fam-title">🏠 Семья <span id="fam-stats"></span></div>
+      <div style="margin-left:auto;display:flex;gap:8px">
+        <button class="btn btn-ghost" onclick="clearDoneAll()" title="Очистить все выполненные">🧹 Очистить выполненные</button>
+      </div>
+    </div>
+    <div class="fam-content">
+      <div class="boards" id="boards-grid"></div>
+    </div>
+  </div>
+
 </div>
 
-<!-- ── Read overlay ── -->
+<!-- ── Read modal ── -->
 <div class="overlay" id="ov-read" onclick="closeOv('ov-read',event)">
   <div class="read-modal">
     <button class="close-btn" onclick="closeOv('ov-read')">✕</button>
@@ -450,33 +472,16 @@
   </div>
 </div>
 
-<!-- ── Form overlay ── -->
+<!-- ── Form modal ── -->
 <div class="overlay" id="ov-form" onclick="closeOv('ov-form',event)">
   <div class="form-box">
     <button class="close-btn" onclick="closeOv('ov-form')">✕</button>
     <div class="form-title" id="f-modal-title">Новая запись</div>
-
-    <div class="fg">
-      <label class="fl">Заголовок</label>
-      <input class="fi" id="f-title" type="text" placeholder="Название записи…" />
-    </div>
-    <div class="fg">
-      <label class="fl">Категория</label>
-      <select class="fs" id="f-cat"></select>
-    </div>
-    <div class="fg">
-      <label class="fl">Содержимое</label>
-      <textarea class="fta" id="f-body" placeholder="Текст, ссылки, заметки…"></textarea>
-    </div>
-    <div class="fg">
-      <label class="fl">Теги (через запятую)</label>
-      <input class="fi" id="f-tags" type="text" placeholder="дизайн, клиент, важное…" />
-    </div>
-    <div class="fg frow">
-      <input type="checkbox" id="f-pin" />
-      <label for="f-pin">Закрепить</label>
-    </div>
-
+    <div class="fg"><label class="fl">Заголовок</label><input class="fi" id="f-title" type="text" placeholder="Название записи…" /></div>
+    <div class="fg"><label class="fl">Категория</label><select class="fs" id="f-cat"></select></div>
+    <div class="fg"><label class="fl">Содержимое</label><textarea class="fta" id="f-body" placeholder="Текст, ссылки, заметки…"></textarea></div>
+    <div class="fg"><label class="fl">Теги (через запятую)</label><input class="fi" id="f-tags" type="text" placeholder="дизайн, клиент, важное…" /></div>
+    <div class="fg frow"><input type="checkbox" id="f-pin" /><label for="f-pin">Закрепить</label></div>
     <div class="form-actions">
       <button class="btn btn-ghost" onclick="closeOv('ov-form')">Отмена</button>
       <button class="btn btn-primary" onclick="submitForm()">Сохранить</button>
@@ -484,7 +489,7 @@
   </div>
 </div>
 
-<!-- ── Confirm overlay ── -->
+<!-- ── Confirm modal ── -->
 <div class="overlay" id="ov-confirm" onclick="closeOv('ov-confirm',event)">
   <div class="confirm-box">
     <div class="confirm-title">Удалить запись?</div>
@@ -497,96 +502,113 @@
 </div>
 
 <script>
-// ── Categories ───────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════
+//  NOTES section
+// ════════════════════════════════════════════════════════════
 const CATS = [
-  { id:'work',      label:'Работа',        icon:'💼', color:'#c9a96e' },
-  { id:'clients',   label:'Клиенты',       icon:'🤝', color:'#9b7fe8' },
-  { id:'templates', label:'Шаблоны',       icon:'📄', color:'#5eaee0' },
-  { id:'ideas',     label:'Идеи',          icon:'💡', color:'#e07b50' },
+  { id:'work',      label:'Работа',       icon:'💼', color:'#c9a96e' },
+  { id:'clients',   label:'Клиенты',      icon:'🤝', color:'#9b7fe8' },
+  { id:'templates', label:'Шаблоны',      icon:'📄', color:'#5eaee0' },
+  { id:'ideas',     label:'Идеи',         icon:'💡', color:'#e07b50' },
   { id:'learn',     label:'Учёба / Инфо', icon:'📚', color:'#5bbf7a' },
-  { id:'links',     label:'Ссылки',        icon:'🔗', color:'#e05577' },
-  { id:'notes',     label:'Заметки',       icon:'🗒️', color:'#8e8ea0' },
-  { id:'misc',      label:'Разное',        icon:'🗃️', color:'#55556a' },
+  { id:'links',     label:'Ссылки',       icon:'🔗', color:'#e05577' },
+  { id:'notes',     label:'Заметки',      icon:'🗒️', color:'#8e8ea0' },
+  { id:'misc',      label:'Разное',       icon:'🗃️', color:'#55556a' },
 ];
 
-// ── Default seed notes ───────────────────────────────────────
-const SEED = [
-  {
-    id:1, cat:'notes', pin:true, tags:['старт'],
-    created:'2025-01-01',
+const SEED_NOTES = [
+  { id:1, cat:'notes', pin:true, tags:['старт'], created:'2025-01-01',
     title:'Добро пожаловать в MyBook!',
     body:`Это твоя личная база знаний ✨
 
 Как пользоваться:
 • Кнопка "＋ Добавить" — новая запись
-• Кликни на карточку — читать полный текст
-• Поиск вверху (или клавиша "/") — по заголовку, тексту и тегам
-• Слева — фильтр по категориям
-• Теги кликабельны — фильтрует по тегу
+• Кликни карточку — читать полный текст
+• Поиск вверху (или "/") — по заголовку, тексту, тегам
+• Слева — фильтр по категориям и раздел Семья
+• Теги кликабельны (фильтр по тегу)
 
 На карточке при наведении:
-  ✏️ Изменить  🗑 Удалить
-
-Всё сохраняется в браузере автоматически.`,
-  },
-  {
-    id:2, cat:'templates', pin:false, tags:['клиент','шаблон'],
-    created:'2025-01-01',
+  ✏️ Изменить  🗑 Удалить  📌 Закрепить` },
+  { id:2, cat:'templates', pin:false, tags:['клиент','шаблон'], created:'2025-01-01',
     title:'Шаблон ответа клиенту',
     body:`Привет! Спасибо за обращение 🙏
 
-Я ознакомилась с твоей идеей. Чтобы рассчитать стоимость и время, мне нужно уточнить:
+Я ознакомилась с твоей идеей. Чтобы рассчитать стоимость и время, нужно уточнить:
 
 1. Размер и место на теле
 2. Цвет или чёрно-белая?
 3. Примеры референсов (если есть)
 4. Примерная дата, когда хочешь записаться
 
-Жду ответа, чтобы всё посчитать ✨`,
-  },
-  {
-    id:3, cat:'ideas', pin:false, tags:['идея','коллаб'],
-    created:'2025-01-01',
+Жду ответа, чтобы всё посчитать ✨` },
+  { id:3, cat:'ideas', pin:false, tags:['идея','коллаб'], created:'2025-01-01',
     title:'Идея: коллаб с фотографом',
-    body:`Сделать совместную съёмку — готовые тату + атмосферные кадры.
-
+    body:`Совместная съёмка — готовые тату + атмосферные кадры.
 Продвигать оба аккаунта.
-Договориться на взаимовыгодной основе.
-
-Найти фотографа в теме dark / minimal.`,
-  },
+Найти фотографа в теме dark / minimal.` },
 ];
 
-// ── Storage ──────────────────────────────────────────────────
-const KEY = 'mybook_v2';
+const NOTES_KEY = 'mybook_v2';
 let NOTES = [];
+let activeCat = 'all', activeTag = null, editingId = null, readingId = null;
 
-function load() {
+function loadNotes() {
   try {
-    const s = localStorage.getItem(KEY);
-    NOTES = s ? JSON.parse(s) : JSON.parse(JSON.stringify(SEED));
-    if (!s) save();
-  } catch { NOTES = JSON.parse(JSON.stringify(SEED)); save(); }
+    const s = localStorage.getItem(NOTES_KEY);
+    NOTES = s ? JSON.parse(s) : JSON.parse(JSON.stringify(SEED_NOTES));
+    if (!s) saveNotes();
+  } catch { NOTES = JSON.parse(JSON.stringify(SEED_NOTES)); saveNotes(); }
 }
-function save() { localStorage.setItem(KEY, JSON.stringify(NOTES)); }
+function saveNotes() { localStorage.setItem(NOTES_KEY, JSON.stringify(NOTES)); }
 
-// ── State ────────────────────────────────────────────────────
-let activeCat = 'all';
-let activeTag = null;
-let editingId = null;
-let readingId = null;
+// ════════════════════════════════════════════════════════════
+//  FAMILY section
+// ════════════════════════════════════════════════════════════
+const BOARDS = [
+  { id:'tasks',    label:'Задачи',   icon:'✅', color:'#5bbf7a', type:'check', placeholder:'Добавить задачу…' },
+  { id:'shopping', label:'Покупки',  icon:'🛒', color:'#5eaee0', type:'check', placeholder:'Добавить в список…' },
+  { id:'wishes',   label:'Желания',  icon:'💫', color:'#9b7fe8', type:'check', placeholder:'Добавить желание…' },
+  { id:'todos',    label:'Дела',     icon:'📅', color:'#e07b50', type:'check', placeholder:'Добавить дело…' },
+  { id:'notes',    label:'Заметки',  icon:'🗒️', color:'#8e8ea0', type:'text',  placeholder:'Написать заметку…' },
+];
 
-// ── Init ─────────────────────────────────────────────────────
-function init() {
-  load();
-  buildSidebar();
-  buildCatSelect();
-  render();
+const FAM_KEY = 'mybook_family';
+let FAMILY = {};
+
+function loadFamily() {
+  try {
+    const s = localStorage.getItem(FAM_KEY);
+    FAMILY = s ? JSON.parse(s) : {};
+  } catch { FAMILY = {}; }
+  BOARDS.forEach(b => { if (!FAMILY[b.id]) FAMILY[b.id] = []; });
+  if (!localStorage.getItem(FAM_KEY)) saveFamily();
+}
+function saveFamily() { localStorage.setItem(FAM_KEY, JSON.stringify(FAMILY)); }
+
+// ════════════════════════════════════════════════════════════
+//  View switching
+// ════════════════════════════════════════════════════════════
+let currentView = 'notes';
+
+function switchView(view, btn) {
+  currentView = view;
+  document.getElementById('notes-page').style.display  = view==='notes'  ? 'flex'  : 'none';
+  document.getElementById('family-page').classList.toggle('visible', view==='family');
+
+  if (view==='family') {
+    document.querySelectorAll('.sb-btn').forEach(b=>b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    renderFamily();
+  }
 }
 
+// ════════════════════════════════════════════════════════════
+//  NOTES render
+// ════════════════════════════════════════════════════════════
 function buildSidebar() {
-  document.getElementById('sb-cats').innerHTML = CATS.map(c => `
-    <button class="sb-btn" data-cat="${c.id}" onclick="setCat('${c.id}',this)">
+  document.getElementById('sb-cats').innerHTML = CATS.map(c=>`
+    <button class="sb-btn" data-view="notes" data-cat="${c.id}" onclick="switchView('notes');setCat('${c.id}',this)">
       <span class="icon">${c.icon}</span> ${c.label}
       <span class="sb-count" id="cnt-${c.id}">0</span>
     </button>`).join('');
@@ -594,33 +616,32 @@ function buildSidebar() {
 
 function buildCatSelect() {
   document.getElementById('f-cat').innerHTML =
-    CATS.map(c => `<option value="${c.id}">${c.icon} ${c.label}</option>`).join('');
+    CATS.map(c=>`<option value="${c.id}">${c.icon} ${c.label}</option>`).join('');
 }
 
 function updateCounts() {
   document.getElementById('cnt-all').textContent    = NOTES.length;
   document.getElementById('cnt-pinned').textContent = NOTES.filter(n=>n.pin).length;
-  CATS.forEach(c => {
+  CATS.forEach(c=>{
     const el = document.getElementById('cnt-'+c.id);
     if (el) el.textContent = NOTES.filter(n=>n.cat===c.id).length;
   });
 }
 
-// ── Filter + Render ──────────────────────────────────────────
 function setCat(cat, btn) {
-  activeCat = cat; activeTag = null;
+  activeCat=cat; activeTag=null;
   document.querySelectorAll('.sb-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
+  if (btn) btn.classList.add('active');
   const c = CATS.find(x=>x.id===cat);
   document.getElementById('page-title').textContent =
-    cat==='all'    ? 'Все записи'         :
-    cat==='pinned' ? '📌 Закреплённые'   :
+    cat==='all'    ? 'Все записи'       :
+    cat==='pinned' ? '📌 Закреплённые' :
     (c ? c.icon+' '+c.label : 'Все записи');
   render();
 }
 
 function setTag(tag) {
-  activeTag = tag; activeCat = 'all';
+  activeTag=tag; activeCat='all';
   document.querySelectorAll('.sb-btn').forEach(b=>b.classList.remove('active'));
   document.querySelector('[data-cat="all"]').classList.add('active');
   document.getElementById('page-title').textContent = '# '+tag;
@@ -628,44 +649,35 @@ function setTag(tag) {
 }
 
 function render() {
+  if (currentView!=='notes') return;
   const q = document.getElementById('search').value.toLowerCase();
   let list = NOTES.slice();
-
-  if (activeCat==='pinned') list = list.filter(n=>n.pin);
-  else if (activeCat!=='all') list = list.filter(n=>n.cat===activeCat);
-
-  if (activeTag) list = list.filter(n=>n.tags?.includes(activeTag));
-
-  if (q) list = list.filter(n=>
-    n.title.toLowerCase().includes(q) ||
-    (n.body||'').toLowerCase().includes(q) ||
-    n.tags?.some(t=>t.toLowerCase().includes(q))
-  );
-
+  if (activeCat==='pinned') list=list.filter(n=>n.pin);
+  else if (activeCat!=='all') list=list.filter(n=>n.cat===activeCat);
+  if (activeTag) list=list.filter(n=>n.tags?.includes(activeTag));
+  if (q) list=list.filter(n=>
+    n.title.toLowerCase().includes(q)||
+    (n.body||'').toLowerCase().includes(q)||
+    n.tags?.some(t=>t.toLowerCase().includes(q)));
   list.sort((a,b)=>(b.pin?1:0)-(a.pin?1:0));
-
   updateCounts();
 
-  const grid  = document.getElementById('grid');
-  const empty = document.getElementById('empty');
-
+  const grid=document.getElementById('grid'), empty=document.getElementById('empty');
   document.getElementById('page-count').textContent =
     list.length ? list.length+' '+plural(list.length,'запись','записи','записей') : '';
 
   if (!list.length) { grid.innerHTML=''; empty.style.display='flex'; return; }
-  empty.style.display = 'none';
+  empty.style.display='none';
 
-  grid.innerHTML = list.map(n => {
-    const c = CATS.find(x=>x.id===n.cat)||{icon:'',label:'',color:'#555'};
-    const tags = (n.tags||[]).map(t=>
-      `<span class="tag" onclick="event.stopPropagation();setTag('${esc(t)}')">#${esc(t)}</span>`
-    ).join('');
-    const date = n.created ? fmtDate(n.created) : '';
+  grid.innerHTML = list.map(n=>{
+    const c=CATS.find(x=>x.id===n.cat)||{icon:'',label:'',color:'#555'};
+    const tags=(n.tags||[]).map(t=>
+      `<span class="tag" onclick="event.stopPropagation();setTag('${esc(t)}')">#${esc(t)}</span>`).join('');
     return `<div class="card" style="border-left-color:${c.color}" onclick="openRead(${n.id})">
       <div class="card-top">
         <span class="card-cat-label" style="color:${c.color}">${c.icon} ${c.label}</span>
         ${n.pin?'<span class="card-pin">📌</span>':''}
-        <span class="card-date">${date}</span>
+        <span class="card-date">${n.created?fmtDate(n.created):''}</span>
       </div>
       <div class="card-title">${esc(n.title)}</div>
       <div class="card-body">${esc(n.body||'')}</div>
@@ -674,8 +686,8 @@ function render() {
         <button class="card-btn" onclick="openForm(${n.id})">✏️ Изменить</button>
         <button class="card-btn del" onclick="confirmDelete(${n.id})">🗑 Удалить</button>
         ${n.pin
-          ? `<button class="card-btn" onclick="togglePin(${n.id})">📌 Открепить</button>`
-          : `<button class="card-btn" onclick="togglePin(${n.id})">📌 Закрепить</button>`}
+          ?`<button class="card-btn" onclick="togglePin(${n.id})">📌 Открепить</button>`
+          :`<button class="card-btn" onclick="togglePin(${n.id})">📌 Закрепить</button>`}
       </div>
     </div>`;
   }).join('');
@@ -683,157 +695,231 @@ function render() {
 
 // ── Read modal ───────────────────────────────────────────────
 function openRead(id) {
-  const n = NOTES.find(x=>x.id===id);
-  if (!n) return;
-  readingId = id;
-  const c = CATS.find(x=>x.id===n.cat)||{icon:'',label:'',color:'#555'};
-  document.getElementById('rm-cat').textContent = c.icon+' '+c.label;
-  document.getElementById('rm-cat').style.color = c.color;
-  document.getElementById('rm-date').textContent = n.created ? fmtDate(n.created) : '';
-  document.getElementById('rm-title').textContent = n.title;
-  document.getElementById('rm-body').innerHTML = linkify(esc(n.body||''));
-  document.getElementById('rm-tags').innerHTML = (n.tags||[])
+  const n=NOTES.find(x=>x.id===id); if (!n) return;
+  readingId=id;
+  const c=CATS.find(x=>x.id===n.cat)||{icon:'',label:'',color:'#555'};
+  document.getElementById('rm-cat').textContent=c.icon+' '+c.label;
+  document.getElementById('rm-cat').style.color=c.color;
+  document.getElementById('rm-date').textContent=n.created?fmtDate(n.created):'';
+  document.getElementById('rm-title').textContent=n.title;
+  document.getElementById('rm-body').innerHTML=linkify(esc(n.body||''));
+  document.getElementById('rm-tags').innerHTML=(n.tags||[])
     .map(t=>`<span class="tag" onclick="setTag('${esc(t)}');closeOv('ov-read')">#${esc(t)}</span>`).join('');
-  document.getElementById('rm-edit-btn').onclick = ()=>{ closeOv('ov-read'); openForm(id); };
-  document.getElementById('rm-del-btn').onclick  = ()=>{ closeOv('ov-read'); confirmDelete(id); };
+  document.getElementById('rm-edit-btn').onclick=()=>{ closeOv('ov-read'); openForm(id); };
+  document.getElementById('rm-del-btn').onclick =()=>{ closeOv('ov-read'); confirmDelete(id); };
   openOv('ov-read');
 }
-
 function copyContent() {
-  const n = NOTES.find(x=>x.id===readingId);
-  if (!n) return;
-  navigator.clipboard?.writeText(n.body||'');
-  toast('📋 Скопировано');
+  const n=NOTES.find(x=>x.id===readingId); if (!n) return;
+  navigator.clipboard?.writeText(n.body||''); toast('📋 Скопировано');
 }
 
 // ── Form modal ───────────────────────────────────────────────
 function openForm(id) {
-  editingId = id || null;
-  document.getElementById('f-modal-title').textContent = id ? 'Изменить запись' : 'Новая запись';
+  editingId=id||null;
+  document.getElementById('f-modal-title').textContent=id?'Изменить запись':'Новая запись';
   if (id) {
-    const n = NOTES.find(x=>x.id===id);
-    if (!n) return;
-    document.getElementById('f-title').value = n.title;
-    document.getElementById('f-cat').value   = n.cat;
-    document.getElementById('f-body').value  = n.body||'';
-    document.getElementById('f-tags').value  = (n.tags||[]).join(', ');
-    document.getElementById('f-pin').checked = !!n.pin;
+    const n=NOTES.find(x=>x.id===id); if (!n) return;
+    document.getElementById('f-title').value=n.title;
+    document.getElementById('f-cat').value=n.cat;
+    document.getElementById('f-body').value=n.body||'';
+    document.getElementById('f-tags').value=(n.tags||[]).join(', ');
+    document.getElementById('f-pin').checked=!!n.pin;
   } else {
-    document.getElementById('f-title').value = '';
-    document.getElementById('f-cat').value   = CATS[0].id;
-    document.getElementById('f-body').value  = '';
-    document.getElementById('f-tags').value  = '';
-    document.getElementById('f-pin').checked = false;
+    document.getElementById('f-title').value='';
+    document.getElementById('f-cat').value=CATS[0].id;
+    document.getElementById('f-body').value='';
+    document.getElementById('f-tags').value='';
+    document.getElementById('f-pin').checked=false;
   }
   openOv('ov-form');
-  setTimeout(()=>document.getElementById('f-title').focus(), 80);
+  setTimeout(()=>document.getElementById('f-title').focus(),80);
 }
-
 function submitForm() {
-  const title = document.getElementById('f-title').value.trim();
+  const title=document.getElementById('f-title').value.trim();
   if (!title) { document.getElementById('f-title').focus(); return; }
-  const tags = document.getElementById('f-tags').value
-    .split(',').map(t=>t.trim()).filter(Boolean);
-
+  const tags=document.getElementById('f-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
   if (editingId) {
-    const n = NOTES.find(x=>x.id===editingId);
-    if (n) {
-      n.title = title;
-      n.cat   = document.getElementById('f-cat').value;
-      n.body  = document.getElementById('f-body').value;
-      n.tags  = tags;
-      n.pin   = document.getElementById('f-pin').checked;
-    }
+    const n=NOTES.find(x=>x.id===editingId);
+    if (n) { n.title=title; n.cat=document.getElementById('f-cat').value;
+      n.body=document.getElementById('f-body').value; n.tags=tags;
+      n.pin=document.getElementById('f-pin').checked; }
     toast('✅ Изменено');
   } else {
-    const maxId = NOTES.reduce((m,n)=>Math.max(m,n.id),0);
-    NOTES.unshift({
-      id: maxId+1,
-      title,
-      cat:  document.getElementById('f-cat').value,
-      body: document.getElementById('f-body').value,
-      tags,
-      pin:  document.getElementById('f-pin').checked,
-      created: new Date().toISOString().slice(0,10),
-    });
+    NOTES.unshift({ id:NOTES.reduce((m,n)=>Math.max(m,n.id),0)+1, title,
+      cat:document.getElementById('f-cat').value, body:document.getElementById('f-body').value,
+      tags, pin:document.getElementById('f-pin').checked, created:today() });
     toast('✅ Сохранено');
   }
-  save(); render(); closeOv('ov-form');
+  saveNotes(); render(); closeOv('ov-form');
 }
 
-// ── Delete ───────────────────────────────────────────────────
 function confirmDelete(id) {
-  document.getElementById('confirm-ok').onclick = () => {
-    NOTES = NOTES.filter(n=>n.id!==id);
-    save(); render(); closeOv('ov-confirm');
-    toast('🗑 Удалено');
+  document.getElementById('confirm-ok').onclick=()=>{
+    NOTES=NOTES.filter(n=>n.id!==id); saveNotes(); render(); closeOv('ov-confirm'); toast('🗑 Удалено');
   };
   openOv('ov-confirm');
 }
-
-// ── Pin ──────────────────────────────────────────────────────
 function togglePin(id) {
-  const n = NOTES.find(x=>x.id===id);
-  if (n) { n.pin = !n.pin; save(); render(); toast(n.pin ? '📌 Закреплено' : 'Откреплено'); }
+  const n=NOTES.find(x=>x.id===id);
+  if (n) { n.pin=!n.pin; saveNotes(); render(); toast(n.pin?'📌 Закреплено':'Откреплено'); }
 }
-
-// ── Export ───────────────────────────────────────────────────
 function exportNotes() {
-  const blob = new Blob([JSON.stringify(NOTES, null, 2)], {type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'mybook-backup-'+new Date().toISOString().slice(0,10)+'.json';
-  a.click();
+  const blob=new Blob([JSON.stringify(NOTES,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='mybook-backup-'+today()+'.json'; a.click();
 }
 
-// ── Overlay helpers ──────────────────────────────────────────
-function openOv(id) { document.getElementById(id).classList.add('open'); }
-function closeOv(id, e) {
-  if (e && e.target !== document.getElementById(id)) return;
-  document.getElementById(id).classList.remove('open');
-}
-
-// ── Toast ────────────────────────────────────────────────────
-function toast(msg) {
-  const t = document.createElement('div');
-  t.className = 'toast'; t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity .3s';
-    setTimeout(()=>t.remove(), 300); }, 2200);
-}
-
-// ── Utils ────────────────────────────────────────────────────
-function esc(s) {
-  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-function linkify(s) {
-  return s.replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>');
-}
-function fmtDate(iso) {
-  const d = new Date(iso);
-  return d.toLocaleDateString('ru-RU',{day:'numeric',month:'short',year:'numeric'});
-}
-function plural(n, one, few, many) {
-  const m = n%10, h = n%100;
-  if (m===1&&h!==11) return one;
-  if (m>=2&&m<=4&&(h<10||h>=20)) return few;
-  return many;
-}
-
-// ── Keyboard ─────────────────────────────────────────────────
-document.addEventListener('keydown', e => {
-  if (e.key==='Escape') ['ov-read','ov-form','ov-confirm'].forEach(id=>{
-    document.getElementById(id).classList.remove('open');
+// ════════════════════════════════════════════════════════════
+//  FAMILY render
+// ════════════════════════════════════════════════════════════
+function renderFamily() {
+  // stats
+  let total=0, done=0;
+  BOARDS.filter(b=>b.type==='check').forEach(b=>{
+    total += FAMILY[b.id].length;
+    done  += FAMILY[b.id].filter(i=>i.done).length;
   });
-  if (e.key==='/' && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) {
-    e.preventDefault(); document.getElementById('search').focus();
-  }
-  if ((e.ctrlKey||e.metaKey) && e.key==='k') {
-    e.preventDefault(); document.getElementById('search').focus();
+  document.getElementById('fam-stats').textContent =
+    total ? `${done} / ${total} выполнено` : '';
+
+  document.getElementById('boards-grid').innerHTML = BOARDS.map(b=>renderBoard(b)).join('');
+}
+
+function renderBoard(b) {
+  const items = FAMILY[b.id] || [];
+  if (b.type==='text') return renderTextBoard(b, items);
+
+  const active = items.filter(i=>!i.done);
+  const doneItems = items.filter(i=>i.done);
+
+  const activeHTML = active.map(i=>itemRow(b.id, i)).join('');
+  const doneHTML   = doneItems.length
+    ? `<div class="done-section">
+        <button class="done-toggle" onclick="toggleDoneSection('${b.id}')">
+          ▸ Выполнено (${doneItems.length})
+        </button>
+        <div class="done-list" id="done-${b.id}" style="display:none">
+          ${doneItems.map(i=>itemRow(b.id,i)).join('')}
+        </div>
+      </div>` : '';
+
+  return `<div class="board">
+    <div class="board-accent" style="background:${b.color}"></div>
+    <div class="board-header">
+      <span class="board-icon">${b.icon}</span>
+      <span class="board-name">${b.label}</span>
+      <span class="board-count">${active.length}</span>
+      <button class="board-add" onclick="focusBoardInput('inp-${b.id}')" title="Добавить">＋</button>
+    </div>
+    <div class="board-list">${activeHTML}</div>
+    ${doneHTML}
+    <div class="board-input-row">
+      <input class="board-input" id="inp-${b.id}" placeholder="${b.placeholder}"
+        onkeydown="if(event.key==='Enter')addFamItem('${b.id}',this)" />
+      <button class="board-submit" onclick="addFamItem('${b.id}',document.getElementById('inp-${b.id}'))">↵</button>
+    </div>
+  </div>`;
+}
+
+function itemRow(boardId, item) {
+  return `<div class="fam-item" id="fi-${boardId}-${item.id}">
+    <input type="checkbox" class="fam-cb" ${item.done?'checked':''} onchange="toggleFamItem('${boardId}',${item.id})" />
+    <span class="fam-text ${item.done?'done':''}">${esc(item.text)}</span>
+    <button class="fam-del" onclick="deleteFamItem('${boardId}',${item.id})">✕</button>
+  </div>`;
+}
+
+function renderTextBoard(b, items) {
+  const notesHTML = items.map(i=>`
+    <div class="note-item" id="fn-${b.id}-${i.id}">
+      ${esc(i.text)}
+      <button class="note-item-del" onclick="deleteFamItem('${b.id}',${i.id})">✕</button>
+    </div>`).join('');
+
+  return `<div class="board">
+    <div class="board-accent" style="background:${b.color}"></div>
+    <div class="board-header">
+      <span class="board-icon">${b.icon}</span>
+      <span class="board-name">${b.label}</span>
+      <span class="board-count">${items.length}</span>
+      <button class="board-add" onclick="focusBoardInput('inp-${b.id}')" title="Добавить">＋</button>
+    </div>
+    ${notesHTML}
+    <div class="board-input-row">
+      <input class="board-input" id="inp-${b.id}" placeholder="${b.placeholder}"
+        onkeydown="if(event.key==='Enter')addFamItem('${b.id}',this)" />
+      <button class="board-submit" onclick="addFamItem('${b.id}',document.getElementById('inp-${b.id}'))">↵</button>
+    </div>
+  </div>`;
+}
+
+// ── Family actions ────────────────────────────────────────────
+function addFamItem(boardId, input) {
+  const text = input.value.trim(); if (!text) return;
+  const items = FAMILY[boardId];
+  const maxId = items.reduce((m,i)=>Math.max(m,i.id),0);
+  items.push({ id:maxId+1, text, done:false });
+  saveFamily(); input.value=''; renderFamily();
+}
+
+function toggleFamItem(boardId, id) {
+  const item = FAMILY[boardId].find(i=>i.id===id);
+  if (item) { item.done=!item.done; saveFamily(); renderFamily(); }
+}
+
+function deleteFamItem(boardId, id) {
+  FAMILY[boardId] = FAMILY[boardId].filter(i=>i.id!==id);
+  saveFamily(); renderFamily();
+}
+
+function toggleDoneSection(boardId) {
+  const el = document.getElementById('done-'+boardId);
+  if (!el) return;
+  const btn = el.previousElementSibling;
+  if (el.style.display==='none') { el.style.display='block'; btn.textContent=btn.textContent.replace('▸','▾'); }
+  else                           { el.style.display='none';  btn.textContent=btn.textContent.replace('▾','▸'); }
+}
+
+function clearDoneAll() {
+  BOARDS.filter(b=>b.type==='check').forEach(b=>{
+    FAMILY[b.id] = FAMILY[b.id].filter(i=>!i.done);
+  });
+  saveFamily(); renderFamily(); toast('🧹 Выполненные удалены');
+}
+
+function focusBoardInput(id) {
+  const el=document.getElementById(id); if(el) el.focus();
+}
+
+// ════════════════════════════════════════════════════════════
+//  Shared utils
+// ════════════════════════════════════════════════════════════
+function openOv(id)  { document.getElementById(id).classList.add('open'); }
+function closeOv(id,e) { if(e&&e.target!==document.getElementById(id)) return; document.getElementById(id).classList.remove('open'); }
+
+function toast(msg) {
+  const t=document.createElement('div'); t.className='toast'; t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity .3s'; setTimeout(()=>t.remove(),300); },2200);
+}
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function linkify(s){ return s.replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>'); }
+function fmtDate(iso){ return new Date(iso).toLocaleDateString('ru-RU',{day:'numeric',month:'short',year:'numeric'}); }
+function today(){ return new Date().toISOString().slice(0,10); }
+function plural(n,one,few,many){ const m=n%10,h=n%100; if(m===1&&h!==11)return one; if(m>=2&&m<=4&&(h<10||h>=20))return few; return many; }
+
+document.addEventListener('keydown', e=>{
+  if (e.key==='Escape') ['ov-read','ov-form','ov-confirm'].forEach(id=>document.getElementById(id).classList.remove('open'));
+  if (e.key==='/'&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)){
+    e.preventDefault(); if(currentView==='notes') document.getElementById('search').focus();
   }
 });
 
-init();
+// ── Boot ─────────────────────────────────────────────────────
+loadNotes(); loadFamily();
+buildSidebar(); buildCatSelect();
+render();
 </script>
 </body>
 </html>
