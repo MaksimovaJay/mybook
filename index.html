@@ -847,7 +847,7 @@ function setupListener(){
 
 async function signInGoogle(){
   document.getElementById('login-err').style.display='none';
-  try{ await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
+  try{ await auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider()); }
   catch(e){ document.getElementById('login-err').style.display='block'; console.error(e); }
 }
 function signOutUser(){ if(_unsubListen){_unsubListen();_unsubListen=null;} familyId=null; auth.signOut(); }
