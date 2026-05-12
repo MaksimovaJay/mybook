@@ -377,6 +377,18 @@
   </style>
 </head>
 <body>
+<!-- ══ LOGIN SCREEN ══ -->
+<div id="login-screen" style="position:fixed;inset:0;background:var(--bg);z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;">
+  <div style="font-size:52px;line-height:1;">📖</div>
+  <div style="font-size:24px;font-weight:700;letter-spacing:-.4px;">MyBook</div>
+  <div style="font-size:14px;color:var(--text2);margin-bottom:8px;">Личная база знаний</div>
+  <button onclick="signInGoogle()" style="display:flex;align-items:center;gap:10px;background:#fff;color:#222;border:none;border-radius:12px;padding:13px 28px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 2px 12px rgba(0,0,0,.3);">
+    <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.34-8.16 2.34-6.26 0-11.57-3.59-13.46-8.83l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+    Войти через Google
+  </button>
+  <div id="login-err" style="font-size:12px;color:#e05577;display:none;">Ошибка входа — попробуй ещё раз</div>
+</div>
+
 <div class="app">
 
   <!-- ══ SIDEBAR (desktop) ══ -->
@@ -446,7 +458,12 @@
     </div>
 
     <div class="sb-bottom">
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 10px 2px;">
+        <img id="user-avatar" width="26" height="26" style="border-radius:50%;display:none;flex-shrink:0;">
+        <span id="user-name" style="font-size:12px;color:var(--text2);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+      </div>
       <button class="sb-btn" onclick="exportAll()"><span>⬇</span> Экспорт</button>
+      <button class="sb-btn" id="signout-btn" style="display:none;" onclick="signOutUser()"><span>🚪</span> Выйти</button>
     </div>
   </aside>
 
@@ -711,7 +728,74 @@
   </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
 <script>
+// ══════════════════════════════════════════════════════════
+//  FIREBASE
+// ══════════════════════════════════════════════════════════
+firebase.initializeApp({
+  apiKey:"AIzaSyBFWM450IARr2gb78oD48pT6f3AkY6tDvI",
+  authDomain:"mybook-6748b.firebaseapp.com",
+  projectId:"mybook-6748b",
+  storageBucket:"mybook-6748b.firebasestorage.app",
+  messagingSenderId:"393438806255",
+  appId:"1:393438806255:web:23b8eedce013483ff49b1a",
+});
+const db   = firebase.firestore();
+const auth = firebase.auth();
+let currentUser=null, _syncTimer=null, _myLastSync=0, _unsubListen=null;
+
+function getDocRef(){ return currentUser?db.collection('users').doc(currentUser.uid).collection('data').doc('all'):null; }
+
+function syncToFirestore(){
+  const ref=getDocRef(); if(!ref) return;
+  clearTimeout(_syncTimer);
+  _syncTimer=setTimeout(async()=>{
+    _myLastSync=Date.now();
+    try{ await ref.set({notes:NOTES,work:WORK,links:LINKS,lcats:LINK_CATS,boards:BOARDS,family:FAMILY,budget:BUDGET,ncats_notes:NOTE_CATS.notes,ncats_work:NOTE_CATS.work,_ts:_myLastSync}); }
+    catch(e){ console.warn('Sync failed:',e); }
+  },800);
+}
+
+function applyFirestoreData(d){
+  if(!d) return;
+  if(d.ncats_notes?.length) NOTE_CATS.notes=d.ncats_notes;
+  if(d.ncats_work?.length)  NOTE_CATS.work=d.ncats_work;
+  if(d.notes)  NOTES=d.notes;
+  if(d.work)   WORK=d.work;
+  if(d.links)  LINKS=d.links;
+  if(d.lcats)  LINK_CATS=d.lcats;
+  if(d.boards) BOARDS=d.boards;
+  if(d.family) FAMILY=d.family;
+  if(d.budget) BUDGET=d.budget;
+  BOARDS=BOARDS.filter(b=>b.id!=='budget');
+  BOARDS.forEach(b=>{ if(!FAMILY[b.id]) FAMILY[b.id]=[]; });
+}
+
+function setupListener(){
+  if(_unsubListen){ _unsubListen(); _unsubListen=null; }
+  const ref=getDocRef(); if(!ref) return;
+  _unsubListen=ref.onSnapshot(snap=>{
+    if(snap.metadata.hasPendingWrites) return;
+    const d=snap.data(); if(!d||d._ts===_myLastSync) return;
+    applyFirestoreData(d);
+    if(curSection==='family') famView==='budget'?renderBudget():renderFamily();
+    else if(curSection==='notes') renderNotes();
+    else if(curSection==='work') renderWork();
+    else if(curSection==='links') renderLinks();
+    toast('🔄 Синхронизировано');
+  });
+}
+
+async function signInGoogle(){
+  document.getElementById('login-err').style.display='none';
+  try{ await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
+  catch(e){ document.getElementById('login-err').style.display='block'; console.error(e); }
+}
+function signOutUser(){ if(_unsubListen){_unsubListen();_unsubListen=null;} auth.signOut(); }
+
 // ══════════════════════════════════════════════════════════
 //  CONFIG
 // ══════════════════════════════════════════════════════════
@@ -739,7 +823,7 @@ const K = {
 
 let BUDGET = [];
 
-function loadAll(){
+async function loadAll(){
   NOTE_CATS = {
     notes: jload('mb_ncats_notes',[
       {id:'ideas', label:'Идеи',         icon:'💡', color:'#e07b50'},
@@ -790,9 +874,15 @@ function loadAll(){
   BUDGET = jload(K.budget, []);
   FAMILY = jload(K.family, {});
   BOARDS.forEach(b=>{ if(!FAMILY[b.id]) FAMILY[b.id]=[]; });
+  // Load from Firestore (overrides localStorage)
+  try{
+    const ref=getDocRef();
+    if(ref){ const snap=await ref.get(); if(snap.exists) applyFirestoreData(snap.data()); }
+  }catch(e){ console.warn('Firestore load failed, using localStorage:',e); }
+  setupListener();
 }
 function jload(key, def){ try{ const s=localStorage.getItem(key); return s?JSON.parse(s):JSON.parse(JSON.stringify(def)); }catch{ return JSON.parse(JSON.stringify(def)); } }
-function jsave(key,val){ localStorage.setItem(key,JSON.stringify(val)); }
+function jsave(key,val){ localStorage.setItem(key,JSON.stringify(val)); syncToFirestore(); }
 
 // ══════════════════════════════════════════════════════════
 //  NAVIGATION
@@ -1521,8 +1611,22 @@ document.addEventListener('keydown',e=>{
 });
 
 // ══ BOOT ══
-loadAll();
-setSection('family');
+auth.onAuthStateChanged(async user=>{
+  if(user){
+    currentUser=user;
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('user-name').textContent=user.displayName||user.email||'';
+    const av=document.getElementById('user-avatar');
+    if(user.photoURL){av.src=user.photoURL;av.style.display='inline-block';}
+    document.getElementById('signout-btn').style.display='flex';
+    await loadAll();
+    setSection('family');
+  } else {
+    currentUser=null;
+    document.getElementById('login-screen').style.display='flex';
+    document.getElementById('signout-btn').style.display='none';
+  }
+});
 </script>
 </body>
 </html>
