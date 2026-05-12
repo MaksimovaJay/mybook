@@ -1368,8 +1368,16 @@ function exportAll(){
 // ══════════════════════════════════════════════════════════
 //  SHARED HELPERS
 // ══════════════════════════════════════════════════════════
+let _ovBackdropDown = false;
+document.addEventListener('pointerdown', e=>{
+  _ovBackdropDown = !!(e.target && e.target.classList.contains('overlay'));
+});
 function openOv(id){ document.getElementById(id).classList.add('open'); }
-function closeOv(id,e){ if(e&&e.target!==document.getElementById(id)) return; document.getElementById(id).classList.remove('open'); }
+function closeOv(id,e){
+  if(e && e.target!==document.getElementById(id)) return;
+  if(e && !_ovBackdropDown) return;
+  document.getElementById(id).classList.remove('open');
+}
 function confirmAction(title,sub,cb){ document.getElementById('cx-title').textContent=title; document.getElementById('cx-sub').textContent=sub||'Это нельзя отменить'; document.getElementById('cx-ok').onclick=()=>{ cb(); closeOv('ov-confirm'); }; openOv('ov-confirm'); }
 function toast(msg){ const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity .3s'; setTimeout(()=>t.remove(),300); },2200); }
 function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
