@@ -808,7 +808,7 @@ async function createFamily(){
   const code=Math.random().toString(36).slice(2,8).toUpperCase();
   try{
     await db.collection('families').doc(code).collection('data').doc('all').set({_created:Date.now()});
-    await db.collection('users').doc(currentUser.uid).set({familyId:code},{merge:true});
+    if(currentUser) await db.collection('users').doc(currentUser.uid).set({familyId:code},{merge:true});
     familyId=code; localStorage.setItem('mb_fid',code);
     document.getElementById('family-setup').style.display='none';
     await loadAll(); setSection('family'); updateFamilyCodeUI();
@@ -830,7 +830,7 @@ async function joinFamily(){
     const fd=await db.collection('families').doc(code).collection('data').doc('all').get();
     if(!fd.exists){err.textContent='Код не найден — проверь правильность';err.style.display='block';return;}
     familyId=code; localStorage.setItem('mb_fid',code);
-    await db.collection('users').doc(currentUser.uid).set({familyId:code},{merge:true});
+    if(currentUser) await db.collection('users').doc(currentUser.uid).set({familyId:code},{merge:true});
     document.getElementById('family-setup').style.display='none';
     await loadAll(); setSection('family'); updateFamilyCodeUI();
   }catch(e){err.textContent='Ошибка соединения';err.style.display='block';}
@@ -1335,7 +1335,7 @@ function openLinkCatForm(catId){
 function submitLinkCat(){
   const name=document.getElementById('lc-name').value.trim(); if(!name){ document.getElementById('lc-name').focus(); return; }
   if(editingLcatId){ const c=LINK_CATS.find(x=>x.id===editingLcatId); if(c){ c.label=name; c.icon=lcSelIcon; } }
-  else { LINK_CATS.push({id:'lc_'+Date.now(),label:name,icon:lcSelIcon}); FAMILY['lc_'+Date.now()]=[];}
+  else { LINK_CATS.push({id:'lc_'+Date.now(),label:name,icon:lcSelIcon}); }
   jsave(K.lcats,LINK_CATS); closeOv('ov-lcat'); renderLinks(); toast('✅ Категория сохранена');
 }
 
