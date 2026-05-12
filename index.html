@@ -321,6 +321,17 @@
     .sw:hover{transform:scale(1.15);}
     .sw.sel{border-color:var(--text);}
 
+    /* Who toggle & badge */
+    .who-btn{flex:1;padding:8px;border-radius:8px;border:1.5px solid var(--border);background:none;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit;}
+    .who-btn.sel-me{background:rgba(201,169,110,.15);border-color:var(--accent);color:var(--accent);}
+    .who-btn.sel-mu{background:rgba(94,174,224,.15);border-color:#5eaee0;color:#5eaee0;}
+    .who-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;flex-shrink:0;}
+    .who-badge.me{background:rgba(201,169,110,.15);color:var(--accent);}
+    .who-badge.mu{background:rgba(94,174,224,.2);color:#5eaee0;}
+    .budget-add-row{display:flex;gap:10px;padding:0 20px 16px;}
+    .btn-income{background:rgba(91,191,122,.15);color:#5bbf7a;border:1.5px solid #5bbf7a;}
+    .btn-income:hover{background:rgba(91,191,122,.28);}
+
     /* Confirm */
     .confirm-box{background:var(--s1);border:1px solid var(--border2);border-radius:14px;width:100%;max-width:320px;padding:22px;text-align:center;}
     .confirm-title{font-size:15px;font-weight:600;margin-bottom:7px;}
@@ -345,6 +356,8 @@
       .tabs{padding:0 14px;}
       .cards-grid,.links-grid,.boards{grid-template-columns:1fr;}
       .toast{bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 10px);}
+      /* prevent iOS zoom on input focus */
+      input,textarea,select,.fi,.fs,.fta,.si,.bi,.board-input{font-size:16px!important;}
     }
   </style>
 </head>
@@ -458,8 +471,9 @@
           <div id="budget-list"></div>
         </div>
         <!-- Add -->
-        <div style="padding:0 20px 16px;">
-          <button class="btn btn-p" style="width:100%" onclick="openFinForm('budget')">＋ Добавить операцию</button>
+        <div class="budget-add-row">
+          <button class="btn btn-d" style="flex:1" onclick="openFinForm('out')">🔴 Расход</button>
+          <button class="btn btn-income" style="flex:1" onclick="openFinForm('in')">💚 Доход</button>
         </div>
       </div>
     </div>
@@ -626,6 +640,13 @@
       <div class="type-toggle">
         <button class="type-btn sel-out" id="ftx-out" onclick="setFinType('out')">🔴 Расход</button>
         <button class="type-btn" id="ftx-in"  onclick="setFinType('in')">💚 Доход</button>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="fl">Кто</label>
+      <div class="type-toggle">
+        <button class="who-btn sel-me" id="ftx-me" onclick="setFinWho('me')">Я</button>
+        <button class="who-btn" id="ftx-mu" onclick="setFinWho('mu')">Муж</button>
       </div>
     </div>
     <div class="fg"><label class="fl">Сумма (₽)</label><input class="fi" id="ftx-amount" type="number" placeholder="0" min="0" inputmode="decimal"/></div>
@@ -1056,12 +1077,14 @@ function renderBudget(){
     const d=new Date(date); const label=d.toLocaleDateString('ru-RU',{day:'numeric',month:'long'});
     const rows=list.map(t=>{
       const parts=t.cat.split(' '); const icon=parts[0]; const catLabel=parts.slice(1).join(' ');
+      const whoBadge=t.who?`<span class="who-badge ${t.who}">${t.who==='me'?'Я':'Муж'}</span>`:'';
       return `<div class="budget-tx-row">
         <div class="budget-tx-ico">${icon}</div>
         <div class="budget-tx-info">
           <div class="budget-tx-cat">${esc(catLabel)}</div>
           ${t.note?`<div class="budget-tx-note">${esc(t.note)}</div>`:''}
         </div>
+        ${whoBadge}
         <div class="budget-tx-right">
           <div class="budget-tx-amt ${t.type==='in'?'fin-in':'fin-out'}">${t.type==='in'?'+':'-'}${fmtMoney(t.amount)} ₽</div>
         </div>
@@ -1141,7 +1164,7 @@ const FIN_CATS = {
   in: ['💼 Зарплата','💻 Фриланс','🎁 Подарок','💰 Другое'],
 };
 
-let finBoardId=null, finTxType='out';
+let finBoardId=null, finTxType='out', finWho='me';
 
 function renderFinanceBoard(b,items){
   const totalIn  = items.filter(t=>t.type==='in' ).reduce((s,t)=>s+t.amount,0);
@@ -1192,16 +1215,24 @@ function renderFinanceBoard(b,items){
   </div>`;
 }
 
-function openFinForm(){
-  finTxType='out';
-  document.getElementById('ftx-out').classList.add('sel-out');
-  document.getElementById('ftx-in').classList.remove('sel-in');
+function openFinForm(type){
+  finTxType=(type==='in'||type==='out')?type:'out';
+  document.getElementById('ftx-out').className='type-btn'+(finTxType==='out'?' sel-out':'');
+  document.getElementById('ftx-in').className='type-btn'+(finTxType==='in'?' sel-in':'');
+  finWho='me';
+  document.getElementById('ftx-me').className='who-btn sel-me';
+  document.getElementById('ftx-mu').className='who-btn';
   document.getElementById('ftx-amount').value='';
   document.getElementById('ftx-note').value='';
   document.getElementById('ftx-date').value=`${budgetYear}-${String(budgetMon+1).padStart(2,'0')}-${String(new Date().getDate()).padStart(2,'0')}`;
   updateFinCats();
   openOv('ov-fin');
   setTimeout(()=>document.getElementById('ftx-amount').focus(),80);
+}
+function setFinWho(who){
+  finWho=who;
+  document.getElementById('ftx-me').className='who-btn'+(who==='me'?' sel-me':'');
+  document.getElementById('ftx-mu').className='who-btn'+(who==='mu'?' sel-mu':'');
 }
 function setFinType(type){
   finTxType=type;
@@ -1215,7 +1246,7 @@ function updateFinCats(){
 function submitFinTx(){
   const amt=parseFloat(document.getElementById('ftx-amount').value.replace(',','.'));
   if(!amt||amt<=0){ document.getElementById('ftx-amount').focus(); return; }
-  BUDGET.push({id:BUDGET.reduce((m,i)=>Math.max(m,i.id),0)+1,type:finTxType,amount:amt,cat:document.getElementById('ftx-cat').value,note:document.getElementById('ftx-note').value.trim(),date:document.getElementById('ftx-date').value||today()});
+  BUDGET.push({id:BUDGET.reduce((m,i)=>Math.max(m,i.id),0)+1,type:finTxType,who:finWho,amount:amt,cat:document.getElementById('ftx-cat').value,note:document.getElementById('ftx-note').value.trim(),date:document.getElementById('ftx-date').value||today()});
   jsave(K.budget,BUDGET); closeOv('ov-fin'); renderBudget(); toast(finTxType==='in'?'💚 Доход добавлен':'🔴 Расход добавлен');
 }
 function fmtMoney(n){ return Math.abs(n).toLocaleString('ru-RU'); }
