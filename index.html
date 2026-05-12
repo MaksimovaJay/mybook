@@ -644,8 +644,8 @@
     <div class="fg">
       <label class="fl">Кто</label>
       <div class="type-toggle">
-        <button class="who-btn sel-me" id="ftx-me" onclick="setFinWho('me')">Я</button>
-        <button class="who-btn" id="ftx-mu" onclick="setFinWho('mu')">Муж</button>
+        <button class="who-btn sel-me" id="ftx-me" onclick="setFinWho('me')">Женя</button>
+        <button class="who-btn" id="ftx-mu" onclick="setFinWho('mu')">Илья</button>
       </div>
     </div>
     <div class="fg"><label class="fl">Сумма (₽)</label><input class="fi" id="ftx-amount" type="number" placeholder="0" min="0" inputmode="decimal"/></div>
@@ -1076,7 +1076,7 @@ function renderBudget(){
     const d=new Date(date); const label=d.toLocaleDateString('ru-RU',{day:'numeric',month:'long'});
     const rows=list.map(t=>{
       const parts=t.cat.split(' '); const icon=parts[0]; const catLabel=parts.slice(1).join(' ');
-      const whoBadge=t.who?`<span class="who-badge ${t.who}">${t.who==='me'?'Я':'Муж'}</span>`:'';
+      const whoBadge=t.who?`<span class="who-badge ${t.who}">${t.who==='me'?'Женя':'Илья'}</span>`:'';
       return `<div class="budget-tx-row">
         <div class="budget-tx-ico">${icon}</div>
         <div class="budget-tx-info">
