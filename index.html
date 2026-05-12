@@ -755,6 +755,23 @@ function loadAll(){
   ]);
   // migrate: remove old budget board if present
   BOARDS = BOARDS.filter(b=>b.id!=='budget');
+  // seed: Бишкек checklist
+  if(!BOARDS.find(b=>b.id==='bishkek')){
+    BOARDS.push({id:'bishkek',label:'Бишкек ✈️',icon:'🧳',color:'#5eaee0',type:'check',placeholder:'Добавить в список...'});
+    FAMILY['bishkek']=[
+      {id:1, text:'Маме духи',                         done:false},
+      {id:2, text:'Марьяше жвачки',                    done:true},
+      {id:3, text:'Маракуя в жидком виде без корочки', done:false},
+      {id:4, text:'Манго (фрукты крч)',                done:false},
+      {id:5, text:'Коляну вонючку или рубашку',        done:true},
+      {id:6, text:'Камиле ?',                          done:false},
+      {id:7, text:'Зажигалку маме две штуки',          done:false},
+      {id:8, text:'Максу зубная щётка',                done:false},
+      {id:9, text:'Максу и Али фотка',                 done:false},
+      {id:10,text:'Черепашку маме',                    done:false},
+    ];
+    jsave(K.boards,BOARDS); jsave(K.family,FAMILY);
+  }
   BUDGET = jload(K.budget, []);
   FAMILY = jload(K.family, {});
   BOARDS.forEach(b=>{ if(!FAMILY[b.id]) FAMILY[b.id]=[]; });
