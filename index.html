@@ -783,6 +783,7 @@ firebase.initializeApp({
 const db   = firebase.firestore();
 const auth = firebase.auth();
 const FBASE = 'https://firestore.googleapis.com/v1/projects/mybook-6748b/databases/(default)/documents';
+const FKEY  = '?key=AIzaSyBFWM450IARr2gb78oD48pT6f3AkY6tDvI';
 let currentUser=null, familyId=null, _syncTimer=null, _myLastSync=0, _unsubListen=null, _pollInterval=null;
 
 function getDocRef(){ return familyId?db.collection('families').doc(familyId).collection('data').doc('all'):null; }
@@ -853,7 +854,7 @@ function syncToFirestore(){
     _myLastSync=Date.now();
     const payload=JSON.stringify({notes:NOTES,work:WORK,links:LINKS,lcats:LINK_CATS,boards:BOARDS,family:FAMILY,budget:BUDGET,ncats_notes:NOTE_CATS.notes,ncats_work:NOTE_CATS.work,_ts:_myLastSync});
     try{
-      await fetch(`${FBASE}/families/${familyId}/data/all`,{
+      await fetch(`${FBASE}/families/${familyId}/data/all${FKEY}`,{
         method:'PATCH',
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({fields:{raw:{stringValue:payload}}})
@@ -880,7 +881,7 @@ function applyFirestoreData(d){
 async function loadFromCloud(){
   if(!familyId) return null;
   try{
-    const resp=await fetch(`${FBASE}/families/${familyId}/data/all`);
+    const resp=await fetch(`${FBASE}/families/${familyId}/data/all${FKEY}`);
     if(!resp.ok) return null;
     const doc=await resp.json();
     const raw=doc.fields?.raw?.stringValue;
