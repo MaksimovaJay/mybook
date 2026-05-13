@@ -783,7 +783,7 @@ firebase.initializeApp({
   appId:"1:393438806255:web:23b8eedce013483ff49b1a",
 });
 const db   = firebase.firestore();
-db.settings({ experimentalAutoDetectLongPolling: true, merge: true });
+try{ db.settings({ experimentalAutoDetectLongPolling: true }); }catch(e){}
 const auth = firebase.auth();
 let currentUser=null, familyId=null, _syncTimer=null, _myLastSync=0, _unsubListen=null, _pollInterval=null;
 
@@ -1320,9 +1320,9 @@ function renderLinks(){
 
   grid.innerHTML=list.map(l=>{
     let domain=''; try{ domain=new URL(l.url).hostname; }catch{}
-    const favUrl=domain?`https://www.google.com/s2/favicons?domain=${domain}&sz=32`:'';
+    const favUrl=domain?`https://${domain}/favicon.ico`:'';
     return `<a class="link-card" href="${esc(l.url)}" target="_blank" rel="noopener">
-      <div class="link-fav">${favUrl?`<img src="${favUrl}" onerror="this.parentElement.textContent='🔗'" />`:'🔗'}</div>
+      <div class="link-fav">${favUrl?`<img src="${favUrl}" onerror="this.style.display='none';this.parentElement.textContent='🔗'" crossorigin="anonymous" />`:'🔗'}</div>
       <div class="link-info">
         <div class="link-title">${esc(l.title||domain||l.url)}</div>
         <div class="link-url">${esc(domain||l.url)}</div>
