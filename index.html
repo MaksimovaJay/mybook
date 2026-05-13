@@ -1105,7 +1105,8 @@ function buildNoteTabs(secId, cats){
 function setNoteTab(sec, cat){
   noteFilter[sec]=cat;
   if(sec==='notes') renderNotes();
-  else renderWork();
+  else if(sec==='work') renderWork();
+  else if(sec==='links') renderLinks();
 }
 
 function renderNotes(){
