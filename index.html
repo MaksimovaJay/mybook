@@ -164,6 +164,7 @@
     /* ══ Link cards ══ */
     .links-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:11px;}
     .link-card{
+      text-decoration:none;color:inherit;
       background:var(--s1);border:1px solid var(--border);border-radius:var(--r);
       padding:14px;display:flex;gap:12px;align-items:flex-start;
       transition:border-color .2s,transform .15s;position:relative;cursor:pointer;
@@ -1320,15 +1321,15 @@ function renderLinks(){
   grid.innerHTML=list.map(l=>{
     let domain=''; try{ domain=new URL(l.url).hostname; }catch{}
     const favUrl=domain?`https://www.google.com/s2/favicons?domain=${domain}&sz=32`:'';
-    return `<div class="link-card" onclick="window.open('${esc(l.url)}','_blank')">
+    return `<a class="link-card" href="${esc(l.url)}" target="_blank" rel="noopener">
       <div class="link-fav">${favUrl?`<img src="${favUrl}" onerror="this.parentElement.textContent='🔗'" />`:'🔗'}</div>
       <div class="link-info">
         <div class="link-title">${esc(l.title||domain||l.url)}</div>
         <div class="link-url">${esc(domain||l.url)}</div>
         ${l.desc?`<div class="link-desc">${esc(l.desc)}</div>`:''}
       </div>
-      <button class="link-del" onclick="event.stopPropagation();confirmAction('Удалить ссылку?','',()=>deleteLink(${l.id}))">✕</button>
-    </div>`;
+      <button class="link-del" onclick="event.stopPropagation();event.preventDefault();confirmAction('Удалить ссылку?','',()=>deleteLink(${l.id}))">✕</button>
+    </a>`;
   }).join('');
 }
 
