@@ -1006,6 +1006,18 @@ async function loadAll(){
     ];
     jsave(K.boards,BOARDS); jsave(K.family,FAMILY);
   }
+  // seed: рабочие заметки
+  if(!WORK.find(n=>n.title==='US-001: Фильтрация каталога')){
+    WORK.push(
+      {id:WORK.reduce((m,n)=>Math.max(m,n.id),0)+1,cat:'templates',pin:false,tags:['user story'],created:'2026-05-13',
+       title:'US-001: Фильтрация каталога',
+       body:'Как покупатель, я хочу фильтровать книги по жанру/автору/цене/рейтингу, чтобы быстро находить нужные издания.\n\nКритерии:\n• Чекбоксы жанров, поиск по автору, слайдер цены, фильтр по звёздам\n• Результаты обновляются мгновенно\n• Счётчик найденных позиций\n• Кнопка «Сбросить фильтры»\n• Параметры в URL\n• Заглушка при 0 результатов\n\nПриоритет: High | 5 SP'},
+      {id:WORK.reduce((m,n)=>Math.max(m,n.id),0)+2,cat:'templates',pin:true,tags:['теория'],created:'2026-05-13',
+       title:'User Story vs Use Case',
+       body:'User Story — кратко про потребность\nФормат: «Как [кто], я хочу [что], чтобы [зачем]»\nДополняется критериями приёмки. Хранится в Jira/Trello.\n\nUse Case — подробный сценарий взаимодействия с системой\nВключает: актор, цель, предусловия, основной путь, альтернативы/ошибки\n\nРазница: Story — потребность, Use Case — реализация поведения'}
+    );
+    jsave(K.work,WORK);
+  }
   // seed: ссылки Жени
   if(!LINK_CATS.find(c=>c.id==='mysites'))  { LINK_CATS.push({id:'mysites',   label:'Мои сайты',   icon:'💻'}); jsave(K.lcats,LINK_CATS); }
   if(!LINK_CATS.find(c=>c.id==='mytools'))  { LINK_CATS.push({id:'mytools',   label:'Инструменты', icon:'🔧'}); jsave(K.lcats,LINK_CATS); }
