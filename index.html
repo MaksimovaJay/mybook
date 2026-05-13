@@ -1006,6 +1006,22 @@ async function loadAll(){
     ];
     jsave(K.boards,BOARDS); jsave(K.family,FAMILY);
   }
+  // seed: ссылки Жени
+  if(!LINK_CATS.find(c=>c.id==='mysites'))  { LINK_CATS.push({id:'mysites',   label:'Мои сайты',   icon:'💻'}); jsave(K.lcats,LINK_CATS); }
+  if(!LINK_CATS.find(c=>c.id==='mytools'))  { LINK_CATS.push({id:'mytools',   label:'Инструменты', icon:'🔧'}); jsave(K.lcats,LINK_CATS); }
+  if(!LINKS.find(l=>l.url.includes('th-mjay.com'))){
+    const seed=[
+      {id:1,  url:'https://th-mjay.com/',                                          title:'TH-MJay',          desc:'Мой основной сайт',         cat:'mysites', created:'2026-05-13'},
+      {id:2,  url:'https://irina-astafieva.ru/',                                   title:'Ирина Астафьева',  desc:'',                          cat:'mysites', created:'2026-05-13'},
+      {id:3,  url:'https://maksimovajay.github.io/Yaroslav-s-website/index.html',  title:'Ярослав',          desc:'Переедет на домен позже',    cat:'mysites', created:'2026-05-13'},
+      {id:4,  url:'https://imax-tattoo.com/',                                      title:'IMAX Tattoo',      desc:'',                          cat:'mysites', created:'2026-05-13'},
+      {id:5,  url:'https://lera-proaut.ru/proАВАclub',                             title:'Лера ProAut',      desc:'',                          cat:'mysites', created:'2026-05-13'},
+      {id:6,  url:'https://psihogolik.getcourse.ru/aba_con_2026',                  title:'ABA Con 2026',     desc:'',                          cat:'mysites', created:'2026-05-13'},
+      {id:7,  url:'https://github.com/',                                           title:'GitHub',           desc:'',                          cat:'mytools', created:'2026-05-13'},
+      {id:8,  url:'https://psihogolik.getcourse.ru/teach/control/stream',          title:'GetCourse Teach',  desc:'',                          cat:'mytools', created:'2026-05-13'},
+    ];
+    LINKS=seed; jsave(K.links,LINKS);
+  }
   BUDGET = jload(K.budget, []);
   FAMILY = jload(K.family, {});
   BOARDS.forEach(b=>{ if(!FAMILY[b.id]) FAMILY[b.id]=[]; });
