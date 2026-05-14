@@ -1710,7 +1710,9 @@ function renderPaymentGroup(groupId, groupLabel, paid){
     if(pa!==pb) return pa-pb;
     return a.name.localeCompare(b.name,'ru');
   });
-  const rows = sorted.map(c=>{
+  const unpaid = sorted.filter(c=>!paid[c.id]);
+  const paidList = sorted.filter(c=>!!paid[c.id]);
+  const renderRow = c => {
     const isPaid=!!paid[c.id];
     const nameEsc=esc(c.name);
     return `<div class="pay-row">
@@ -1722,7 +1724,11 @@ function renderPaymentGroup(groupId, groupLabel, paid){
       <button class="pay-copy" onclick="copyReminder('${nameEsc}')" title="Скопировать напоминание">📋</button>
       <button class="pay-del" onclick="confirmAction('Удалить клиента?','${nameEsc} будет удалён из всех месяцев',()=>deleteClient('${c.id}'))">✕</button>
     </div>`;
-  }).join('');
+  };
+  const separator = unpaid.length&&paidList.length
+    ? `<div style="display:flex;align-items:center;gap:8px;margin:10px 0;"><div style="flex:1;height:1px;background:var(--border);"></div><span style="font-size:11px;color:var(--text3);white-space:nowrap;">${paidList.length} оплатили</span><div style="flex:1;height:1px;background:var(--border);"></div></div>`
+    : '';
+  const rows = unpaid.map(renderRow).join('') + separator + paidList.map(renderRow).join('');
   return `<div class="pay-group">
     <div class="pay-group-header">
       <div>
