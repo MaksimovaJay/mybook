@@ -1091,6 +1091,7 @@ function setupListener(){
     if(snap.metadata.hasPendingWrites) return;
     const d=snap.data(); if(!d||d._ts===_myLastSync) return;
     applyFirestoreData(d);
+    _ensureBoards();
     _migrateClients();
     _ensureFamilySeeds();
     if(curSection==='family') famView==='budget'?renderBudget():renderFamily();
@@ -1239,11 +1240,32 @@ async function loadAll(){
     if(ref){ const snap=await ref.get(); if(snap.exists) applyFirestoreData(snap.data()); }
   }catch(e){ console.warn('Firestore load failed:',e); }
   // ── All seeds/migrations run AFTER Firestore load — safe to call jsave ──
+  _ensureBoards();
   _migrateContent();
   _migrateTemplates();
   _migrateGroups();
   _migrateClients();
   setupListener();
+}
+
+const DEFAULT_BOARDS = [
+  {id:'tasks',  label:'Задачи',  icon:'✅', color:'#5bbf7a', type:'check', placeholder:'Добавить задачу…'},
+  {id:'shop',   label:'Покупки', icon:'🛒', color:'#5eaee0', type:'check', placeholder:'Добавить в список…'},
+  {id:'wishes', label:'Желания', icon:'💫', color:'#9b7fe8', type:'check', placeholder:'Добавить желание…'},
+  {id:'todos',  label:'Дела',   icon:'📅', color:'#e07b50', type:'check', placeholder:'Добавить дело…'},
+  {id:'fnotes', label:'Заметки',icon:'🗒️', color:'#8e8ea0', type:'text',  placeholder:'Написать…'},
+];
+
+function _ensureBoards(){
+  let changed=false;
+  DEFAULT_BOARDS.forEach(def=>{
+    if(!BOARDS.find(b=>b.id===def.id)){
+      BOARDS.push(def);
+      if(!FAMILY[def.id]) FAMILY[def.id]=[];
+      changed=true;
+    }
+  });
+  if(changed){ jsave(K.boards,BOARDS); jsave(K.family,FAMILY); }
 }
 
 function _ensureFamilySeeds(){
