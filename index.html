@@ -1249,46 +1249,6 @@ async function loadAll(){
   PCONSULTS = jload(K.pconsults, {});
   PBOARDS   = jload(K.pboards,  []);
   PTASKS    = jload(K.ptasks,   {});
-  // seed: шаблоны сообщений
-  if(TEMPLATES.length===0){
-    TEMPLATES=[
-      {id:'t1',title:'Оплата и реквизиты',created:'2026-05-14',
-       text:'Хорошо, запись происходит только после полной оплаты.\n\nРеквизиты:\n\nТ-Банк — Шушина Ярослава\n2200 7009 5162 9251\n\nМбанк visa (Кыргызстан)\n4177 4901 6679 6831\nMESHERIAKOV ARSENII'},
-      {id:'t2',title:'Анкета о ребёнке',created:'2026-05-14',
-       text:'Расскажите о ребёнке просто своими словами:\n— Что вас беспокоит?\n— Какие успехи есть?\n— Куда вы ходили?\n— и т.д.'},
-    ];
-    jsave(K.templates,TEMPLATES);
-  }
-  if(!TEMPLATES.find(t=>t.id==='t3')){
-    TEMPLATES.push({id:'t3',title:'Консультация (от администратора)',created:'2026-05-14',
-     text:'Здравствуйте!\nЯрослава проводит разовые онлайн-консультации. Ближайшее окно — 10 июня.\nПродолжительность консультации — 1 час. Стоимость — 10 000 сом.\n\nЗа 4 дня до консультации необходимо отправить информацию о ребёнке и видео, чтобы Ярослава могла предварительно ознакомиться с ребёнком в его естественных условиях.\n\nОбращаем внимание, что консультация не гарантирует дальнейшие занятия, так как сначала Ярославе важно понять особенности ребёнка и только после этого подбирать специалиста и формат работы.\n\nЕсли вам подходит такой формат, можем записать вас на консультацию.'});
-    jsave(K.templates,TEMPLATES);
-  }
-  // seed: клиенты супервизий АВА
-  if(PCLIENTS.length===0){
-    PCLIENTS=[
-      {id:'c1',name:'Inna Rudiakova',    group:'aba1'},
-      {id:'c2',name:'Daria',             group:'aba1'},
-      {id:'c3',name:'Ирина Лабановская', group:'aba1'},
-      {id:'c4',name:'Наталья Иванова',   group:'aba1'},
-      {id:'c5',name:'Онищенко Ирина',    group:'aba1'},
-      {id:'c6',name:'Екатерина',         group:'aba1'},
-      {id:'c7',name:'Анастасия',         group:'aba1'},
-      {id:'c8',name:'Maria',             group:'aba1'},
-      {id:'c9',name:'Tanya S',           group:'aba1'},
-      {id:'c10',name:'Ксения Воронова',  group:'aba2'},
-    ];
-    jsave(K.pclients,PCLIENTS);
-  }
-  // migrate: add group field to existing clients without one
-  let _migrated=false;
-  PCLIENTS.forEach(c=>{ if(!c.group){ c.group='aba1'; _migrated=true; } });
-  // seed: add Ксения Воронова to aba2 if missing
-  if(!PCLIENTS.find(c=>c.name==='Ксения Воронова')){
-    PCLIENTS.push({id:'c10',name:'Ксения Воронова',group:'aba2'});
-    _migrated=true;
-  }
-  if(_migrated) jsave(K.pclients,PCLIENTS);
   FAMILY = jload(K.family, {});
   BOARDS.forEach(b=>{ if(!FAMILY[b.id]) FAMILY[b.id]=[]; });
   // Load from Firestore (overrides localStorage)
@@ -1296,7 +1256,59 @@ async function loadAll(){
     const ref=getDocRef();
     if(ref){ const snap=await ref.get(); if(snap.exists) applyFirestoreData(snap.data()); }
   }catch(e){ console.warn('Firestore load failed:',e); }
+  // ── Migrations run AFTER Firestore load so they can't be overwritten ──
+  _migrateTemplates();
+  _migrateClients();
   setupListener();
+}
+
+function _migrateTemplates(){
+  let changed=false;
+  if(TEMPLATES.length===0){
+    TEMPLATES=[
+      {id:'t1',title:'Оплата и реквизиты',created:'2026-05-14',
+       text:'Хорошо, запись происходит только после полной оплаты.\n\nРеквизиты:\n\nТ-Банк — Шушина Ярослава\n2200 7009 5162 9251\n\nМбанк visa (Кыргызстан)\n4177 4901 6679 6831\nMESHERIAKOV ARSENII'},
+      {id:'t2',title:'Анкета о ребёнке',created:'2026-05-14',
+       text:'Расскажите о ребёнке просто своими словами:\n— Что вас беспокоит?\n— Какие успехи есть?\n— Куда вы ходили?\n— и т.д.'},
+    ];
+    changed=true;
+  }
+  if(!TEMPLATES.find(t=>t.id==='t3')){
+    TEMPLATES.push({id:'t3',title:'Консультация (от администратора)',created:'2026-05-14',
+     text:'Здравствуйте!\nЯрослава проводит разовые онлайн-консультации. Ближайшее окно — 10 июня.\nПродолжительность консультации — 1 час. Стоимость — 10 000 сом.\n\nЗа 4 дня до консультации необходимо отправить информацию о ребёнке и видео, чтобы Ярослава могла предварительно ознакомиться с ребёнком в его естественных условиях.\n\nОбращаем внимание, что консультация не гарантирует дальнейшие занятия, так как сначала Ярославе важно понять особенности ребёнка и только после этого подбирать специалиста и формат работы.\n\nЕсли вам подходит такой формат, можем записать вас на консультацию.'});
+    changed=true;
+  }
+  if(changed) jsave(K.templates,TEMPLATES);
+}
+
+function _migrateClients(){
+  // Canonical ABA От А до Я client list
+  const ABA1 = [
+    {id:'c1',name:'Daria'},
+    {id:'c2',name:'Inna Rudiakova'},
+    {id:'c3',name:'Ирина Лабановская'},
+    {id:'c4',name:'Наталья Иванова'},
+    {id:'c5',name:'Онищенко Ирина'},
+    {id:'c6',name:'Екатерина'},
+    {id:'c7',name:'Анастасия'},
+    {id:'c8',name:'Maria'},
+    {id:'c9',name:'Tanya S'},
+  ];
+  let changed=false;
+  // Add missing aba1 clients
+  ABA1.forEach(ref=>{
+    if(!PCLIENTS.find(c=>c.name===ref.name)){
+      PCLIENTS.push({id:ref.id,name:ref.name,group:'aba1'});
+      changed=true;
+    }
+  });
+  // Fix missing group field
+  PCLIENTS.forEach(c=>{ if(!c.group){ c.group='aba1'; changed=true; } });
+  // Remove aba2 group entirely (user deleted ABAриум)
+  const before=PCLIENTS.length;
+  PCLIENTS=PCLIENTS.filter(c=>c.group!=='aba2');
+  if(PCLIENTS.length!==before) changed=true;
+  if(changed) jsave(K.pclients,PCLIENTS);
 }
 function jload(key, def){ try{ const s=localStorage.getItem(key); return s?JSON.parse(s):JSON.parse(JSON.stringify(def)); }catch{ return JSON.parse(JSON.stringify(def)); } }
 function jsave(key,val){ localStorage.setItem(key,JSON.stringify(val)); syncToFirestore(); }
@@ -1705,7 +1717,6 @@ function renderPsiho(){
 
 const PAY_GROUPS = [
   {id:'aba1', label:'ABA От А до Я'},
-  {id:'aba2', label:'ABAриум'},
 ];
 
 function renderPaymentGroup(groupId, groupLabel, paid){
