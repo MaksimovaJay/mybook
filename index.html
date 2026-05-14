@@ -936,12 +936,24 @@
   <div class="modal modal-sm">
     <button class="close-x" onclick="closeOv('ov-client')">✕</button>
     <div class="modal-title" id="cf-title">Добавить клиента</div>
-    <div class="fg" style="margin-bottom:6px;font-size:12px;color:var(--text2);">Группа: <strong id="cf-group-lbl"></strong></div>
-    <input type="hidden" id="cf-group" value="aba1"/>
+    <div class="fg"><label class="fl">Группа</label><select class="fi" id="cf-group"></select></div>
     <div class="fg"><label class="fl">Имя</label><input class="fi" id="cf-name" type="text" placeholder="Имя клиента…"/></div>
     <div class="form-actions">
       <button class="btn btn-g" onclick="closeOv('ov-client')">Отмена</button>
       <button class="btn btn-p" onclick="submitClient()">Добавить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Group form ── -->
+<div class="overlay" id="ov-group" onclick="closeOv('ov-group',event)">
+  <div class="modal modal-sm">
+    <button class="close-x" onclick="closeOv('ov-group')">✕</button>
+    <div class="modal-title" id="gf-title">Новая группа</div>
+    <div class="fg"><label class="fl">Название</label><input class="fi" id="gf-name" type="text" placeholder="Название группы…" onkeydown="if(event.key==='Enter')submitGroup()"/></div>
+    <div class="form-actions">
+      <button class="btn btn-g" onclick="closeOv('ov-group')">Отмена</button>
+      <button class="btn btn-p" onclick="submitGroup()">Сохранить</button>
     </div>
   </div>
 </div>
@@ -1044,7 +1056,7 @@ function syncToFirestore(){
   clearTimeout(_syncTimer);
   _syncTimer=setTimeout(async()=>{
     _myLastSync=Date.now();
-    try{ await ref.set({notes:NOTES,work:WORK,links:LINKS,lcats:LINK_CATS,boards:BOARDS,family:FAMILY,budget:BUDGET,ncats_notes:NOTE_CATS.notes,ncats_work:NOTE_CATS.work,templates:TEMPLATES,pclients:PCLIENTS,ppayments:PPAYMENTS,pconsults:PCONSULTS,pboards:PBOARDS,ptasks:PTASKS,_ts:_myLastSync}); }
+    try{ await ref.set({notes:NOTES,work:WORK,links:LINKS,lcats:LINK_CATS,boards:BOARDS,family:FAMILY,budget:BUDGET,ncats_notes:NOTE_CATS.notes,ncats_work:NOTE_CATS.work,templates:TEMPLATES,pclients:PCLIENTS,ppayments:PPAYMENTS,pconsults:PCONSULTS,pboards:PBOARDS,ptasks:PTASKS,pgroups:PGROUPS,_ts:_myLastSync}); }
     catch(e){ console.warn('Sync failed:',e); }
   },800);
 }
@@ -1066,6 +1078,7 @@ function applyFirestoreData(d){
   if(d.pconsults) PCONSULTS=d.pconsults;
   if(d.pboards)   PBOARDS=d.pboards;
   if(d.ptasks)    PTASKS=d.ptasks;
+  if(d.pgroups)   PGROUPS=d.pgroups;
   BOARDS=BOARDS.filter(b=>b.id!=='budget');
   BOARDS.forEach(b=>{ if(!FAMILY[b.id]) FAMILY[b.id]=[]; });
 }
@@ -1079,9 +1092,8 @@ function setupListener(){
     applyFirestoreData(d);
     if(curSection==='family') famView==='budget'?renderBudget():renderFamily();
     else if(curSection==='notes') renderNotes();
-    else if(curSection==='work') renderWork();
+    else if(curSection==='work'){ if(workMode==='psiho') renderPsiho(); else renderWork(); }
     else if(curSection==='links') renderLinks();
-    else if(curSection==='work'&&workMode==='psiho') renderPsiho();
     toast('🔄 Синхронизировано');
   });
 }
@@ -1154,12 +1166,13 @@ const K = {
   links:'mb_links', lcats:'mb_lcats',
   boards:'mb_boards', family:'mb_family', budget:'mb_budget',
   templates:'mb_templates', pclients:'mb_pclients', ppayments:'mb_ppayments', pconsults:'mb_pconsults',
-  pboards:'mb_pboards', ptasks:'mb_ptasks',
+  pboards:'mb_pboards', ptasks:'mb_ptasks', pgroups:'mb_pgroups',
 };
 
 let BUDGET = [];
 let TEMPLATES = [], PCLIENTS = [], PPAYMENTS = {}, PCONSULTS = {};
 let PBOARDS = [], PTASKS = {};
+let PGROUPS = [];
 
 async function loadAll(){
   NOTE_CATS = {
@@ -1249,6 +1262,7 @@ async function loadAll(){
   PCONSULTS = jload(K.pconsults, {});
   PBOARDS   = jload(K.pboards,  []);
   PTASKS    = jload(K.ptasks,   {});
+  PGROUPS   = jload(K.pgroups,  []);
   FAMILY = jload(K.family, {});
   BOARDS.forEach(b=>{ if(!FAMILY[b.id]) FAMILY[b.id]=[]; });
   // Load from Firestore (overrides localStorage)
@@ -1258,6 +1272,7 @@ async function loadAll(){
   }catch(e){ console.warn('Firestore load failed:',e); }
   // ── Migrations run AFTER Firestore load so they can't be overwritten ──
   _migrateTemplates();
+  _migrateGroups();
   _migrateClients();
   setupListener();
 }
@@ -1282,33 +1297,38 @@ function _migrateTemplates(){
 }
 
 function _migrateClients(){
-  // Canonical ABA От А до Я client list
-  const ABA1 = [
-    {id:'c1',name:'Daria'},
-    {id:'c2',name:'Inna Rudiakova'},
-    {id:'c3',name:'Ирина Лабановская'},
-    {id:'c4',name:'Наталья Иванова'},
-    {id:'c5',name:'Онищенко Ирина'},
-    {id:'c6',name:'Екатерина'},
-    {id:'c7',name:'Анастасия'},
-    {id:'c8',name:'Maria'},
-    {id:'c9',name:'Tanya S'},
-  ];
   let changed=false;
-  // Add missing aba1 clients
-  ABA1.forEach(ref=>{
-    if(!PCLIENTS.find(c=>c.name===ref.name)){
-      PCLIENTS.push({id:ref.id,name:ref.name,group:'aba1'});
-      changed=true;
-    }
-  });
-  // Fix missing group field
-  PCLIENTS.forEach(c=>{ if(!c.group){ c.group='aba1'; changed=true; } });
-  // Remove aba2 group entirely (user deleted ABAриум)
+  // One-time seed only when list is completely empty (fresh install)
+  if(PCLIENTS.length===0){
+    PCLIENTS=[
+      {id:'c1', name:'Daria',              group:'aba1'},
+      {id:'c2', name:'Inna Rudiakova',     group:'aba1'},
+      {id:'c3', name:'Ирина Лабановская',  group:'aba1'},
+      {id:'c4', name:'Наталья Иванова',    group:'aba1'},
+      {id:'c5', name:'Онищенко Ирина',     group:'aba1'},
+      {id:'c6', name:'Екатерина',          group:'aba1'},
+      {id:'c7', name:'Анастасия',          group:'aba1'},
+      {id:'c8', name:'Maria',              group:'aba1'},
+      {id:'c9', name:'Tanya S',            group:'aba1'},
+      {id:'c10',name:'Ксения Воронова',    group:'aba1'},
+    ];
+    changed=true;
+  }
+  // Fix missing group field on existing clients
+  PCLIENTS.forEach(c=>{ if(!c.group){ c.group=PGROUPS[0]?.id||'aba1'; changed=true; } });
+  // Remove aba2 clients (old ABAриум group, deleted)
   const before=PCLIENTS.length;
   PCLIENTS=PCLIENTS.filter(c=>c.group!=='aba2');
   if(PCLIENTS.length!==before) changed=true;
   if(changed) jsave(K.pclients,PCLIENTS);
+}
+
+function _migrateGroups(){
+  // One-time seed only when groups list is completely empty
+  if(PGROUPS.length===0){
+    PGROUPS=[{id:'aba1',label:'ABA От А до Я'}];
+    jsave(K.pgroups,PGROUPS);
+  }
 }
 function jload(key, def){ try{ const s=localStorage.getItem(key); return s?JSON.parse(s):JSON.parse(JSON.stringify(def)); }catch{ return JSON.parse(JSON.stringify(def)); } }
 function jsave(key,val){ localStorage.setItem(key,JSON.stringify(val)); syncToFirestore(); }
@@ -1715,9 +1735,7 @@ function renderPsiho(){
   setPsihoView(psihoView);
 }
 
-const PAY_GROUPS = [
-  {id:'aba1', label:'ABA От А до Я'},
-];
+let editingGroupId = null;
 
 function renderPaymentGroup(groupId, groupLabel, paid){
   const clients = PCLIENTS.filter(c=>c.group===groupId);
@@ -1749,10 +1767,14 @@ function renderPaymentGroup(groupId, groupLabel, paid){
   return `<div class="pay-group">
     <div class="pay-group-header">
       <div>
-        <span class="pay-group-title">${groupLabel}</span>
+        <span class="pay-group-title">${esc(groupLabel)}</span>
         <span class="pay-group-meta"> · ${paidCount}/${clients.length} оплатили</span>
       </div>
-      <button class="pay-group-add" onclick="openClientForm('${groupId}')">＋ Клиент</button>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button class="pay-group-add" onclick="openClientForm('${groupId}')">＋ Клиент</button>
+        <button class="pay-group-add" onclick="openGroupForm('${groupId}')" title="Переименовать">✎</button>
+        <button class="pay-group-add" style="color:#e05577;" onclick="confirmAction('Удалить группу «${esc(groupLabel)}»?','Все клиенты группы будут удалены',()=>deleteGroup('${groupId}'))" title="Удалить группу">✕</button>
+      </div>
     </div>
     ${rows||'<div style="font-size:13px;color:var(--text3);padding:8px 0;">Пока никого нет</div>'}
   </div>`;
@@ -1769,7 +1791,8 @@ function renderPayments(){
      <div class="psiho-stat"><div class="psiho-stat-num" style="color:#e05577">${total-paidCount}</div><div class="psiho-stat-lbl">Не оплатили</div></div>
      <div class="psiho-stat"><div class="psiho-stat-num">${total}</div><div class="psiho-stat-lbl">Всего</div></div>`;
   document.getElementById('psiho-clients-list').innerHTML =
-    PAY_GROUPS.map(g=>renderPaymentGroup(g.id, g.label, paid)).join('');
+    PGROUPS.map(g=>renderPaymentGroup(g.id, g.label, paid)).join('') +
+    `<button class="btn btn-g" style="width:100%;margin-top:14px;" onclick="openGroupForm()">＋ Добавить группу</button>`;
 }
 
 function copyReminder(name){
@@ -1786,9 +1809,9 @@ function togglePayment(clientId){
 }
 
 function openClientForm(group){
-  const g=group||'aba1';
-  document.getElementById('cf-group').value=g;
-  document.getElementById('cf-group-lbl').textContent=PAY_GROUPS.find(x=>x.id===g)?.label||g;
+  const g=group||PGROUPS[0]?.id||'aba1';
+  const sel=document.getElementById('cf-group');
+  sel.innerHTML=PGROUPS.map(pg=>`<option value="${pg.id}"${pg.id===g?' selected':''}>${esc(pg.label)}</option>`).join('');
   document.getElementById('cf-name').value='';
   openOv('ov-client');
   setTimeout(()=>document.getElementById('cf-name').focus(),100);
@@ -1812,6 +1835,44 @@ function deleteClient(id){
   jsave(K.ppayments,PPAYMENTS);
   renderPayments();
   toast('🗑 Удалено');
+}
+
+function openGroupForm(id){
+  editingGroupId=id||null;
+  const g=id?PGROUPS.find(x=>x.id===id):null;
+  document.getElementById('gf-title').textContent=g?'Переименовать группу':'Новая группа';
+  document.getElementById('gf-name').value=g?.label||'';
+  openOv('ov-group');
+  setTimeout(()=>document.getElementById('gf-name').focus(),100);
+}
+
+function submitGroup(){
+  const label=(document.getElementById('gf-name').value||'').trim();
+  if(!label) return;
+  if(editingGroupId){
+    const g=PGROUPS.find(x=>x.id===editingGroupId);
+    if(g) g.label=label;
+  } else {
+    PGROUPS.push({id:Date.now().toString(36),label});
+  }
+  jsave(K.pgroups,PGROUPS);
+  closeOv('ov-group');
+  renderPayments();
+  toast('✅ Группа сохранена');
+}
+
+function deleteGroup(id){
+  const groupClientIds=PCLIENTS.filter(c=>c.group===id).map(c=>c.id);
+  PGROUPS=PGROUPS.filter(g=>g.id!==id);
+  PCLIENTS=PCLIENTS.filter(c=>c.group!==id);
+  if(groupClientIds.length>0){
+    Object.keys(PPAYMENTS).forEach(k=>{ groupClientIds.forEach(cid=>{ delete PPAYMENTS[k][cid]; }); });
+    jsave(K.ppayments,PPAYMENTS);
+  }
+  jsave(K.pgroups,PGROUPS);
+  jsave(K.pclients,PCLIENTS);
+  renderPayments();
+  toast('🗑 Группа удалена');
 }
 
 function renderTemplates(){
@@ -2384,7 +2445,7 @@ function today(){ return new Date().toISOString().slice(0,10); }
 function plural(n,a,b,c){ const m=n%10,h=n%100; if(m===1&&h!==11)return a; if(m>=2&&m<=4&&(h<10||h>=20))return b; return c; }
 
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape') ['ov-read','ov-note','ov-link','ov-board','ov-lcat','ov-ncat','ov-fin','ov-confirm','ov-tmpl','ov-client','ov-pboard'].forEach(id=>document.getElementById(id)?.classList.remove('open'));
+  if(e.key==='Escape') ['ov-read','ov-note','ov-link','ov-board','ov-lcat','ov-ncat','ov-fin','ov-confirm','ov-tmpl','ov-client','ov-group','ov-pboard'].forEach(id=>document.getElementById(id)?.classList.remove('open'));
 });
 
 // ══ PWA ══
