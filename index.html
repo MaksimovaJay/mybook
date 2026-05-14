@@ -1377,24 +1377,29 @@ function _migrateClients(){
   // One-time seed only when list is completely empty (fresh install)
   if(PCLIENTS.length===0){
     PCLIENTS=[
-      {id:'c1', name:'Daria',              group:'aba1'},
-      {id:'c2', name:'Inna Rudiakova',     group:'aba1'},
-      {id:'c3', name:'Ирина Лабановская',  group:'aba1'},
-      {id:'c4', name:'Наталья Иванова',    group:'aba1'},
-      {id:'c5', name:'Онищенко Ирина',     group:'aba1'},
-      {id:'c6', name:'Екатерина',          group:'aba1'},
-      {id:'c7', name:'Анастасия',          group:'aba1'},
-      {id:'c8', name:'Maria',              group:'aba1'},
-      {id:'c9', name:'Tanya S',            group:'aba1'},
-      {id:'c10',name:'Ксения Воронова',    group:'aba1'},
+      {id:'c1', name:'Daria',              firstName:'Дарья',    group:'aba1'},
+      {id:'c2', name:'Inna Rudiakova',     firstName:'Инна',     group:'aba1'},
+      {id:'c3', name:'Ирина Лабановская',  firstName:'Ирина',    group:'aba1'},
+      {id:'c4', name:'Наталья Иванова',    firstName:'Наталья',  group:'aba1'},
+      {id:'c5', name:'Онищенко Ирина',     firstName:'Ирина',    group:'aba1'},
+      {id:'c6', name:'Екатерина',          firstName:'Екатерина',group:'aba1'},
+      {id:'c7', name:'Анастасия',          firstName:'Анастасия',group:'aba1'},
+      {id:'c8', name:'Maria',              firstName:'Мария',    group:'aba1'},
+      {id:'c9', name:'Tanya S',            firstName:'Таня',     group:'aba1'},
+      {id:'c10',name:'Ксения Воронова',    firstName:'Ксения',   group:'aba1'},
     ];
     changed=true;
   } else {
     // Ensure Ксения is in aba1 even for existing users (moved from deleted aba2)
     const k=PCLIENTS.find(c=>c.name==='Ксения Воронова');
-    if(!k){ PCLIENTS.push({id:'c10',name:'Ксения Воронова',group:'aba1'}); changed=true; }
+    if(!k){ PCLIENTS.push({id:'c10',name:'Ксения Воронова',firstName:'Ксения',group:'aba1'}); changed=true; }
     else if(k.group!=='aba1'){ k.group='aba1'; changed=true; }
   }
+  // Add firstName to existing clients that don't have it
+  const firstNameMap={'Daria':'Дарья','Inna Rudiakova':'Инна','Ирина Лабановская':'Ирина',
+    'Наталья Иванова':'Наталья','Онищенко Ирина':'Ирина','Екатерина':'Екатерина',
+    'Анастасия':'Анастасия','Maria':'Мария','Tanya S':'Таня','Ксения Воронова':'Ксения'};
+  PCLIENTS.forEach(c=>{ if(!c.firstName){ c.firstName=firstNameMap[c.name]||c.name.split(' ')[0]; changed=true; } });
   // Fix missing group field on existing clients
   PCLIENTS.forEach(c=>{ if(!c.group){ c.group=PGROUPS[0]?.id||'aba1'; changed=true; } });
   // Remove any remaining aba2 clients
@@ -1837,7 +1842,7 @@ function renderPaymentGroup(groupId, groupLabel, paid){
         <div class="pay-toggle ${isPaid?'on':''}"></div>
         <span style="font-size:12px;color:${isPaid?'#5bbf7a':'var(--text3)'};">${isPaid?'Оплатил':'Ожидание'}</span>
       </div>
-      <button class="pay-copy" onclick="copyReminder('${nameEsc}')" title="Скопировать напоминание">📋</button>
+      <button class="pay-copy" onclick="copyReminder('${esc(c.firstName||c.name.split(' ')[0])}')" title="Скопировать напоминание">📋</button>
       <button class="pay-del" onclick="confirmAction('Удалить клиента?','${nameEsc} будет удалён из всех месяцев',()=>deleteClient('${c.id}'))">✕</button>
     </div>`;
   };
