@@ -181,7 +181,8 @@
     .link-del:hover{color:#e05577!important;}
 
     /* ══ Family boards ══ */
-    .fam-topbar{display:flex;align-items:center;gap:10px;padding:12px 20px;padding-top:calc(12px + env(safe-area-inset-top));border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:20;}
+    .fam-topbar{display:flex;align-items:center;gap:10px;padding:12px 20px;padding-top:calc(12px + env(safe-area-inset-top));border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:20;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;}
+    .fam-topbar::-webkit-scrollbar{display:none;}
     .boards{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:12px;align-items:start;}
     .board{background:var(--s1);border:1px solid var(--border);border-radius:14px;display:flex;flex-direction:column;overflow:hidden;}
     .board-accent{height:3px;}
@@ -228,7 +229,7 @@
     .board-add-tile:hover{border-color:var(--accent);background:rgba(201,169,110,.04);color:var(--accent);}
 
     /* ── Family tabs ── */
-    .fam-topbar{display:flex;align-items:center;gap:4px;padding:0 20px;padding-top:env(safe-area-inset-top);border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:20;}
+    .fam-topbar{display:flex;align-items:center;gap:4px;padding:0 20px;padding-top:env(safe-area-inset-top);border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:20;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;}
     .fam-tab{background:none;border:none;color:var(--text3);padding:13px 14px;font-size:13.5px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s,border-color .15s;font-family:inherit;white-space:nowrap;}
     .fam-tab:hover{color:var(--text2);}
     .fam-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
@@ -672,9 +673,9 @@
       <div id="work-psiho-view" style="display:none;">
         <div class="fam-topbar" style="border-top:1px solid var(--border);">
           <button class="fam-tab active" id="ptab-payments" onclick="setPsihoView('payments')">💳 Оплата</button>
-          <button class="fam-tab" id="ptab-templates" onclick="setPsihoView('templates')">💬 Шаблоны сообщений</button>
+          <button class="fam-tab" id="ptab-templates" onclick="setPsihoView('templates')">💬 Шаблоны</button>
           <button class="fam-tab" id="ptab-consults" onclick="setPsihoView('consults')">📅 Запись</button>
-          <button class="fam-tab" id="ptab-ptasks" onclick="setPsihoView('ptasks')">📋 Задачи</button>
+          <button class="fam-tab" id="ptab-ptasks" style="display:none" onclick="setPsihoView('ptasks')">📋 Задачи</button>
         </div>
         <!-- Payments view -->
         <div id="psiho-view-payments">
