@@ -394,6 +394,25 @@
     .psiho-stat{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;flex:1;min-width:80px;}
     .psiho-stat-num{font-size:22px;font-weight:700;}
     .psiho-stat-lbl{font-size:11px;color:var(--text2);margin-top:2px;}
+    /* Consultations */
+    .consult-header{text-align:center;padding:16px 0 20px;}
+    .consult-title{font-size:18px;font-weight:700;margin-bottom:12px;}
+    .consult-date-row{display:flex;flex-direction:column;align-items:center;gap:6px;}
+    .consult-date-input{max-width:180px;text-align:center;}
+    .consult-date-display{font-size:20px;font-weight:700;color:var(--accent);}
+    .consult-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:420px;margin:0 auto;}
+    .slot-card{border-radius:14px;padding:20px 14px;text-align:center;cursor:pointer;transition:all .18s;border:2px solid transparent;user-select:none;}
+    .slot-card.free{background:rgba(201,169,110,.12);border-color:var(--accent);}
+    .slot-card.free:hover{background:rgba(201,169,110,.2);}
+    .slot-card.taken{background:var(--s2);border-color:var(--border);opacity:.6;}
+    .slot-time{font-size:26px;font-weight:800;line-height:1;}
+    .slot-card.taken .slot-time{text-decoration:line-through;color:var(--text3);}
+    .slot-status{font-size:11px;font-weight:700;letter-spacing:.08em;margin-top:8px;}
+    .slot-card.free .slot-status{color:var(--accent);}
+    .slot-card.taken .slot-status{color:var(--text3);}
+    /* Psiho task boards */
+    .pboards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
+    @media(max-width:700px){.pboards-grid{grid-template-columns:1fr;}.consult-grid{gap:8px;}}
 
     /* ══ RESPONSIVE ══ */
     @media(max-width:700px){
@@ -490,12 +509,31 @@
 
     <!-- Работа -->
     <div class="sb-group">
-      <div class="sb-group-head" id="sg-work" onclick="setSection('work')">
+      <div class="sb-group-head" id="sg-work" onclick="setSection('work');setWorkMode('notes')">
         <span class="sb-group-icon">💼</span>
         <span class="sb-group-label">Работа</span>
       </div>
       <div class="sb-sub" id="sb-work-sub">
         <div id="sb-work-list"></div>
+        <div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border);">
+          <button class="sb-item" style="font-weight:600;" onclick="setSection('work');setWorkMode('psiho')">
+            <span>🧠</span> psihogolik
+          </button>
+          <div style="padding-left:10px;">
+            <button class="sb-item" onclick="setSection('work');setWorkMode('psiho');setPsihoView('payments')">
+              <span class="dot" style="background:#c9a96e"></span> Оплата
+            </button>
+            <button class="sb-item" onclick="setSection('work');setWorkMode('psiho');setPsihoView('templates')">
+              <span class="dot" style="background:#5eaee0"></span> Шаблоны сообщений
+            </button>
+            <button class="sb-item" onclick="setSection('work');setWorkMode('notes');noteFilter.work='templates';renderWork()">
+              <span class="dot" style="background:#9b7fe8"></span> Шаблоны
+            </button>
+            <button class="sb-item" onclick="setSection('work');setWorkMode('notes');noteFilter.work='ideas-work';renderWork()">
+              <span class="dot" style="background:#e07b50"></span> Идеи
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -511,24 +549,6 @@
         <div id="sb-links-list"></div>
         <button class="sb-item" onclick="openLinkCatForm()">
           <span style="font-size:13px;color:var(--text3)">＋</span> Новая категория
-        </button>
-      </div>
-    </div>
-
-    <div class="sb-divider"></div>
-
-    <!-- psihogolik -->
-    <div class="sb-group">
-      <div class="sb-group-head" id="sg-psiho" onclick="setSection('psiho')">
-        <span class="sb-group-icon">🧠</span>
-        <span class="sb-group-label">psihogolik</span>
-      </div>
-      <div class="sb-sub">
-        <button class="sb-item" onclick="setSection('psiho');setPsihoView('payments')">
-          <span>💳</span> Оплата
-        </button>
-        <button class="sb-item" onclick="setSection('psiho');setPsihoView('templates')">
-          <span>💬</span> Шаблоны
         </button>
       </div>
     </div>
@@ -612,19 +632,90 @@
 
     <!-- ── РАБОТА ── -->
     <div class="section" id="sec-work">
-      <div class="topbar">
-        <div class="search-wrap">
-          <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8.5" cy="8.5" r="5.5"/><line x1="13.5" y1="13.5" x2="18" y2="18"/></svg>
-          <input class="si" id="work-search" type="text" placeholder="Поиск…" oninput="renderWork()" />
+      <!-- Mode selector -->
+      <div class="fam-topbar">
+        <button class="fam-tab active" id="wtab-notes" onclick="setWorkMode('notes')">💼 Работа</button>
+        <button class="fam-tab" id="wtab-psiho" onclick="setWorkMode('psiho')">🧠 psihogolik</button>
+      </div>
+      <!-- Work notes view -->
+      <div id="work-notes-view">
+        <div class="topbar">
+          <div class="search-wrap">
+            <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8.5" cy="8.5" r="5.5"/><line x1="13.5" y1="13.5" x2="18" y2="18"/></svg>
+            <input class="si" id="work-search" type="text" placeholder="Поиск…" oninput="renderWork()" />
+          </div>
+          <div class="topbar-right">
+            <button class="btn btn-p" onclick="openNoteForm('work')">＋ Добавить</button>
+          </div>
         </div>
-        <div class="topbar-right">
-          <button class="btn btn-p" onclick="openNoteForm('work')">＋ Добавить</button>
+        <div class="tabs" id="work-tabs"></div>
+        <div class="section-content">
+          <div id="work-grid" class="cards-grid"></div>
+          <div id="work-empty" class="empty" style="display:none"><div class="empty-icon">💼</div><div class="empty-txt">Пока пусто — добавь запись</div></div>
         </div>
       </div>
-      <div class="tabs" id="work-tabs"></div>
-      <div class="section-content">
-        <div id="work-grid" class="cards-grid"></div>
-        <div id="work-empty" class="empty" style="display:none"><div class="empty-icon">💼</div><div class="empty-txt">Пока пусто — добавь запись</div></div>
+      <!-- Psihogolik view -->
+      <div id="work-psiho-view" style="display:none;">
+        <div class="fam-topbar" style="border-top:1px solid var(--border);">
+          <button class="fam-tab active" id="ptab-payments" onclick="setPsihoView('payments')">💳 Оплата</button>
+          <button class="fam-tab" id="ptab-templates" onclick="setPsihoView('templates')">💬 Шаблоны сообщений</button>
+          <button class="fam-tab" id="ptab-consults" onclick="setPsihoView('consults')">📅 Запись</button>
+          <button class="fam-tab" id="ptab-ptasks" onclick="setPsihoView('ptasks')">📋 Задачи</button>
+        </div>
+        <!-- Payments view -->
+        <div id="psiho-view-payments">
+          <div class="budget-nav">
+            <button class="budget-nav-btn" onclick="psihoMonthStep(-1)">‹</button>
+            <span class="budget-month-label" id="psiho-month-lbl"></span>
+            <button class="budget-nav-btn" onclick="psihoMonthStep(1)">›</button>
+          </div>
+          <div class="section-content" style="padding-top:8px;">
+            <div class="psiho-stats" id="psiho-stats"></div>
+            <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
+              <button class="btn btn-p" onclick="openClientForm()">＋ Клиент</button>
+            </div>
+            <div id="psiho-clients-list"></div>
+          </div>
+        </div>
+        <!-- Шаблоны сообщений view -->
+        <div id="psiho-view-templates" style="display:none;">
+          <div class="topbar">
+            <div class="search-wrap">
+              <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8.5" cy="8.5" r="5.5"/><line x1="13.5" y1="13.5" x2="18" y2="18"/></svg>
+              <input class="si" id="tmpl-search" type="text" placeholder="Поиск…" oninput="renderTemplates()" />
+            </div>
+            <button class="btn btn-p" onclick="openTemplateForm()">＋ Шаблон</button>
+          </div>
+          <div class="section-content">
+            <div id="tmpl-list"></div>
+            <div id="tmpl-empty" class="empty" style="display:none"><div class="empty-icon">💬</div><div class="empty-txt">Добавь первый шаблон сообщения</div></div>
+          </div>
+        </div>
+        <!-- Tasks view -->
+        <div id="psiho-view-ptasks" style="display:none;">
+          <div class="section-content">
+            <div class="pboards-grid" id="pboards-grid"></div>
+            <div style="margin-top:10px;"><button class="btn btn-g" onclick="openPBoardForm()">＋ Новый раздел</button></div>
+          </div>
+        </div>
+        <!-- Consultations view -->
+        <div id="psiho-view-consults" style="display:none;">
+          <div class="budget-nav">
+            <button class="budget-nav-btn" onclick="psihoMonthStep(-1)">‹</button>
+            <span class="budget-month-label" id="psiho-consult-month-lbl"></span>
+            <button class="budget-nav-btn" onclick="psihoMonthStep(1)">›</button>
+          </div>
+          <div class="section-content" style="padding-top:12px;">
+            <div class="consult-header">
+              <div class="consult-title">Ближайший день записи</div>
+              <div class="consult-date-row">
+                <input type="date" class="fi consult-date-input" id="consult-date-input" onchange="saveConsultDate(this.value)" />
+                <div class="consult-date-display" id="consult-date-display"></div>
+              </div>
+            </div>
+            <div class="consult-grid" id="consult-grid"></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -646,43 +737,6 @@
       </div>
     </div>
 
-    <!-- ── PSIHOGOLIK ── -->
-    <div class="section" id="sec-psiho">
-      <div class="fam-topbar">
-        <button class="fam-tab active" id="ptab-payments" onclick="setPsihoView('payments')">💳 Оплата</button>
-        <button class="fam-tab" id="ptab-templates" onclick="setPsihoView('templates')">💬 Шаблоны</button>
-      </div>
-      <!-- Payments view -->
-      <div id="psiho-view-payments">
-        <div class="budget-nav">
-          <button class="budget-nav-btn" onclick="psihoMonthStep(-1)">‹</button>
-          <span class="budget-month-label" id="psiho-month-lbl"></span>
-          <button class="budget-nav-btn" onclick="psihoMonthStep(1)">›</button>
-        </div>
-        <div class="section-content" style="padding-top:8px;">
-          <div class="psiho-stats" id="psiho-stats"></div>
-          <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
-            <button class="btn btn-p" onclick="openClientForm()">＋ Клиент</button>
-          </div>
-          <div id="psiho-clients-list"></div>
-        </div>
-      </div>
-      <!-- Templates view -->
-      <div id="psiho-view-templates" style="display:none;">
-        <div class="topbar">
-          <div class="search-wrap">
-            <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8.5" cy="8.5" r="5.5"/><line x1="13.5" y1="13.5" x2="18" y2="18"/></svg>
-            <input class="si" id="tmpl-search" type="text" placeholder="Поиск…" oninput="renderTemplates()" />
-          </div>
-          <button class="btn btn-p" onclick="openTemplateForm()">＋ Шаблон</button>
-        </div>
-        <div class="section-content">
-          <div id="tmpl-list"></div>
-          <div id="tmpl-empty" class="empty" style="display:none"><div class="empty-icon">💬</div><div class="empty-txt">Добавь первый шаблон сообщения</div></div>
-        </div>
-      </div>
-    </div>
-
   </div><!-- /main -->
 </div><!-- /app -->
 
@@ -699,9 +753,6 @@
   </button>
   <button class="bn-item" id="bn-links" onclick="setSection('links')">
     <span class="bn-icon">🔗</span><span class="bn-label">Ссылки</span>
-  </button>
-  <button class="bn-item" id="bn-psiho" onclick="setSection('psiho')">
-    <span class="bn-icon">🧠</span><span class="bn-label">Психо</span>
   </button>
 </nav>
 
@@ -838,6 +889,21 @@
   </div>
 </div>
 
+<!-- ── Psiho board form ── -->
+<div class="overlay" id="ov-pboard" onclick="closeOv('ov-pboard',event)">
+  <div class="modal modal-sm">
+    <button class="close-x" onclick="closeOv('ov-pboard')">✕</button>
+    <div class="modal-title" id="pbf-title">Новый раздел</div>
+    <div class="fg"><label class="fl">Название</label><input class="fi" id="pbf-name" type="text" placeholder="Название раздела…"/></div>
+    <div class="fg"><label class="fl">Иконка</label><div class="icon-grid" id="pbf-icons"></div></div>
+    <div class="fg"><label class="fl">Цвет</label><div class="swatches" id="pbf-colors"></div></div>
+    <div class="form-actions">
+      <button class="btn btn-g" onclick="closeOv('ov-pboard')">Отмена</button>
+      <button class="btn btn-p" onclick="submitPBoard()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── Template form ── -->
 <div class="overlay" id="ov-tmpl" onclick="closeOv('ov-tmpl',event)">
   <div class="modal">
@@ -963,7 +1029,7 @@ function syncToFirestore(){
   clearTimeout(_syncTimer);
   _syncTimer=setTimeout(async()=>{
     _myLastSync=Date.now();
-    try{ await ref.set({notes:NOTES,work:WORK,links:LINKS,lcats:LINK_CATS,boards:BOARDS,family:FAMILY,budget:BUDGET,ncats_notes:NOTE_CATS.notes,ncats_work:NOTE_CATS.work,templates:TEMPLATES,pclients:PCLIENTS,ppayments:PPAYMENTS,_ts:_myLastSync}); }
+    try{ await ref.set({notes:NOTES,work:WORK,links:LINKS,lcats:LINK_CATS,boards:BOARDS,family:FAMILY,budget:BUDGET,ncats_notes:NOTE_CATS.notes,ncats_work:NOTE_CATS.work,templates:TEMPLATES,pclients:PCLIENTS,ppayments:PPAYMENTS,pconsults:PCONSULTS,pboards:PBOARDS,ptasks:PTASKS,_ts:_myLastSync}); }
     catch(e){ console.warn('Sync failed:',e); }
   },800);
 }
@@ -982,6 +1048,9 @@ function applyFirestoreData(d){
   if(d.templates) TEMPLATES=d.templates;
   if(d.pclients)  PCLIENTS=d.pclients;
   if(d.ppayments) PPAYMENTS=d.ppayments;
+  if(d.pconsults) PCONSULTS=d.pconsults;
+  if(d.pboards)   PBOARDS=d.pboards;
+  if(d.ptasks)    PTASKS=d.ptasks;
   BOARDS=BOARDS.filter(b=>b.id!=='budget');
   BOARDS.forEach(b=>{ if(!FAMILY[b.id]) FAMILY[b.id]=[]; });
 }
@@ -997,7 +1066,7 @@ function setupListener(){
     else if(curSection==='notes') renderNotes();
     else if(curSection==='work') renderWork();
     else if(curSection==='links') renderLinks();
-    else if(curSection==='psiho') renderPsiho();
+    else if(curSection==='work'&&workMode==='psiho') renderPsiho();
     toast('🔄 Синхронизировано');
   });
 }
@@ -1069,11 +1138,13 @@ const K = {
   notes:'mb_notes', work:'mb_work',
   links:'mb_links', lcats:'mb_lcats',
   boards:'mb_boards', family:'mb_family', budget:'mb_budget',
-  templates:'mb_templates', pclients:'mb_pclients', ppayments:'mb_ppayments',
+  templates:'mb_templates', pclients:'mb_pclients', ppayments:'mb_ppayments', pconsults:'mb_pconsults',
+  pboards:'mb_pboards', ptasks:'mb_ptasks',
 };
 
 let BUDGET = [];
-let TEMPLATES = [], PCLIENTS = [], PPAYMENTS = {};
+let TEMPLATES = [], PCLIENTS = [], PPAYMENTS = {}, PCONSULTS = {};
+let PBOARDS = [], PTASKS = {};
 
 async function loadAll(){
   NOTE_CATS = {
@@ -1160,6 +1231,34 @@ async function loadAll(){
   TEMPLATES = jload(K.templates, []);
   PCLIENTS  = jload(K.pclients,  []);
   PPAYMENTS = jload(K.ppayments, {});
+  PCONSULTS = jload(K.pconsults, {});
+  PBOARDS   = jload(K.pboards,  []);
+  PTASKS    = jload(K.ptasks,   {});
+  // seed: шаблоны сообщений
+  if(TEMPLATES.length===0){
+    TEMPLATES=[
+      {id:'t1',title:'Оплата и реквизиты',created:'2026-05-14',
+       text:'Хорошо, запись происходит только после полной оплаты.\n\nРеквизиты:\n\nТ-Банк — Шушина Ярослава\n2200 7009 5162 9251\n\nМбанк visa (Кыргызстан)\n4177 4901 6679 6831\nMESHERIAKOV ARSENII'},
+      {id:'t2',title:'Анкета о ребёнке',created:'2026-05-14',
+       text:'Расскажите о ребёнке просто своими словами:\n— Что вас беспокоит?\n— Какие успехи есть?\n— Куда вы ходили?\n— и т.д.'},
+    ];
+    jsave(K.templates,TEMPLATES);
+  }
+  // seed: клиенты супервизий АВА
+  if(PCLIENTS.length===0){
+    PCLIENTS=[
+      {id:'c1',name:'Inna Rudiakova'},
+      {id:'c2',name:'Daria'},
+      {id:'c3',name:'Ирина Лабановская'},
+      {id:'c4',name:'Наталья Иванова'},
+      {id:'c5',name:'Онищенко Ирина'},
+      {id:'c6',name:'Екатерина'},
+      {id:'c7',name:'Анастасия'},
+      {id:'c8',name:'Maria'},
+      {id:'c9',name:'Tanya S'},
+    ];
+    jsave(K.pclients,PCLIENTS);
+  }
   FAMILY = jload(K.family, {});
   BOARDS.forEach(b=>{ if(!FAMILY[b.id]) FAMILY[b.id]=[]; });
   // Load from Firestore (overrides localStorage)
@@ -1181,10 +1280,12 @@ let famView    = 'boards';
 let noteFilter = {notes:'all', work:'all', links:'all'};
 let budgetYear = new Date().getFullYear();
 let budgetMon  = new Date().getMonth(); // 0-based
+let workMode   = 'notes';
 let psihoView  = 'payments';
 let psihoYear  = new Date().getFullYear();
 let psihoMon   = new Date().getMonth();
 let editingTmplId = null;
+const CONSULT_SLOTS = ['9:30','11:00','13:00','14:30'];
 let editingNoteId = null, editingNoteSection = null, readingNote = null;
 let editingBoardId = null, bfSelIcon='✅', bfSelColor='#5bbf7a';
 let editingLcatId = null, lcSelIcon='👨‍👩‍👧';
@@ -1204,9 +1305,18 @@ function setSection(s){
 
   if(s==='family'){ famView==='budget'?renderBudget():renderFamily(); }
   if(s==='notes')  renderNotes();
-  if(s==='work')   renderWork();
+  if(s==='work')   { workMode==='psiho'?renderPsiho():renderWork(); }
   if(s==='links')  renderLinks();
-  if(s==='psiho')  renderPsiho();
+}
+
+function setWorkMode(m){
+  workMode=m;
+  document.getElementById('work-notes-view').style.display = m==='notes'?'':'none';
+  document.getElementById('work-psiho-view').style.display = m==='psiho'?'':'none';
+  document.getElementById('wtab-notes').classList.toggle('active', m==='notes');
+  document.getElementById('wtab-psiho').classList.toggle('active', m==='psiho');
+  if(m==='notes') renderWork();
+  else renderPsiho();
 }
 
 // ══════════════════════════════════════════════════════════
@@ -1539,12 +1649,16 @@ const MONTHS_RU=['Январь','Февраль','Март','Апрель','Ма
 
 function setPsihoView(v){
   psihoView=v;
-  document.getElementById('psiho-view-payments').style.display = v==='payments'?'':'none';
-  document.getElementById('psiho-view-templates').style.display = v==='templates'?'':'none';
-  document.getElementById('ptab-payments').classList.toggle('active', v==='payments');
-  document.getElementById('ptab-templates').classList.toggle('active', v==='templates');
+  ['payments','templates','consults','ptasks'].forEach(id=>{
+    const el=document.getElementById('psiho-view-'+id);
+    if(el) el.style.display = v===id?'':'none';
+    const tab=document.getElementById('ptab-'+id);
+    if(tab) tab.classList.toggle('active', v===id);
+  });
   if(v==='payments') renderPayments();
-  else renderTemplates();
+  else if(v==='templates') renderTemplates();
+  else if(v==='consults') renderConsults();
+  else if(v==='ptasks') renderPBoards();
 }
 
 function psihoMonthKey(){ return psihoYear+'-'+String(psihoMon+1).padStart(2,'0'); }
@@ -1556,8 +1670,7 @@ function psihoMonthStep(d){
 }
 
 function renderPsiho(){
-  if(psihoView==='payments') renderPayments();
-  else renderTemplates();
+  setPsihoView(psihoView);
 }
 
 function renderPayments(){
@@ -1699,6 +1812,128 @@ function deleteTemplate(id){
   jsave(K.templates,TEMPLATES);
   renderTemplates();
   toast('🗑 Удалено');
+}
+
+// ── Consultations ──
+function renderConsults(){
+  const key=psihoMonthKey();
+  const c=PCONSULTS[key]||{};
+  const lbl=document.getElementById('psiho-consult-month-lbl');
+  if(lbl) lbl.textContent=MONTHS_RU[psihoMon]+' '+psihoYear;
+  const dateIn=document.getElementById('consult-date-input');
+  const dateDis=document.getElementById('consult-date-display');
+  if(dateIn) dateIn.value=c.date||'';
+  if(dateDis) dateDis.textContent=c.date?formatConsultDate(c.date):'';
+  const grid=document.getElementById('consult-grid'); if(!grid) return;
+  grid.innerHTML=CONSULT_SLOTS.map((t,i)=>{
+    const taken=!!(c['s'+i]);
+    return `<div class="slot-card ${taken?'taken':'free'}" onclick="toggleSlot(${i})">
+      <div class="slot-time">${t}</div>
+      <div class="slot-status">${taken?'ЗАНЯТО':'СВОБОДНО'}</div>
+    </div>`;
+  }).join('');
+}
+function formatConsultDate(iso){
+  if(!iso) return '';
+  const d=new Date(iso+'T12:00:00');
+  return d.toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});
+}
+function saveConsultDate(val){
+  const key=psihoMonthKey();
+  if(!PCONSULTS[key]) PCONSULTS[key]={};
+  PCONSULTS[key].date=val;
+  const el=document.getElementById('consult-date-display');
+  if(el) el.textContent=formatConsultDate(val);
+  jsave(K.pconsults,PCONSULTS);
+}
+function toggleSlot(i){
+  const key=psihoMonthKey();
+  if(!PCONSULTS[key]) PCONSULTS[key]={};
+  PCONSULTS[key]['s'+i]=!PCONSULTS[key]['s'+i];
+  jsave(K.pconsults,PCONSULTS);
+  renderConsults();
+}
+
+// ── Psiho task boards ──
+let editingPBoardId=null, pbfSelIcon='📋', pbfSelColor='#c9a96e';
+
+function renderPBoards(){
+  PBOARDS.forEach(b=>{ if(!PTASKS[b.id]) PTASKS[b.id]=[]; });
+  const grid=document.getElementById('pboards-grid'); if(!grid) return;
+  grid.innerHTML=PBOARDS.map(b=>renderPBoard(b)).join('');
+}
+
+function renderPBoard(b){
+  const items=PTASKS[b.id]||[];
+  const done=items.filter(i=>i.done).length;
+  const rows=items.map(item=>`
+    <div class="board-item ${item.done?'done':''}">
+      <label class="board-check-wrap">
+        <input type="checkbox" ${item.done?'checked':''} onchange="togglePTask('${b.id}','${item.id}',this.checked)" />
+        <span class="board-item-text">${esc(item.text)}</span>
+      </label>
+      <button class="board-item-del" onclick="deletePTask('${b.id}','${item.id}')">✕</button>
+    </div>`).join('');
+  return `<div class="board-card">
+    <div class="board-header" style="border-color:${b.color}">
+      <span class="board-icon">${b.icon}</span>
+      <span class="board-title">${esc(b.label)}</span>
+      <span class="board-count">${done}/${items.length}</span>
+      <button class="board-edit-btn" onclick="openPBoardForm('${b.id}')">✎</button>
+      <button class="board-edit-btn" style="color:#e05577" onclick="confirmAction('Удалить раздел?','',()=>deletePBoard('${b.id}'))">✕</button>
+    </div>
+    <div class="board-items">${rows}</div>
+    <div class="board-input-row">
+      <input class="board-input" id="pbi-${b.id}" placeholder="${esc(b.placeholder||'Добавить…')}" onkeydown="if(event.key==='Enter')addPTask('${b.id}')" />
+      <button class="board-add-btn" onclick="addPTask('${b.id}')">＋</button>
+    </div>
+  </div>`;
+}
+
+function addPTask(boardId){
+  const inp=document.getElementById('pbi-'+boardId); if(!inp) return;
+  const text=inp.value.trim(); if(!text) return;
+  if(!PTASKS[boardId]) PTASKS[boardId]=[];
+  PTASKS[boardId].push({id:Date.now().toString(36),text,done:false});
+  inp.value='';
+  jsave(K.ptasks,PTASKS); renderPBoards();
+}
+function togglePTask(boardId,itemId,done){
+  const item=(PTASKS[boardId]||[]).find(x=>x.id===itemId); if(item) item.done=done;
+  jsave(K.ptasks,PTASKS); renderPBoards();
+}
+function deletePTask(boardId,itemId){
+  PTASKS[boardId]=(PTASKS[boardId]||[]).filter(x=>x.id!==itemId);
+  jsave(K.ptasks,PTASKS); renderPBoards();
+}
+function openPBoardForm(id){
+  editingPBoardId=id||null;
+  const b=id?PBOARDS.find(x=>x.id===id):null;
+  document.getElementById('pbf-title').textContent=b?'Редактировать раздел':'Новый раздел';
+  document.getElementById('pbf-name').value=b?.label||'';
+  pbfSelIcon=b?.icon||'📋'; pbfSelColor=b?.color||'#c9a96e';
+  document.getElementById('pbf-icons').innerHTML=BOARD_ICONS.map(ic=>
+    `<div class="ico ${ic===pbfSelIcon?'sel':''}" onclick="pbfSelIcon='${ic}';document.querySelectorAll('#pbf-icons .ico').forEach(e=>e.classList.remove('sel'));this.classList.add('sel')">${ic}</div>`
+  ).join('');
+  document.getElementById('pbf-colors').innerHTML=BOARD_COLORS.map(c=>
+    `<div class="swatch ${c===pbfSelColor?'sel':''}" style="background:${c}" onclick="pbfSelColor='${c}';document.querySelectorAll('#pbf-colors .swatch').forEach(e=>e.classList.remove('sel'));this.classList.add('sel')"></div>`
+  ).join('');
+  openOv('ov-pboard'); setTimeout(()=>document.getElementById('pbf-name').focus(),80);
+}
+function submitPBoard(){
+  const name=(document.getElementById('pbf-name').value||'').trim(); if(!name) return;
+  if(editingPBoardId){
+    const b=PBOARDS.find(x=>x.id===editingPBoardId);
+    if(b){ b.label=name; b.icon=pbfSelIcon; b.color=pbfSelColor; }
+  } else {
+    const id=Date.now().toString(36);
+    PBOARDS.push({id,label:name,icon:pbfSelIcon,color:pbfSelColor,placeholder:'Добавить…'});
+  }
+  jsave(K.pboards,PBOARDS); closeOv('ov-pboard'); renderPBoards(); toast('✅ Сохранено');
+}
+function deletePBoard(id){
+  PBOARDS=PBOARDS.filter(b=>b.id!==id); delete PTASKS[id];
+  jsave(K.pboards,PBOARDS); jsave(K.ptasks,PTASKS); renderPBoards(); toast('🗑 Удалено');
 }
 
 function renderFamily(){
@@ -2070,7 +2305,7 @@ function today(){ return new Date().toISOString().slice(0,10); }
 function plural(n,a,b,c){ const m=n%10,h=n%100; if(m===1&&h!==11)return a; if(m>=2&&m<=4&&(h<10||h>=20))return b; return c; }
 
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape') ['ov-read','ov-note','ov-link','ov-board','ov-lcat','ov-ncat','ov-fin','ov-confirm','ov-tmpl','ov-client'].forEach(id=>document.getElementById(id)?.classList.remove('open'));
+  if(e.key==='Escape') ['ov-read','ov-note','ov-link','ov-board','ov-lcat','ov-ncat','ov-fin','ov-confirm','ov-tmpl','ov-client','ov-pboard'].forEach(id=>document.getElementById(id)?.classList.remove('open'));
 });
 
 // ══ PWA ══
