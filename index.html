@@ -14,9 +14,9 @@
   <style>
     *{box-sizing:border-box;margin:0;padding:0;}
     :root{
-      --bg:#0d0d0f;--s1:#141417;--s2:#1c1c21;--s3:#242429;
-      --border:#2a2a32;--border2:#35353f;
-      --text:#eeeef2;--text2:#8e8ea0;--text3:#55556a;
+      --bg:#1a1825;--s1:#211f30;--s2:#28263b;--s3:#323049;
+      --border:#3d3a5c;--border2:#514d70;
+      --text:#e8e6f2;--text2:#9390ae;--text3:#62607e;
       --accent:#c9a96e;--r:12px;
       --nav-h:62px;
     }
@@ -395,21 +395,27 @@
     .psiho-stat-num{font-size:22px;font-weight:700;}
     .psiho-stat-lbl{font-size:11px;color:var(--text2);margin-top:2px;}
     /* Consultations */
-    .consult-header{text-align:center;padding:16px 0 20px;}
-    .consult-title{font-size:18px;font-weight:700;margin-bottom:12px;}
-    .consult-date-row{display:flex;flex-direction:column;align-items:center;gap:6px;}
-    .consult-date-input{max-width:180px;text-align:center;}
-    .consult-date-display{font-size:20px;font-weight:700;color:var(--accent);}
-    .consult-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:420px;margin:0 auto;}
-    .slot-card{border-radius:14px;padding:20px 14px;text-align:center;cursor:pointer;transition:all .18s;border:2px solid transparent;user-select:none;}
-    .slot-card.free{background:rgba(201,169,110,.12);border-color:var(--accent);}
-    .slot-card.free:hover{background:rgba(201,169,110,.2);}
-    .slot-card.taken{background:var(--s2);border-color:var(--border);opacity:.6;}
-    .slot-time{font-size:26px;font-weight:800;line-height:1;}
-    .slot-card.taken .slot-time{text-decoration:line-through;color:var(--text3);}
-    .slot-status{font-size:11px;font-weight:700;letter-spacing:.08em;margin-top:8px;}
-    .slot-card.free .slot-status{color:var(--accent);}
-    .slot-card.taken .slot-status{color:var(--text3);}
+    /* Consultation page — light panel */
+    .consult-panel{background:#faf8f5;border-radius:22px;padding:28px 22px 32px;max-width:460px;margin:0 auto;}
+    .consult-panel-month{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:22px;}
+    .consult-panel-month .budget-nav-btn{background:none;border:1.5px solid #d8d4cc;color:#5c5870;border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:background .15s;}
+    .consult-panel-month .budget-nav-btn:hover{background:#f0ede8;}
+    .consult-panel-month-lbl{font-size:13px;font-weight:600;color:#5c5870;min-width:120px;text-align:center;}
+    .consult-title{font-size:22px;font-weight:800;color:#1c1820;text-align:center;margin-bottom:6px;line-height:1.25;}
+    .consult-date-row{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:24px;}
+    .consult-date-input{max-width:180px;text-align:center;background:#f0ede8;border:1.5px solid #d8d4cc;color:#1c1820;border-radius:8px;padding:6px 10px;}
+    .consult-date-display{font-size:24px;font-weight:800;color:#1c1820;text-align:center;line-height:1.2;}
+    .consult-subtitle{font-size:12px;color:#9590a4;text-align:center;margin-top:4px;letter-spacing:.01em;}
+    .consult-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    .slot-card{border-radius:18px;padding:24px 14px 20px;text-align:center;cursor:pointer;transition:all .2s;border:2px solid transparent;user-select:none;}
+    .slot-card.free{background:#fde8ed;border-color:#e8a0aa;}
+    .slot-card.free:hover{background:#f9d5dc;border-color:#df8a96;}
+    .slot-card.taken{background:#f2f0f6;border-color:#e0dce8;}
+    .slot-time{font-size:30px;font-weight:800;line-height:1;color:#1c1820;}
+    .slot-card.taken .slot-time{text-decoration:line-through;color:#bbb8cc;}
+    .slot-status{font-size:11px;font-weight:700;letter-spacing:.1em;margin-top:10px;}
+    .slot-card.free .slot-status{color:#d96878;}
+    .slot-card.taken .slot-status{color:#bbb8cc;}
     /* Psiho task boards */
     .pboards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
     @media(max-width:700px){.pboards-grid{grid-template-columns:1fr;}.consult-grid{gap:8px;}}
@@ -700,20 +706,21 @@
         </div>
         <!-- Consultations view -->
         <div id="psiho-view-consults" style="display:none;">
-          <div class="budget-nav">
-            <button class="budget-nav-btn" onclick="psihoMonthStep(-1)">‹</button>
-            <span class="budget-month-label" id="psiho-consult-month-lbl"></span>
-            <button class="budget-nav-btn" onclick="psihoMonthStep(1)">›</button>
-          </div>
-          <div class="section-content" style="padding-top:12px;">
-            <div class="consult-header">
+          <div class="section-content" style="padding-top:16px;">
+            <div class="consult-panel">
+              <div class="consult-panel-month">
+                <button class="budget-nav-btn" onclick="psihoMonthStep(-1)">‹</button>
+                <span class="consult-panel-month-lbl" id="psiho-consult-month-lbl"></span>
+                <button class="budget-nav-btn" onclick="psihoMonthStep(1)">›</button>
+              </div>
               <div class="consult-title">Ближайший день записи</div>
               <div class="consult-date-row">
-                <input type="date" class="fi consult-date-input" id="consult-date-input" onchange="saveConsultDate(this.value)" />
-                <div class="consult-date-display" id="consult-date-display"></div>
+                <div class="consult-date-display" id="consult-date-display">Выбери дату</div>
+                <div class="consult-subtitle">по московскому времени · 55–60 минут · онлайн</div>
+                <input type="date" class="consult-date-input" id="consult-date-input" onchange="saveConsultDate(this.value)" />
               </div>
+              <div class="consult-grid" id="consult-grid"></div>
             </div>
-            <div class="consult-grid" id="consult-grid"></div>
           </div>
         </div>
       </div>
@@ -1820,10 +1827,13 @@ function renderConsults(){
   const c=PCONSULTS[key]||{};
   const lbl=document.getElementById('psiho-consult-month-lbl');
   if(lbl) lbl.textContent=MONTHS_RU[psihoMon]+' '+psihoYear;
+  // Update payment month label too if on that view
+  const plbl=document.getElementById('psiho-month-lbl');
+  if(plbl) plbl.textContent=MONTHS_RU[psihoMon]+' '+psihoYear;
   const dateIn=document.getElementById('consult-date-input');
   const dateDis=document.getElementById('consult-date-display');
   if(dateIn) dateIn.value=c.date||'';
-  if(dateDis) dateDis.textContent=c.date?formatConsultDate(c.date):'';
+  if(dateDis) dateDis.textContent=c.date?formatConsultDate(c.date):'Выбери дату';
   const grid=document.getElementById('consult-grid'); if(!grid) return;
   grid.innerHTML=CONSULT_SLOTS.map((t,i)=>{
     const taken=!!(c['s'+i]);
