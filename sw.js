@@ -1,4 +1,4 @@
-const CACHE = 'mybook-v4';
+const CACHE = 'mybook-v5';
 const CORE = ['/mybook/', '/mybook/index.html', '/mybook/icon.svg', '/mybook/manifest.json'];
 
 self.addEventListener('install', e => {

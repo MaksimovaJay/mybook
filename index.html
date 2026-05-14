@@ -1205,56 +1205,6 @@ async function loadAll(){
   ]);
   // migrate: remove old budget board if present
   BOARDS = BOARDS.filter(b=>b.id!=='budget');
-  // seed: Бишкек checklist
-  if(!BOARDS.find(b=>b.id==='bishkek')){
-    BOARDS.push({id:'bishkek',label:'Бишкек ✈️',icon:'🧳',color:'#5eaee0',type:'check',placeholder:'Добавить в список...'});
-    FAMILY['bishkek']=[
-      {id:1, text:'Маме духи',                         done:false},
-      {id:2, text:'Марьяше жвачки',                    done:true},
-      {id:3, text:'Маракуя в жидком виде без корочки', done:false},
-      {id:4, text:'Манго (фрукты крч)',                done:false},
-      {id:5, text:'Коляну вонючку или рубашку',        done:true},
-      {id:6, text:'Камиле ?',                          done:false},
-      {id:7, text:'Зажигалку маме две штуки',          done:false},
-      {id:8, text:'Максу зубная щётка',                done:false},
-      {id:9, text:'Максу и Али фотка',                 done:false},
-      {id:10,text:'Черепашку маме',                    done:false},
-    ];
-    jsave(K.boards,BOARDS); jsave(K.family,FAMILY);
-  }
-  // seed: рабочие заметки
-  if(!WORK.find(n=>n.title==='US-001: Фильтрация каталога')){
-    WORK.push(
-      {id:WORK.reduce((m,n)=>Math.max(m,n.id),0)+1,cat:'templates',pin:false,tags:['user story'],created:'2026-05-13',
-       title:'US-001: Фильтрация каталога',
-       body:'Как покупатель, я хочу фильтровать книги по жанру/автору/цене/рейтингу, чтобы быстро находить нужные издания.\n\nКритерии:\n• Чекбоксы жанров, поиск по автору, слайдер цены, фильтр по звёздам\n• Результаты обновляются мгновенно\n• Счётчик найденных позиций\n• Кнопка «Сбросить фильтры»\n• Параметры в URL\n• Заглушка при 0 результатов\n\nПриоритет: High | 5 SP'},
-      {id:WORK.reduce((m,n)=>Math.max(m,n.id),0)+2,cat:'templates',pin:true,tags:['теория'],created:'2026-05-13',
-       title:'User Story vs Use Case',
-       body:'User Story — кратко про потребность\nФормат: «Как [кто], я хочу [что], чтобы [зачем]»\nДополняется критериями приёмки. Хранится в Jira/Trello.\n\nUse Case — подробный сценарий взаимодействия с системой\nВключает: актор, цель, предусловия, основной путь, альтернативы/ошибки\n\nРазница: Story — потребность, Use Case — реализация поведения'}
-    );
-    WORK.push(
-      {id:WORK.reduce((m,n)=>Math.max(m,n.id),0)+3,cat:'templates',pin:true,tags:['бриф'],created:'2026-05-13',
-       title:'Бриф на разработку сайта',
-       body:'── Этап 1: Сайт ──\n• Чем занимается компания / что продаёте?\n• Цель сайта — продажи, заявки, имидж, инфо?\n• Есть ли сайт? Что не устраивает?\n• Кто целевая аудитория?\n• Какие страницы нужны?\n• Каталог — сколько позиций?\n• Нужна ли онлайн-оплата?\n\n── Этап 2: Визуал ──\n• Логотип, фирменный стиль, брендбук?\n• Готовые фото и тексты или делаем?\n• 2–3 сайта которые нравятся визуально\n• Что точно не нравится?\n• Предпочтения по цветам?\n• Настроение — строго или легко/современно?\n• Интеграции — CRM, мессенджеры, карты, формы?\n• Личный кабинет? Блог/новости?\n\n── Этап 3: Сроки ──\n• Бюджет?\n• Дедлайн?\n• Кто ведёт проект со стороны клиента?\n• Кто будет наполнять сайт после запуска?\n• SEO и аналитика?\n• Платформа?\n\n── Этап 4: Продвижение ──\n• Реклама после запуска?\n• SEO?\n• Аналитика — счётчики, отслеживание заявок?'}
-    );
-    jsave(K.work,WORK);
-  }
-  // seed: ссылки Жени
-  if(!LINK_CATS.find(c=>c.id==='mysites'))  { LINK_CATS.push({id:'mysites',   label:'Мои сайты',   icon:'💻'}); jsave(K.lcats,LINK_CATS); }
-  if(!LINK_CATS.find(c=>c.id==='mytools'))  { LINK_CATS.push({id:'mytools',   label:'Инструменты', icon:'🔧'}); jsave(K.lcats,LINK_CATS); }
-  if(!LINKS.find(l=>l.url.includes('th-mjay.com'))){
-    const seed=[
-      {id:1,  url:'https://th-mjay.com/',                                          title:'TH-MJay',          desc:'Мой основной сайт',         cat:'mysites', created:'2026-05-13'},
-      {id:2,  url:'https://irina-astafieva.ru/',                                   title:'Ирина Астафьева',  desc:'',                          cat:'mysites', created:'2026-05-13'},
-      {id:3,  url:'https://maksimovajay.github.io/Yaroslav-s-website/index.html',  title:'Ярослав',          desc:'Переедет на домен позже',    cat:'mysites', created:'2026-05-13'},
-      {id:4,  url:'https://imax-tattoo.com/',                                      title:'IMAX Tattoo',      desc:'',                          cat:'mysites', created:'2026-05-13'},
-      {id:5,  url:'https://lera-proaut.ru/proАВАclub',                             title:'Лера ProAut',      desc:'',                          cat:'mysites', created:'2026-05-13'},
-      {id:6,  url:'https://psihogolik.getcourse.ru/aba_con_2026',                  title:'ABA Con 2026',     desc:'',                          cat:'mysites', created:'2026-05-13'},
-      {id:7,  url:'https://github.com/',                                           title:'GitHub',           desc:'',                          cat:'mytools', created:'2026-05-13'},
-      {id:8,  url:'https://psihogolik.getcourse.ru/teach/control/stream',          title:'GetCourse Teach',  desc:'',                          cat:'mytools', created:'2026-05-13'},
-    ];
-    LINKS=seed; jsave(K.links,LINKS);
-  }
   BUDGET    = jload(K.budget,    []);
   TEMPLATES = jload(K.templates, []);
   PCLIENTS  = jload(K.pclients,  []);
@@ -1270,11 +1220,70 @@ async function loadAll(){
     const ref=getDocRef();
     if(ref){ const snap=await ref.get(); if(snap.exists) applyFirestoreData(snap.data()); }
   }catch(e){ console.warn('Firestore load failed:',e); }
-  // ── Migrations run AFTER Firestore load so they can't be overwritten ──
+  // ── All seeds/migrations run AFTER Firestore load — safe to call jsave ──
+  _migrateContent();
   _migrateTemplates();
   _migrateGroups();
   _migrateClients();
   setupListener();
+}
+
+function _migrateContent(){
+  let changed=false;
+  // Seed: Бишкек checklist
+  if(!BOARDS.find(b=>b.id==='bishkek')){
+    BOARDS.push({id:'bishkek',label:'Бишкек ✈️',icon:'🧳',color:'#5eaee0',type:'check',placeholder:'Добавить в список...'});
+    if(!FAMILY['bishkek']) FAMILY['bishkek']=[
+      {id:1, text:'Маме духи',                         done:false},
+      {id:2, text:'Марьяше жвачки',                    done:true},
+      {id:3, text:'Маракуя в жидком виде без корочки', done:false},
+      {id:4, text:'Манго (фрукты крч)',                done:false},
+      {id:5, text:'Коляну вонючку или рубашку',        done:true},
+      {id:6, text:'Камиле ?',                          done:false},
+      {id:7, text:'Зажигалку маме две штуки',          done:false},
+      {id:8, text:'Максу зубная щётка',                done:false},
+      {id:9, text:'Максу и Али фотка',                 done:false},
+      {id:10,text:'Черепашку маме',                    done:false},
+    ];
+    jsave(K.boards,BOARDS); jsave(K.family,FAMILY);
+    changed=true;
+  }
+  // Seed: рабочие заметки
+  if(!WORK.find(n=>n.title==='US-001: Фильтрация каталога')){
+    WORK.push(
+      {id:WORK.reduce((m,n)=>Math.max(m,n.id),0)+1,cat:'templates',pin:false,tags:['user story'],created:'2026-05-13',
+       title:'US-001: Фильтрация каталога',
+       body:'Как покупатель, я хочу фильтровать книги по жанру/автору/цене/рейтингу, чтобы быстро находить нужные издания.\n\nКритерии:\n• Чекбоксы жанров, поиск по автору, слайдер цены, фильтр по звёздам\n• Результаты обновляются мгновенно\n• Счётчик найденных позиций\n• Кнопка «Сбросить фильтры»\n• Параметры в URL\n• Заглушка при 0 результатов\n\nПриоритет: High | 5 SP'},
+      {id:WORK.reduce((m,n)=>Math.max(m,n.id),0)+2,cat:'templates',pin:true,tags:['теория'],created:'2026-05-13',
+       title:'User Story vs Use Case',
+       body:'User Story — кратко про потребность\nФормат: «Как [кто], я хочу [что], чтобы [зачем]»\nДополняется критериями приёмки. Хранится в Jira/Trello.\n\nUse Case — подробный сценарий взаимодействия с системой\nВключает: актор, цель, предусловия, основной путь, альтернативы/ошибки\n\nРазница: Story — потребность, Use Case — реализация поведения'}
+    );
+    WORK.push(
+      {id:WORK.reduce((m,n)=>Math.max(m,n.id),0)+3,cat:'templates',pin:true,tags:['бриф'],created:'2026-05-13',
+       title:'Бриф на разработку сайта',
+       body:'── Этап 1: Сайт ──\n• Чем занимается компания / что продаёте?\n• Цель сайта — продажи, заявки, имидж, инфо?\n• Есть ли сайт? Что не устраивает?\n• Кто целевая аудитория?\n• Какие страницы нужны?\n• Каталог — сколько позиций?\n• Нужна ли онлайн-оплата?\n\n── Этап 2: Визуал ──\n• Логотип, фирменный стиль, брендбук?\n• Готовые фото и тексты или делаем?\n• 2–3 сайта которые нравятся визуально\n• Что точно не нравится?\n• Предпочтения по цветам?\n• Настроение — строго или легко/современно?\n• Интеграции — CRM, мессенджеры, карты, формы?\n• Личный кабинет? Блог/новости?\n\n── Этап 3: Сроки ──\n• Бюджет?\n• Дедлайн?\n• Кто ведёт проект со стороны клиента?\n• Кто будет наполнять сайт после запуска?\n• SEO и аналитика?\n• Платформа?\n\n── Этап 4: Продвижение ──\n• Реклама после запуска?\n• SEO?\n• Аналитика — счётчики, отслеживание заявок?'}
+    );
+    jsave(K.work,WORK);
+    changed=true;
+  }
+  // Seed: link cats
+  if(!LINK_CATS.find(c=>c.id==='mysites')){ LINK_CATS.push({id:'mysites',label:'Мои сайты',  icon:'💻'}); jsave(K.lcats,LINK_CATS); changed=true; }
+  if(!LINK_CATS.find(c=>c.id==='mytools')){ LINK_CATS.push({id:'mytools',label:'Инструменты',icon:'🔧'}); jsave(K.lcats,LINK_CATS); changed=true; }
+  // Seed: links
+  if(!LINKS.find(l=>l.url.includes('th-mjay.com'))){
+    LINKS=[
+      {id:1,  url:'https://th-mjay.com/',                                          title:'TH-MJay',          desc:'Мой основной сайт',         cat:'mysites', created:'2026-05-13'},
+      {id:2,  url:'https://irina-astafieva.ru/',                                   title:'Ирина Астафьева',  desc:'',                          cat:'mysites', created:'2026-05-13'},
+      {id:3,  url:'https://maksimovajay.github.io/Yaroslav-s-website/index.html',  title:'Ярослав',          desc:'Переедет на домен позже',    cat:'mysites', created:'2026-05-13'},
+      {id:4,  url:'https://imax-tattoo.com/',                                      title:'IMAX Tattoo',      desc:'',                          cat:'mysites', created:'2026-05-13'},
+      {id:5,  url:'https://lera-proaut.ru/proАВАclub',                             title:'Лера ProAut',      desc:'',                          cat:'mysites', created:'2026-05-13'},
+      {id:6,  url:'https://psihogolik.getcourse.ru/aba_con_2026',                  title:'ABA Con 2026',     desc:'',                          cat:'mysites', created:'2026-05-13'},
+      {id:7,  url:'https://github.com/',                                           title:'GitHub',           desc:'',                          cat:'mytools', created:'2026-05-13'},
+      {id:8,  url:'https://psihogolik.getcourse.ru/teach/control/stream',          title:'GetCourse Teach',  desc:'',                          cat:'mytools', created:'2026-05-13'},
+    ];
+    jsave(K.links,LINKS);
+    changed=true;
+  }
 }
 
 function _migrateTemplates(){
