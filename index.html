@@ -380,6 +380,14 @@
     .pay-toggle.on::after{left:19px;}
     .pay-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:15px;padding:2px 4px;border-radius:4px;transition:color .15s;}
     .pay-del:hover{color:#e05577;}
+    .pay-copy{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:2px 5px;border-radius:4px;transition:color .15s;}
+    .pay-copy:hover{color:var(--accent);}
+    .pay-group{margin-bottom:18px;}
+    .pay-group-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+    .pay-group-title{font-size:13px;font-weight:700;color:var(--text2);letter-spacing:.02em;}
+    .pay-group-meta{font-size:12px;color:var(--text3);}
+    .pay-group-add{background:none;border:1px dashed var(--border2);color:var(--text3);border-radius:6px;padding:2px 8px;font-size:12px;cursor:pointer;transition:all .15s;}
+    .pay-group-add:hover{border-color:var(--accent);color:var(--accent);}
     .tmpl-card{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:10px;}
     .tmpl-head{display:flex;align-items:flex-start;gap:8px;}
     .tmpl-title{font-size:14px;font-weight:600;flex:1;line-height:1.4;}
@@ -677,9 +685,6 @@
           </div>
           <div class="section-content" style="padding-top:8px;">
             <div class="psiho-stats" id="psiho-stats"></div>
-            <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
-              <button class="btn btn-p" onclick="openClientForm()">＋ Клиент</button>
-            </div>
             <div id="psiho-clients-list"></div>
           </div>
         </div>
@@ -929,7 +934,9 @@
 <div class="overlay" id="ov-client" onclick="closeOv('ov-client',event)">
   <div class="modal modal-sm">
     <button class="close-x" onclick="closeOv('ov-client')">✕</button>
-    <div class="modal-title">Добавить клиента</div>
+    <div class="modal-title" id="cf-title">Добавить клиента</div>
+    <div class="fg" style="margin-bottom:6px;font-size:12px;color:var(--text2);">Группа: <strong id="cf-group-lbl"></strong></div>
+    <input type="hidden" id="cf-group" value="aba1"/>
     <div class="fg"><label class="fl">Имя</label><input class="fi" id="cf-name" type="text" placeholder="Имя клиента…"/></div>
     <div class="form-actions">
       <button class="btn btn-g" onclick="closeOv('ov-client')">Отмена</button>
@@ -1254,18 +1261,28 @@ async function loadAll(){
   // seed: клиенты супервизий АВА
   if(PCLIENTS.length===0){
     PCLIENTS=[
-      {id:'c1',name:'Inna Rudiakova'},
-      {id:'c2',name:'Daria'},
-      {id:'c3',name:'Ирина Лабановская'},
-      {id:'c4',name:'Наталья Иванова'},
-      {id:'c5',name:'Онищенко Ирина'},
-      {id:'c6',name:'Екатерина'},
-      {id:'c7',name:'Анастасия'},
-      {id:'c8',name:'Maria'},
-      {id:'c9',name:'Tanya S'},
+      {id:'c1',name:'Inna Rudiakova',    group:'aba1'},
+      {id:'c2',name:'Daria',             group:'aba1'},
+      {id:'c3',name:'Ирина Лабановская', group:'aba1'},
+      {id:'c4',name:'Наталья Иванова',   group:'aba1'},
+      {id:'c5',name:'Онищенко Ирина',    group:'aba1'},
+      {id:'c6',name:'Екатерина',         group:'aba1'},
+      {id:'c7',name:'Анастасия',         group:'aba1'},
+      {id:'c8',name:'Maria',             group:'aba1'},
+      {id:'c9',name:'Tanya S',           group:'aba1'},
+      {id:'c10',name:'Ксения Воронова',  group:'aba2'},
     ];
     jsave(K.pclients,PCLIENTS);
   }
+  // migrate: add group field to existing clients without one
+  let _migrated=false;
+  PCLIENTS.forEach(c=>{ if(!c.group){ c.group='aba1'; _migrated=true; } });
+  // seed: add Ксения Воронова to aba2 if missing
+  if(!PCLIENTS.find(c=>c.name==='Ксения Воронова')){
+    PCLIENTS.push({id:'c10',name:'Ксения Воронова',group:'aba2'});
+    _migrated=true;
+  }
+  if(_migrated) jsave(K.pclients,PCLIENTS);
   FAMILY = jload(K.family, {});
   BOARDS.forEach(b=>{ if(!FAMILY[b.id]) FAMILY[b.id]=[]; });
   // Load from Firestore (overrides localStorage)
@@ -1680,36 +1697,61 @@ function renderPsiho(){
   setPsihoView(psihoView);
 }
 
+const PAY_GROUPS = [
+  {id:'aba1', label:'ABA От А до Я'},
+  {id:'aba2', label:'ABAриум'},
+];
+
+function renderPaymentGroup(groupId, groupLabel, paid){
+  const clients = PCLIENTS.filter(c=>c.group===groupId);
+  const paidCount = clients.filter(c=>paid[c.id]).length;
+  const sorted = [...clients].sort((a,b)=>{
+    const pa=paid[a.id]?1:0, pb=paid[b.id]?1:0;
+    if(pa!==pb) return pa-pb;
+    return a.name.localeCompare(b.name,'ru');
+  });
+  const rows = sorted.map(c=>{
+    const isPaid=!!paid[c.id];
+    const nameEsc=esc(c.name);
+    return `<div class="pay-row">
+      <span class="pay-name">${nameEsc}</span>
+      <div class="pay-toggle-wrap" onclick="togglePayment('${c.id}')">
+        <div class="pay-toggle ${isPaid?'on':''}"></div>
+        <span style="font-size:12px;color:${isPaid?'#5bbf7a':'var(--text3)'};">${isPaid?'Оплатил':'Ожидание'}</span>
+      </div>
+      <button class="pay-copy" onclick="copyReminder('${nameEsc}')" title="Скопировать напоминание">📋</button>
+      <button class="pay-del" onclick="confirmAction('Удалить клиента?','${nameEsc} будет удалён из всех месяцев',()=>deleteClient('${c.id}'))">✕</button>
+    </div>`;
+  }).join('');
+  return `<div class="pay-group">
+    <div class="pay-group-header">
+      <div>
+        <span class="pay-group-title">${groupLabel}</span>
+        <span class="pay-group-meta"> · ${paidCount}/${clients.length} оплатили</span>
+      </div>
+      <button class="pay-group-add" onclick="openClientForm('${groupId}')">＋ Клиент</button>
+    </div>
+    ${rows||'<div style="font-size:13px;color:var(--text3);padding:8px 0;">Пока никого нет</div>'}
+  </div>`;
+}
+
 function renderPayments(){
   const key=psihoMonthKey();
   const paid=PPAYMENTS[key]||{};
   document.getElementById('psiho-month-lbl').textContent=MONTHS_RU[psihoMon]+' '+psihoYear;
   const total=PCLIENTS.length;
   const paidCount=PCLIENTS.filter(c=>paid[c.id]).length;
-  document.getElementById('psiho-stats').innerHTML=total===0?'':
+  document.getElementById('psiho-stats').innerHTML=
     `<div class="psiho-stat"><div class="psiho-stat-num" style="color:#5bbf7a">${paidCount}</div><div class="psiho-stat-lbl">Оплатили</div></div>
      <div class="psiho-stat"><div class="psiho-stat-num" style="color:#e05577">${total-paidCount}</div><div class="psiho-stat-lbl">Не оплатили</div></div>
      <div class="psiho-stat"><div class="psiho-stat-num">${total}</div><div class="psiho-stat-lbl">Всего</div></div>`;
-  if(total===0){
-    document.getElementById('psiho-clients-list').innerHTML='<div class="empty"><div class="empty-icon">💳</div><div class="empty-txt">Добавь клиентов в список</div></div>';
-    return;
-  }
-  const sorted=[...PCLIENTS].sort((a,b)=>{
-    const pa=paid[a.id]?1:0, pb=paid[b.id]?1:0;
-    if(pa!==pb) return pa-pb;
-    return a.name.localeCompare(b.name,'ru');
-  });
-  document.getElementById('psiho-clients-list').innerHTML=sorted.map(c=>{
-    const isPaid=!!paid[c.id];
-    return `<div class="pay-row">
-      <span class="pay-name">${esc(c.name)}</span>
-      <div class="pay-toggle-wrap" onclick="togglePayment('${c.id}')">
-        <div class="pay-toggle ${isPaid?'on':''}"></div>
-        <span style="font-size:12px;color:${isPaid?'#5bbf7a':'var(--text3)'};">${isPaid?'Оплатил':'Ожидание'}</span>
-      </div>
-      <button class="pay-del" onclick="confirmAction('Удалить клиента?','${esc(c.name)} будет удалён из всех месяцев',()=>deleteClient('${c.id}'))">✕</button>
-    </div>`;
-  }).join('');
+  document.getElementById('psiho-clients-list').innerHTML =
+    PAY_GROUPS.map(g=>renderPaymentGroup(g.id, g.label, paid)).join('');
+}
+
+function copyReminder(name){
+  const msg=`Здравствуйте, ${name}!\nНапоминаем, что 15-е число — последний день оплаты супервизий у Ярославы.`;
+  navigator.clipboard.writeText(msg).then(()=>toast('📋 Напоминание скопировано')).catch(()=>toast('⚠️ Не удалось скопировать'));
 }
 
 function togglePayment(clientId){
@@ -1720,7 +1762,10 @@ function togglePayment(clientId){
   renderPayments();
 }
 
-function openClientForm(){
+function openClientForm(group){
+  const g=group||'aba1';
+  document.getElementById('cf-group').value=g;
+  document.getElementById('cf-group-lbl').textContent=PAY_GROUPS.find(x=>x.id===g)?.label||g;
   document.getElementById('cf-name').value='';
   openOv('ov-client');
   setTimeout(()=>document.getElementById('cf-name').focus(),100);
@@ -1728,8 +1773,9 @@ function openClientForm(){
 
 function submitClient(){
   const name=(document.getElementById('cf-name').value||'').trim();
+  const group=document.getElementById('cf-group').value||'aba1';
   if(!name) return;
-  PCLIENTS.push({id:Date.now().toString(36),name});
+  PCLIENTS.push({id:Date.now().toString(36),name,group});
   jsave(K.pclients,PCLIENTS);
   closeOv('ov-client');
   renderPayments();
