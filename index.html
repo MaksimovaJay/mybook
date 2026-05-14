@@ -1091,6 +1091,7 @@ function setupListener(){
     if(snap.metadata.hasPendingWrites) return;
     const d=snap.data(); if(!d||d._ts===_myLastSync) return;
     applyFirestoreData(d);
+    _migrateClients(); // re-apply client rules after every remote update
     if(curSection==='family') famView==='budget'?renderBudget():renderFamily();
     else if(curSection==='notes') renderNotes();
     else if(curSection==='work'){ if(workMode==='psiho') renderPsiho(); else renderWork(); }
@@ -1142,6 +1143,21 @@ function bootWithFamily(){
 function updateFamilyCodeMob(){ const el=document.getElementById('fcode-val-mob'); if(el&&familyId) el.textContent=familyId; }
 
 function signOutUser(){ if(_unsubListen){_unsubListen();_unsubListen=null;} familyId=null; auth.signOut(); }
+
+// Restore data from localStorage backup (use if Firestore lost data)
+window._restoreFromLocal = function(){
+  const fam  = localStorage.getItem('mb_family');
+  const bud  = localStorage.getItem('mb_budget');
+  const info = [];
+  if(fam){ const d=JSON.parse(fam); const keys=Object.keys(d); info.push('family: '+keys.map(k=>k+'('+d[k].length+')').join(', ')); }
+  if(bud){ const d=JSON.parse(bud); info.push('budget: '+d.length+' записей'); }
+  if(!fam&&!bud){ console.log('Нет данных в localStorage'); return; }
+  console.log('Найдено в localStorage:', info.join(' | '));
+  if(fam){ FAMILY=JSON.parse(fam); jsave(K.family,FAMILY); }
+  if(bud){ BUDGET=JSON.parse(bud); jsave(K.budget,BUDGET); }
+  setSection('family'); renderFamily();
+  console.log('✅ Данные восстановлены из localStorage и синхронизированы в Firestore');
+};
 
 // ══════════════════════════════════════════════════════════
 //  CONFIG
@@ -1323,10 +1339,15 @@ function _migrateClients(){
       {id:'c10',name:'Ксения Воронова',    group:'aba1'},
     ];
     changed=true;
+  } else {
+    // Ensure Ксения is in aba1 even for existing users (moved from deleted aba2)
+    const k=PCLIENTS.find(c=>c.name==='Ксения Воронова');
+    if(!k){ PCLIENTS.push({id:'c10',name:'Ксения Воронова',group:'aba1'}); changed=true; }
+    else if(k.group!=='aba1'){ k.group='aba1'; changed=true; }
   }
   // Fix missing group field on existing clients
   PCLIENTS.forEach(c=>{ if(!c.group){ c.group=PGROUPS[0]?.id||'aba1'; changed=true; } });
-  // Remove aba2 clients (old ABAриум group, deleted)
+  // Remove any remaining aba2 clients
   const before=PCLIENTS.length;
   PCLIENTS=PCLIENTS.filter(c=>c.group!=='aba2');
   if(PCLIENTS.length!==before) changed=true;
@@ -1794,8 +1815,10 @@ function renderPayments(){
   const key=psihoMonthKey();
   const paid=PPAYMENTS[key]||{};
   document.getElementById('psiho-month-lbl').textContent=MONTHS_RU[psihoMon]+' '+psihoYear;
-  const total=PCLIENTS.length;
-  const paidCount=PCLIENTS.filter(c=>paid[c.id]).length;
+  const validIds=new Set(PGROUPS.map(g=>g.id));
+  const validClients=PCLIENTS.filter(c=>validIds.has(c.group));
+  const total=validClients.length;
+  const paidCount=validClients.filter(c=>paid[c.id]).length;
   document.getElementById('psiho-stats').innerHTML=
     `<div class="psiho-stat"><div class="psiho-stat-num" style="color:#5bbf7a">${paidCount}</div><div class="psiho-stat-lbl">Оплатили</div></div>
      <div class="psiho-stat"><div class="psiho-stat-num" style="color:#e05577">${total-paidCount}</div><div class="psiho-stat-lbl">Не оплатили</div></div>
