@@ -1829,7 +1829,7 @@ function renderPayments(){
 }
 
 function copyReminder(name){
-  const msg=`Здравствуйте, ${name}!\nНапоминаем, что 15-е число — последний день оплаты супервизий у Ярославы.`;
+  const msg=`Здравствуйте, ${name}. Напоминаю вам об оплате ✨`;
   navigator.clipboard.writeText(msg).then(()=>toast('📋 Напоминание скопировано')).catch(()=>toast('⚠️ Не удалось скопировать'));
 }
 
