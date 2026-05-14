@@ -1283,6 +1283,25 @@ function _migrateContent(){
     jsave(K.work,WORK);
     changed=true;
   }
+  // Seed: family todos (квартира 23 мая)
+  if(!FAMILY['todos']) FAMILY['todos']=[];
+  const todoTexts=['23 мая — передвинуть кровать в детской (закрыть дырку)','23 мая — прибраться','23 мая — убрать все наклейки'];
+  todoTexts.forEach((text,i)=>{
+    if(!FAMILY['todos'].find(t=>t.text===text)){
+      FAMILY['todos'].push({id:Date.now()+i,text,done:false});
+      changed=true;
+    }
+  });
+  // Seed: family shop (что купить)
+  if(!FAMILY['shop']) FAMILY['shop']=[];
+  const shopTexts=['Две пачки клейкого риса','Кокосовый крем'];
+  shopTexts.forEach((text,i)=>{
+    if(!FAMILY['shop'].find(t=>t.text===text)){
+      FAMILY['shop'].push({id:Date.now()+100+i,text,done:false});
+      changed=true;
+    }
+  });
+  if(changed) jsave(K.family,FAMILY);
   // Seed: link cats
   if(!LINK_CATS.find(c=>c.id==='mysites')){ LINK_CATS.push({id:'mysites',label:'Мои сайты',  icon:'💻'}); jsave(K.lcats,LINK_CATS); changed=true; }
   if(!LINK_CATS.find(c=>c.id==='mytools')){ LINK_CATS.push({id:'mytools',label:'Инструменты',icon:'🔧'}); jsave(K.lcats,LINK_CATS); changed=true; }
