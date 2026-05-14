@@ -370,6 +370,31 @@
     ::-webkit-scrollbar-track{background:transparent;}
     ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
 
+    /* ══ Psihogolik ══ */
+    .pay-row{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:var(--r);background:var(--s2);border:1px solid var(--border);margin-bottom:6px;}
+    .pay-name{flex:1;font-size:14px;}
+    .pay-toggle-wrap{display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none;}
+    .pay-toggle{width:38px;height:22px;border-radius:11px;background:var(--border2);position:relative;transition:background .2s;flex-shrink:0;}
+    .pay-toggle.on{background:#5bbf7a;}
+    .pay-toggle::after{content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;top:3px;left:3px;transition:left .2s;}
+    .pay-toggle.on::after{left:19px;}
+    .pay-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:15px;padding:2px 4px;border-radius:4px;transition:color .15s;}
+    .pay-del:hover{color:#e05577;}
+    .tmpl-card{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:10px;}
+    .tmpl-head{display:flex;align-items:flex-start;gap:8px;}
+    .tmpl-title{font-size:14px;font-weight:600;flex:1;line-height:1.4;}
+    .tmpl-acts{display:flex;gap:5px;flex-shrink:0;flex-wrap:wrap;}
+    .tmpl-body{font-size:13px;color:var(--text2);margin-top:8px;white-space:pre-wrap;line-height:1.5;max-height:90px;overflow:hidden;}
+    .tmpl-body.exp{max-height:none;}
+    .tmpl-copy{background:rgba(201,169,110,.15);border:1px solid rgba(201,169,110,.3);color:var(--accent);border-radius:6px;padding:3px 10px;font-size:12px;cursor:pointer;transition:background .15s;}
+    .tmpl-copy:hover{background:rgba(201,169,110,.25);}
+    .tmpl-small{background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:3px 6px;border-radius:5px;transition:color .15s;}
+    .tmpl-small:hover{color:var(--text2);}
+    .psiho-stats{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+    .psiho-stat{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;flex:1;min-width:80px;}
+    .psiho-stat-num{font-size:22px;font-weight:700;}
+    .psiho-stat-lbl{font-size:11px;color:var(--text2);margin-top:2px;}
+
     /* ══ RESPONSIVE ══ */
     @media(max-width:700px){
       .sidebar{display:none;}
@@ -490,6 +515,24 @@
       </div>
     </div>
 
+    <div class="sb-divider"></div>
+
+    <!-- psihogolik -->
+    <div class="sb-group">
+      <div class="sb-group-head" id="sg-psiho" onclick="setSection('psiho')">
+        <span class="sb-group-icon">🧠</span>
+        <span class="sb-group-label">psihogolik</span>
+      </div>
+      <div class="sb-sub">
+        <button class="sb-item" onclick="setSection('psiho');setPsihoView('payments')">
+          <span>💳</span> Оплата
+        </button>
+        <button class="sb-item" onclick="setSection('psiho');setPsihoView('templates')">
+          <span>💬</span> Шаблоны
+        </button>
+      </div>
+    </div>
+
     <div class="sb-bottom">
       <div style="display:flex;align-items:center;gap:8px;padding:6px 10px 2px;">
         <img id="user-avatar" width="26" height="26" style="border-radius:50%;display:none;flex-shrink:0;">
@@ -603,6 +646,43 @@
       </div>
     </div>
 
+    <!-- ── PSIHOGOLIK ── -->
+    <div class="section" id="sec-psiho">
+      <div class="fam-topbar">
+        <button class="fam-tab active" id="ptab-payments" onclick="setPsihoView('payments')">💳 Оплата</button>
+        <button class="fam-tab" id="ptab-templates" onclick="setPsihoView('templates')">💬 Шаблоны</button>
+      </div>
+      <!-- Payments view -->
+      <div id="psiho-view-payments">
+        <div class="budget-nav">
+          <button class="budget-nav-btn" onclick="psihoMonthStep(-1)">‹</button>
+          <span class="budget-month-label" id="psiho-month-lbl"></span>
+          <button class="budget-nav-btn" onclick="psihoMonthStep(1)">›</button>
+        </div>
+        <div class="section-content" style="padding-top:8px;">
+          <div class="psiho-stats" id="psiho-stats"></div>
+          <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
+            <button class="btn btn-p" onclick="openClientForm()">＋ Клиент</button>
+          </div>
+          <div id="psiho-clients-list"></div>
+        </div>
+      </div>
+      <!-- Templates view -->
+      <div id="psiho-view-templates" style="display:none;">
+        <div class="topbar">
+          <div class="search-wrap">
+            <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8.5" cy="8.5" r="5.5"/><line x1="13.5" y1="13.5" x2="18" y2="18"/></svg>
+            <input class="si" id="tmpl-search" type="text" placeholder="Поиск…" oninput="renderTemplates()" />
+          </div>
+          <button class="btn btn-p" onclick="openTemplateForm()">＋ Шаблон</button>
+        </div>
+        <div class="section-content">
+          <div id="tmpl-list"></div>
+          <div id="tmpl-empty" class="empty" style="display:none"><div class="empty-icon">💬</div><div class="empty-txt">Добавь первый шаблон сообщения</div></div>
+        </div>
+      </div>
+    </div>
+
   </div><!-- /main -->
 </div><!-- /app -->
 
@@ -619,6 +699,9 @@
   </button>
   <button class="bn-item" id="bn-links" onclick="setSection('links')">
     <span class="bn-icon">🔗</span><span class="bn-label">Ссылки</span>
+  </button>
+  <button class="bn-item" id="bn-psiho" onclick="setSection('psiho')">
+    <span class="bn-icon">🧠</span><span class="bn-label">Психо</span>
   </button>
 </nav>
 
@@ -755,6 +838,33 @@
   </div>
 </div>
 
+<!-- ── Template form ── -->
+<div class="overlay" id="ov-tmpl" onclick="closeOv('ov-tmpl',event)">
+  <div class="modal">
+    <button class="close-x" onclick="closeOv('ov-tmpl')">✕</button>
+    <div class="modal-title" id="tf-title">Новый шаблон</div>
+    <div class="fg"><label class="fl">Название</label><input class="fi" id="tf-name" type="text" placeholder="Название шаблона…"/></div>
+    <div class="fg"><label class="fl">Текст</label><textarea class="fta" id="tf-body" placeholder="Текст сообщения…" style="min-height:140px;"></textarea></div>
+    <div class="form-actions">
+      <button class="btn btn-g" onclick="closeOv('ov-tmpl')">Отмена</button>
+      <button class="btn btn-p" onclick="submitTemplate()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Client form ── -->
+<div class="overlay" id="ov-client" onclick="closeOv('ov-client',event)">
+  <div class="modal modal-sm">
+    <button class="close-x" onclick="closeOv('ov-client')">✕</button>
+    <div class="modal-title">Добавить клиента</div>
+    <div class="fg"><label class="fl">Имя</label><input class="fi" id="cf-name" type="text" placeholder="Имя клиента…"/></div>
+    <div class="form-actions">
+      <button class="btn btn-g" onclick="closeOv('ov-client')">Отмена</button>
+      <button class="btn btn-p" onclick="submitClient()">Добавить</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── Confirm ── -->
 <div class="overlay" id="ov-confirm" onclick="closeOv('ov-confirm',event)">
   <div class="confirm-box">
@@ -853,7 +963,7 @@ function syncToFirestore(){
   clearTimeout(_syncTimer);
   _syncTimer=setTimeout(async()=>{
     _myLastSync=Date.now();
-    try{ await ref.set({notes:NOTES,work:WORK,links:LINKS,lcats:LINK_CATS,boards:BOARDS,family:FAMILY,budget:BUDGET,ncats_notes:NOTE_CATS.notes,ncats_work:NOTE_CATS.work,_ts:_myLastSync}); }
+    try{ await ref.set({notes:NOTES,work:WORK,links:LINKS,lcats:LINK_CATS,boards:BOARDS,family:FAMILY,budget:BUDGET,ncats_notes:NOTE_CATS.notes,ncats_work:NOTE_CATS.work,templates:TEMPLATES,pclients:PCLIENTS,ppayments:PPAYMENTS,_ts:_myLastSync}); }
     catch(e){ console.warn('Sync failed:',e); }
   },800);
 }
@@ -866,9 +976,12 @@ function applyFirestoreData(d){
   if(d.work)   WORK=d.work;
   if(d.links)  LINKS=d.links;
   if(d.lcats)  LINK_CATS=d.lcats;
-  if(d.boards) BOARDS=d.boards;
-  if(d.family) FAMILY=d.family;
-  if(d.budget) BUDGET=d.budget;
+  if(d.boards)    BOARDS=d.boards;
+  if(d.family)    FAMILY=d.family;
+  if(d.budget)    BUDGET=d.budget;
+  if(d.templates) TEMPLATES=d.templates;
+  if(d.pclients)  PCLIENTS=d.pclients;
+  if(d.ppayments) PPAYMENTS=d.ppayments;
   BOARDS=BOARDS.filter(b=>b.id!=='budget');
   BOARDS.forEach(b=>{ if(!FAMILY[b.id]) FAMILY[b.id]=[]; });
 }
@@ -884,6 +997,7 @@ function setupListener(){
     else if(curSection==='notes') renderNotes();
     else if(curSection==='work') renderWork();
     else if(curSection==='links') renderLinks();
+    else if(curSection==='psiho') renderPsiho();
     toast('🔄 Синхронизировано');
   });
 }
@@ -955,9 +1069,11 @@ const K = {
   notes:'mb_notes', work:'mb_work',
   links:'mb_links', lcats:'mb_lcats',
   boards:'mb_boards', family:'mb_family', budget:'mb_budget',
+  templates:'mb_templates', pclients:'mb_pclients', ppayments:'mb_ppayments',
 };
 
 let BUDGET = [];
+let TEMPLATES = [], PCLIENTS = [], PPAYMENTS = {};
 
 async function loadAll(){
   NOTE_CATS = {
@@ -1040,7 +1156,10 @@ async function loadAll(){
     ];
     LINKS=seed; jsave(K.links,LINKS);
   }
-  BUDGET = jload(K.budget, []);
+  BUDGET    = jload(K.budget,    []);
+  TEMPLATES = jload(K.templates, []);
+  PCLIENTS  = jload(K.pclients,  []);
+  PPAYMENTS = jload(K.ppayments, {});
   FAMILY = jload(K.family, {});
   BOARDS.forEach(b=>{ if(!FAMILY[b.id]) FAMILY[b.id]=[]; });
   // Load from Firestore (overrides localStorage)
@@ -1062,6 +1181,10 @@ let famView    = 'boards';
 let noteFilter = {notes:'all', work:'all', links:'all'};
 let budgetYear = new Date().getFullYear();
 let budgetMon  = new Date().getMonth(); // 0-based
+let psihoView  = 'payments';
+let psihoYear  = new Date().getFullYear();
+let psihoMon   = new Date().getMonth();
+let editingTmplId = null;
 let editingNoteId = null, editingNoteSection = null, readingNote = null;
 let editingBoardId = null, bfSelIcon='✅', bfSelColor='#5bbf7a';
 let editingLcatId = null, lcSelIcon='👨‍👩‍👧';
@@ -1083,6 +1206,7 @@ function setSection(s){
   if(s==='notes')  renderNotes();
   if(s==='work')   renderWork();
   if(s==='links')  renderLinks();
+  if(s==='psiho')  renderPsiho();
 }
 
 // ══════════════════════════════════════════════════════════
@@ -1405,6 +1529,176 @@ function setFamView(view){
   // topbar actions (now in burger menu — always visible)
   if(view==='budget') renderBudget();
   else renderFamily();
+}
+
+// ══════════════════════════════════════════════════════════
+//  PSIHOGOLIK
+// ══════════════════════════════════════════════════════════
+
+const MONTHS_RU=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+
+function setPsihoView(v){
+  psihoView=v;
+  document.getElementById('psiho-view-payments').style.display = v==='payments'?'':'none';
+  document.getElementById('psiho-view-templates').style.display = v==='templates'?'':'none';
+  document.getElementById('ptab-payments').classList.toggle('active', v==='payments');
+  document.getElementById('ptab-templates').classList.toggle('active', v==='templates');
+  if(v==='payments') renderPayments();
+  else renderTemplates();
+}
+
+function psihoMonthKey(){ return psihoYear+'-'+String(psihoMon+1).padStart(2,'0'); }
+function psihoMonthStep(d){
+  psihoMon+=d;
+  if(psihoMon<0){psihoMon=11;psihoYear--;}
+  if(psihoMon>11){psihoMon=0;psihoYear++;}
+  renderPayments();
+}
+
+function renderPsiho(){
+  if(psihoView==='payments') renderPayments();
+  else renderTemplates();
+}
+
+function renderPayments(){
+  const key=psihoMonthKey();
+  const paid=PPAYMENTS[key]||{};
+  document.getElementById('psiho-month-lbl').textContent=MONTHS_RU[psihoMon]+' '+psihoYear;
+  const total=PCLIENTS.length;
+  const paidCount=PCLIENTS.filter(c=>paid[c.id]).length;
+  document.getElementById('psiho-stats').innerHTML=total===0?'':
+    `<div class="psiho-stat"><div class="psiho-stat-num" style="color:#5bbf7a">${paidCount}</div><div class="psiho-stat-lbl">Оплатили</div></div>
+     <div class="psiho-stat"><div class="psiho-stat-num" style="color:#e05577">${total-paidCount}</div><div class="psiho-stat-lbl">Не оплатили</div></div>
+     <div class="psiho-stat"><div class="psiho-stat-num">${total}</div><div class="psiho-stat-lbl">Всего</div></div>`;
+  if(total===0){
+    document.getElementById('psiho-clients-list').innerHTML='<div class="empty"><div class="empty-icon">💳</div><div class="empty-txt">Добавь клиентов в список</div></div>';
+    return;
+  }
+  const sorted=[...PCLIENTS].sort((a,b)=>{
+    const pa=paid[a.id]?1:0, pb=paid[b.id]?1:0;
+    if(pa!==pb) return pa-pb;
+    return a.name.localeCompare(b.name,'ru');
+  });
+  document.getElementById('psiho-clients-list').innerHTML=sorted.map(c=>{
+    const isPaid=!!paid[c.id];
+    return `<div class="pay-row">
+      <span class="pay-name">${esc(c.name)}</span>
+      <div class="pay-toggle-wrap" onclick="togglePayment('${c.id}')">
+        <div class="pay-toggle ${isPaid?'on':''}"></div>
+        <span style="font-size:12px;color:${isPaid?'#5bbf7a':'var(--text3)'};">${isPaid?'Оплатил':'Ожидание'}</span>
+      </div>
+      <button class="pay-del" onclick="confirmAction('Удалить клиента?','${esc(c.name)} будет удалён из всех месяцев',()=>deleteClient('${c.id}'))">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function togglePayment(clientId){
+  const key=psihoMonthKey();
+  if(!PPAYMENTS[key]) PPAYMENTS[key]={};
+  PPAYMENTS[key][clientId]=!PPAYMENTS[key][clientId];
+  jsave(K.ppayments,PPAYMENTS);
+  renderPayments();
+}
+
+function openClientForm(){
+  document.getElementById('cf-name').value='';
+  openOv('ov-client');
+  setTimeout(()=>document.getElementById('cf-name').focus(),100);
+}
+
+function submitClient(){
+  const name=(document.getElementById('cf-name').value||'').trim();
+  if(!name) return;
+  PCLIENTS.push({id:Date.now().toString(36),name});
+  jsave(K.pclients,PCLIENTS);
+  closeOv('ov-client');
+  renderPayments();
+  toast('✅ Клиент добавлен');
+}
+
+function deleteClient(id){
+  PCLIENTS=PCLIENTS.filter(c=>c.id!==id);
+  Object.keys(PPAYMENTS).forEach(k=>{ if(PPAYMENTS[k]) delete PPAYMENTS[k][id]; });
+  jsave(K.pclients,PCLIENTS);
+  jsave(K.ppayments,PPAYMENTS);
+  renderPayments();
+  toast('🗑 Удалено');
+}
+
+function renderTemplates(){
+  const q=(document.getElementById('tmpl-search')?.value||'').toLowerCase();
+  const filtered=TEMPLATES.filter(t=>!q||t.title.toLowerCase().includes(q)||t.text.toLowerCase().includes(q));
+  const list=document.getElementById('tmpl-list');
+  const empty=document.getElementById('tmpl-empty');
+  if(filtered.length===0){ list.innerHTML=''; empty.style.display=''; return; }
+  empty.style.display='none';
+  list.innerHTML=filtered.map(t=>`
+    <div class="tmpl-card">
+      <div class="tmpl-head">
+        <span class="tmpl-title">${esc(t.title)}</span>
+        <div class="tmpl-acts">
+          <button class="tmpl-copy" onclick="copyTemplate('${t.id}')">📋 Скопировать</button>
+          <button class="tmpl-small" onclick="openTemplateForm('${t.id}')" title="Редактировать">✎</button>
+          <button class="tmpl-small" style="color:#e05577" onclick="confirmAction('Удалить шаблон?','',()=>deleteTemplate('${t.id}'))" title="Удалить">✕</button>
+        </div>
+      </div>
+      <div class="tmpl-body" id="tb-${t.id}">${esc(t.text)}</div>
+      <button onclick="expandTemplate('${t.id}')" id="te-${t.id}" style="background:none;border:none;color:var(--text3);font-size:11px;cursor:pointer;margin-top:4px;">Показать полностью ▾</button>
+    </div>
+  `).join('');
+  setTimeout(()=>{
+    filtered.forEach(t=>{
+      const el=document.getElementById('tb-'+t.id);
+      const btn=document.getElementById('te-'+t.id);
+      if(el&&btn&&el.scrollHeight<=el.clientHeight+4) btn.style.display='none';
+    });
+  },0);
+}
+
+function expandTemplate(id){
+  const el=document.getElementById('tb-'+id);
+  const btn=document.getElementById('te-'+id);
+  if(!el||!btn) return;
+  if(el.classList.contains('exp')){ el.classList.remove('exp'); btn.textContent='Показать полностью ▾'; }
+  else { el.classList.add('exp'); btn.textContent='Свернуть ▴'; }
+}
+
+function copyTemplate(id){
+  const t=TEMPLATES.find(x=>x.id===id); if(!t) return;
+  navigator.clipboard.writeText(t.text).then(()=>toast('📋 Скопировано')).catch(()=>toast('⚠️ Не удалось скопировать'));
+}
+
+function openTemplateForm(id){
+  editingTmplId=id||null;
+  const t=id?TEMPLATES.find(x=>x.id===id):null;
+  document.getElementById('tf-title').textContent=t?'Редактировать шаблон':'Новый шаблон';
+  document.getElementById('tf-name').value=t?.title||'';
+  document.getElementById('tf-body').value=t?.text||'';
+  openOv('ov-tmpl');
+  setTimeout(()=>document.getElementById('tf-name').focus(),100);
+}
+
+function submitTemplate(){
+  const title=(document.getElementById('tf-name').value||'').trim();
+  const text=(document.getElementById('tf-body').value||'').trim();
+  if(!title||!text) return;
+  if(editingTmplId){
+    const t=TEMPLATES.find(x=>x.id===editingTmplId);
+    if(t){ t.title=title; t.text=text; }
+  } else {
+    TEMPLATES.push({id:Date.now().toString(36),title,text,created:today()});
+  }
+  jsave(K.templates,TEMPLATES);
+  closeOv('ov-tmpl');
+  renderTemplates();
+  toast('💬 Шаблон сохранён');
+}
+
+function deleteTemplate(id){
+  TEMPLATES=TEMPLATES.filter(t=>t.id!==id);
+  jsave(K.templates,TEMPLATES);
+  renderTemplates();
+  toast('🗑 Удалено');
 }
 
 function renderFamily(){
@@ -1776,7 +2070,7 @@ function today(){ return new Date().toISOString().slice(0,10); }
 function plural(n,a,b,c){ const m=n%10,h=n%100; if(m===1&&h!==11)return a; if(m>=2&&m<=4&&(h<10||h>=20))return b; return c; }
 
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape') ['ov-read','ov-note','ov-link','ov-board','ov-lcat','ov-ncat','ov-fin','ov-confirm'].forEach(id=>document.getElementById(id)?.classList.remove('open'));
+  if(e.key==='Escape') ['ov-read','ov-note','ov-link','ov-board','ov-lcat','ov-ncat','ov-fin','ov-confirm','ov-tmpl','ov-client'].forEach(id=>document.getElementById(id)?.classList.remove('open'));
 });
 
 // ══ PWA ══
